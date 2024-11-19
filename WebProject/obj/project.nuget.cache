@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "tXmD5awP2mA=",
+  "dgSpecHash": "lW4fvvxIKlQ=",
   "success": true,
-  "projectFilePath": "D:\\WebProject\\WebProject\\WebProject.csproj",
+  "projectFilePath": "d:\\WebProject\\WebProject\\WebProject.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\hoang\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
     "C:\\Users\\hoang\\.nuget\\packages\\microsoft.aspnetcore.authorization\\8.0.8\\microsoft.aspnetcore.authorization.8.0.8.nupkg.sha512",
