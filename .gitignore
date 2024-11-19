@@ -129,3 +129,6 @@ _pkginfo.txt
 # Others
 ClientBin/
 appsettings.json
+
+WebProject/bin/
+WebProject/obj/
