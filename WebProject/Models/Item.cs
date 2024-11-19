@@ -1,4 +1,4 @@
-namespace WebProject.Data
+namespace WebProject.Models
 {
   public class Item
   {

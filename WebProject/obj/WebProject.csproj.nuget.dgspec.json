@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "d:\\WebProject\\WebProject\\WebProject.csproj": {}
+    "D:\\WebProject\\WebProject\\WebProject.csproj": {}
   },
   "projects": {
-    "d:\\WebProject\\WebProject\\WebProject.csproj": {
+    "D:\\WebProject\\WebProject\\WebProject.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "d:\\WebProject\\WebProject\\WebProject.csproj",
+        "projectUniqueName": "D:\\WebProject\\WebProject\\WebProject.csproj",
         "projectName": "WebProject",
-        "projectPath": "d:\\WebProject\\WebProject\\WebProject.csproj",
+        "projectPath": "D:\\WebProject\\WebProject\\WebProject.csproj",
         "packagesPath": "C:\\Users\\hoang\\.nuget\\packages\\",
-        "outputPath": "d:\\WebProject\\WebProject\\obj\\",
+        "outputPath": "D:\\WebProject\\WebProject\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\hoang\\AppData\\Roaming\\NuGet\\NuGet.Config",

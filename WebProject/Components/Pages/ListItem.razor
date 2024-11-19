@@ -2,32 +2,59 @@
 @using Microsoft.EntityFrameworkCore
 @using WebProject.Data
 @inject ApplicationDbContext DbContext
+@inject ISnackbar Snackbar
+@using MudBlazor
+
+@rendermode InteractiveServer
+
+<PageTitle>Items</PageTitle>
 
 <h3>Items</h3>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Price</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in items)
-        {
-            <tr>
-                <td>@item.Name</td>
-                <td>@item.Price</td>
-            </tr>
-        }
-    </tbody>
-</table>
+@if (isLoading)
+{
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" Style="margin-bottom: 20px;" />
+}
+else
+{
+    <MudTable Items="@items" Hover="true" Striped="true">
+        <HeaderContent>
+            <MudTh>Name</MudTh>
+            <MudTh>Price</MudTh>
+        </HeaderContent>
+        <RowTemplate Context="item">
+            <MudTd>@item.Name</MudTd>
+            <MudTd>@item.Price</MudTd>
+        </RowTemplate>
+    </MudTable>
+
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="@(() => Snackbar.Add("Simple Snackbar"))">
+        Open Snackbar
+    </MudButton>
+}
 
 @code {
     private List<Item> items = new();
+    private bool isLoading = true;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        items = await DbContext.Items.ToListAsync();
+        if (firstRender)
+        {
+            try
+            {
+                items = await DbContext.Items.ToListAsync();
+                Snackbar.Add("Items loaded successfully", Severity.Success);
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add($"Error loading items: {ex.Message}", Severity.Error);
+            }
+            finally
+            {
+                isLoading = false;
+                StateHasChanged();
+            }
+        }
     }
 }
