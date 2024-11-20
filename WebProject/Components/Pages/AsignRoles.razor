@@ -1,0 +1,73 @@
+@page "/assign-roles"
+@attribute [Authorize(Roles = "Admin")]
+
+@using Microsoft.AspNetCore.Identity
+@using System.ComponentModel.DataAnnotations
+@using WebProject.Data
+
+@inject UserManager<ApplicationUser> UserManager
+@inject RoleManager<IdentityRole> RoleManager
+@inject ISnackbar Snackbar
+
+<PageTitle>Assign Roles</PageTitle>
+
+<h3>Assign Roles</h3>
+
+<EditForm Model="Input" OnValidSubmit="OnValidSubmitAsync">
+  <DataAnnotationsValidator />
+  <ValidationSummary />
+  <div class="form-group">
+    <label for="username">Username</label>
+    <InputText id="username" @bind-Value="Input.Username" class="form-control" />
+  </div>
+  <div class="form-group">
+    <label for="role">Role</label>
+    <InputText id="role" @bind-Value="Input.Role" class="form-control" />
+  </div>
+  <button type="submit" class="btn btn-primary">Assign Role</button>
+</EditForm>
+
+@code {
+  private InputModel Input { get; set; } = new();
+
+  private async Task OnValidSubmitAsync()
+  {
+    var user = await UserManager.FindByNameAsync(Input.Username);
+    if (user != null)
+    {
+      var roleExists = await RoleManager.RoleExistsAsync(Input.Role);
+      if (roleExists)
+      {
+        var result = await UserManager.AddToRoleAsync(user, Input.Role);
+        if (result.Succeeded)
+        {
+          Snackbar.Add("Role assigned successfully", Severity.Success);
+        }
+        else
+        {
+          foreach (var error in result.Errors)
+          {
+            Snackbar.Add(error.Description, Severity.Error);
+          }
+        }
+      }
+      else
+      {
+        // Handle role not existing
+      }
+    }
+    else
+    {
+      // Handle user not found
+    }
+  }
+
+  private class InputModel
+  {
+    [Required]
+    public string Username { get; set; } = "";
+
+    [Required]
+    public string Role { get; set; } = "";
+  }
+}
