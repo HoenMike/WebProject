@@ -1,12 +1,12 @@
-﻿@inherits LayoutComponentBase
+﻿@using WebProject.Theme
+@inherits LayoutComponentBase
 
-<MudThemeProvider />
+<MudThemeProvider Theme="@CustomTheme.MyTheme" />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
 
 <div class="page">
-
     <div class="sidebar">
         <NavMenu />
     </div>

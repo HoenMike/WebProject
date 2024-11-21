@@ -49,7 +49,6 @@ else
             {
                 items = await DbContext.Items.ToListAsync();
                 displayedItems = items;
-                Snackbar.Add("Items loaded successfully", Severity.Success);
             }
             catch (Exception ex)
             {
