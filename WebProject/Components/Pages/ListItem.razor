@@ -11,27 +11,35 @@
 
 <h3>Items</h3>
 
+<MudPaper Class="pa-4 mb-4">
+    <MudTextField @bind-Value="searchTerm" Label="Search Items" AdornmentIcon="@Icons.Material.Filled.Search"
+        AdornmentColor="Color.Primary" Immediate="true" Clearable="true" OnClearButtonClick="ClearSearch"
+        OnKeyUp="FilterItems" />
+</MudPaper>
+
 @if (isLoading)
 {
     <MudProgressLinear Indeterminate="true" Color="Color.Primary" Style="margin-bottom: 20px;" />
 }
 else
 {
-    <MudTable Items="@items" Hover="true" Striped="true">
+    <MudTable Items="@displayedItems" Hover="true" Striped="true">
         <HeaderContent>
             <MudTh>Name</MudTh>
             <MudTh>Price</MudTh>
         </HeaderContent>
         <RowTemplate Context="item">
             <MudTd>@item.Name</MudTd>
-            <MudTd>@item.Price</MudTd>
+            <MudTd>@item.Price.ToString("C")</MudTd>
         </RowTemplate>
     </MudTable>
 }
 
 @code {
     private List<Item> items = new();
+    private List<Item> displayedItems = new();
     private bool isLoading = true;
+    private string searchTerm = string.Empty;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -40,6 +48,7 @@ else
             try
             {
                 items = await DbContext.Items.ToListAsync();
+                displayedItems = items;
                 Snackbar.Add("Items loaded successfully", Severity.Success);
             }
             catch (Exception ex)
@@ -52,5 +61,26 @@ else
                 StateHasChanged();
             }
         }
+    }
+
+    private void FilterItems()
+    {
+        if (string.IsNullOrEmpty(searchTerm))
+        {
+            displayedItems = items;
+        }
+        else
+        {
+            displayedItems = items.Where(item =>
+            item.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+            ).ToList();
+        }
+    }
+
+    private void ClearSearch()
+    {
+        searchTerm = string.Empty;
+        displayedItems = items;
+        StateHasChanged();
     }
 }
