@@ -16,7 +16,6 @@ main {
 .top-row {
   background-color: white;
   border-bottom: 1px solid pink;
-  justify-content: flex-end;
   height: 3.5rem;
   display: flex;
   align-items: center;

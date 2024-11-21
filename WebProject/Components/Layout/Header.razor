@@ -1,0 +1,19 @@
+@using MudBlazor
+
+@rendermode InteractiveServer
+
+<header class="top-row">
+  <div class="container-fluid d-flex justify-content-between align-items-center">
+    <MudTextField @bind-Value="searchQuery" Placeholder="Tìm kiếm tại đây" Immediate="true" DebounceInterval="300"
+      Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" />
+  </div>
+</header>
+
+@code {
+  private string searchQuery = string.Empty;
+
+  protected override void OnInitialized()
+  {
+    // You can add any initialization logic here if needed
+  }
+}
