@@ -1,11 +1,10 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using MudBlazor.Services;
 using WebProject.Components;
 using WebProject.Components.Account;
 using WebProject.Data;
-using MudBlazor.Services;
-using MudBlazor;
 
 var builder = WebApplication.CreateBuilder(args);
 
