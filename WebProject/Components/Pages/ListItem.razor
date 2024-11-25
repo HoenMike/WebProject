@@ -3,6 +3,7 @@
 @using WebProject.Data
 @inject ApplicationDbContext DbContext
 @inject ISnackbar Snackbar
+@inject IDialogService DialogService
 @using MudBlazor
 
 @rendermode InteractiveServer
@@ -12,9 +13,14 @@
 <h3>Items</h3>
 
 <MudPaper Class="pa-4 mb-4">
-    <MudTextField @bind-Value="searchTerm" Label="Search Items" AdornmentIcon="@Icons.Material.Filled.Search"
-        AdornmentColor="Color.Primary" Immediate="true" Clearable="true" OnClearButtonClick="ClearSearch"
-        OnKeyUp="FilterItems" />
+    <MudGrid>
+        <MudItem xs="12">
+            <MudTextField Variant="Variant.Outlined" @bind-Value="searchTerm" Label="Search Items" AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" Immediate="true" Clearable="true" OnClearButtonClick="ClearSearch" OnKeyUp="FilterItems" />
+        </MudItem>
+        <MudItem xs="2">
+            <MudButton Variant="Variant.Filled" OnClick="OpenAddItemDialog" Color="Color.Secondary" Class="ml-2">Add Item</MudButton>
+        </MudItem>
+    </MudGrid>
 </MudPaper>
 
 @if (isLoading)
@@ -45,20 +51,25 @@ else
     {
         if (firstRender)
         {
-            try
-            {
-                items = await DbContext.Items.ToListAsync();
-                displayedItems = items;
-            }
-            catch (Exception ex)
-            {
-                Snackbar.Add($"Error loading items: {ex.Message}", Severity.Error);
-            }
-            finally
-            {
-                isLoading = false;
-                StateHasChanged();
-            }
+            await LoadItems();
+        }
+    }
+
+    private async Task LoadItems()
+    {
+        try
+        {
+            items = await DbContext.Items.ToListAsync();
+            displayedItems = items;
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error loading items: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
         }
     }
 
@@ -81,5 +92,18 @@ else
         searchTerm = string.Empty;
         displayedItems = items;
         StateHasChanged();
+    }
+
+    private async Task OpenAddItemDialog()
+    {
+        var parameters = new DialogParameters();
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+        var dialog = DialogService.Show<AddItemDialog>("Add Item", parameters, options);
+        var result = await dialog.Result;
+
+        if (result != null && !result.Canceled)
+        {
+            await LoadItems();
+        }
     }
 }

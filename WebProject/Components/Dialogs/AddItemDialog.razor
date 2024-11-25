@@ -1,0 +1,42 @@
+@inject ApplicationDbContext DbContext
+@inject ISnackbar Snackbar
+@using Microsoft.AspNetCore.Components.Forms
+@using MudBlazor
+
+
+<MudDialog>
+  <DialogContent>
+    <MudTextField @bind-Value="newItem.Name" Label="Name" Required="true" />
+    <MudTextField @bind-Value="newItem.Price" Label="Price" Required="true" Type="number" />
+  </DialogContent>
+  <DialogActions>
+    <MudButton Variant="Variant.Filled" OnClick="AddItem" Color="Color.Success">Add</MudButton>
+
+    <MudButton OnClick="Cancel" Color="Color.Primary">Cancel</MudButton>
+  </DialogActions>
+</MudDialog>
+
+@code {
+  [CascadingParameter] MudDialogInstance MudDialog { get; set; } = default!;
+  private Item newItem = new();
+
+  private async Task AddItem()
+  {
+    try
+    {
+      DbContext.Items.Add(newItem);
+      await DbContext.SaveChangesAsync();
+      Snackbar.Add("Item added successfully", Severity.Success);
+      MudDialog.Close(DialogResult.Ok(newItem));
+    }
+    catch (Exception ex)
+    {
+      Snackbar.Add($"Error adding item: {ex.Message}", Severity.Error);
+    }
+  }
+
+  private void Cancel()
+  {
+    MudDialog.Cancel();
+  }
+}
