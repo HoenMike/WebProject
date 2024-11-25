@@ -33,10 +33,14 @@ else
         <HeaderContent>
             <MudTh>Name</MudTh>
             <MudTh>Price</MudTh>
+            <MudTh>Actions</MudTh>
         </HeaderContent>
         <RowTemplate Context="item">
             <MudTd>@item.Name</MudTd>
             <MudTd>@item.Price.ToString("C")</MudTd>
+            <MudTd>
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => OpenDeleteConfirmationDialog(item)" />
+            </MudTd>
         </RowTemplate>
     </MudTable>
 }
@@ -104,6 +108,42 @@ else
         if (result != null && !result.Canceled)
         {
             await LoadItems();
+        }
+    }
+
+    private async Task OpenDeleteConfirmationDialog(Item item)
+    {
+        var parameters = new DialogParameters
+            {
+                ["Message"] = $"Are you sure you want to delete the item '{item.Name}'?"
+            };
+        var options = new DialogOptions
+            {
+                CloseButton = true,
+                MaxWidth = MaxWidth.Small,
+                FullWidth = true
+            };
+        var dialog = DialogService.Show<ConfirmationDialog>("Delete Item", parameters, options);
+        var result = await dialog.Result;
+
+        if (result != null && result.Data is bool confirmed && confirmed)
+        {
+            await DeleteItem(item);
+        }
+    }
+
+    private async Task DeleteItem(Item item)
+    {
+        try
+        {
+            DbContext.Items.Remove(item);
+            await DbContext.SaveChangesAsync();
+            Snackbar.Add("Item deleted successfully", Severity.Success);
+            await LoadItems();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error deleting item: {ex.Message}", Severity.Error);
         }
     }
 }

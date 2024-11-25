@@ -3,15 +3,19 @@
 @using Microsoft.AspNetCore.Components.Forms
 @using MudBlazor
 
-
 <MudDialog>
   <DialogContent>
-    <MudTextField @bind-Value="newItem.Name" Label="Name" Required="true" />
-    <MudTextField @bind-Value="newItem.Price" Label="Price" Required="true" Type="number" />
+    <MudGrid>
+      <MudItem xs="12">
+        <MudTextField @bind-Value="newItem.Name" Label="Name" Required="true" />
+      </MudItem>
+      <MudItem xs="12">
+        <MudTextField @bind-Value="newItem.Price" Label="Price" Required="true" InputType="InputType.Number" />
+      </MudItem>
+    </MudGrid>
   </DialogContent>
   <DialogActions>
     <MudButton Variant="Variant.Filled" OnClick="AddItem" Color="Color.Success">Add</MudButton>
-
     <MudButton OnClick="Cancel" Color="Color.Primary">Cancel</MudButton>
   </DialogActions>
 </MudDialog>
@@ -22,6 +26,12 @@
 
   private async Task AddItem()
   {
+    if (string.IsNullOrWhiteSpace(newItem.Name))
+    {
+      Snackbar.Add("Name cannot be empty", Severity.Error);
+      return;
+    }
+
     try
     {
       DbContext.Items.Add(newItem);
