@@ -12,8 +12,8 @@ using WebProject.Data;
 namespace WebProject.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241125043303_AddImageUrlToItem")]
-    partial class AddImageUrlToItem
+    [Migration("20241125114503_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
