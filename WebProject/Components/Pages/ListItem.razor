@@ -31,14 +31,17 @@ else
 {
     <MudTable Items="@displayedItems" Hover="true" Striped="true">
         <HeaderContent>
+            <MudTh>Image</MudTh>
             <MudTh>Name</MudTh>
             <MudTh>Price</MudTh>
             <MudTh>Actions</MudTh>
         </HeaderContent>
         <RowTemplate Context="item">
+            <MudTd><img src="@item.ImageUrl" alt="@item.Name" style="width: 50px; height: 50px;" /></MudTd>
             <MudTd>@item.Name</MudTd>
             <MudTd>@item.Price.ToString("C")</MudTd>
             <MudTd>
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="() => OpenEditItemDialog(item)" />
                 <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => OpenDeleteConfirmationDialog(item)" />
             </MudTd>
         </RowTemplate>
@@ -129,6 +132,19 @@ else
         if (result != null && result.Data is bool confirmed && confirmed)
         {
             await DeleteItem(item);
+        }
+    }
+
+    private async Task OpenEditItemDialog(Item item)
+    {
+        var parameters = new DialogParameters { ["Item"] = item };
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+        var dialog = DialogService.Show<EditItemDialog>("Edit Item", parameters, options);
+        var result = await dialog.Result;
+
+        if (result != null && !result.Canceled)
+        {
+            await LoadItems();
         }
     }
 

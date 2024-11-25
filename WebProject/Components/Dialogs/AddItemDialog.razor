@@ -12,6 +12,9 @@
       <MudItem xs="12">
         <MudTextField @bind-Value="newItem.Price" Label="Price" Required="true" InputType="InputType.Number" />
       </MudItem>
+      <MudItem xs="12">
+        <MudTextField @bind-Value="newItem.ImageUrl" Label="Image URL" Required="true" />
+      </MudItem>
     </MudGrid>
   </DialogContent>
   <DialogActions>
@@ -26,9 +29,9 @@
 
   private async Task AddItem()
   {
-    if (string.IsNullOrWhiteSpace(newItem.Name))
+    if (string.IsNullOrWhiteSpace(newItem.Name) || string.IsNullOrWhiteSpace(newItem.ImageUrl))
     {
-      Snackbar.Add("Name cannot be empty", Severity.Error);
+      Snackbar.Add("Name and Image URL cannot be empty", Severity.Error);
       return;
     }
 
