@@ -23,11 +23,16 @@
 
 .navbar-brand {
   font-size: 2rem;
-  color: black;
 }
-.navbar-brand:hover {
-  color: pink;
+.text-pink {
+  color: #FF66A1; 
 }
+.text-black {
+  color: black; 
+}
+/* .navbar-brand:hover {
+  color: red;
+} */
 
 .bi {
   display: inline-block;
