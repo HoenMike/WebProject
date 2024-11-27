@@ -1,0 +1,73 @@
+@inject ApplicationDbContext DbContext
+@inject ISnackbar Snackbar
+@using MudBlazor
+
+<MudDialog>
+    <DialogContent>
+        <MudGrid>
+            <MudItem xs="12">
+                <MudTextField @bind-Value="editBlog.Title" Label="Title" Required="true" />
+            </MudItem>
+            <MudItem xs="12">
+                <MudTextField @bind-Value="editBlog.Content" Label="Content" Required="true" Textarea="true" Rows="5" />
+            </MudItem>
+            <MudItem xs="12">
+                <MudTextField @bind-Value="editBlog.ImageUrl" Label="Image URL" />
+            </MudItem>
+        </MudGrid>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Filled" OnClick="EditBlog" Color="Color.Success">Save</MudButton>
+        <MudButton OnClick="Cancel" Color="Color.Primary">Cancel</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = default!;
+    [Parameter] public Blog Blog { get; set; } = default!;
+    private Blog editBlog = new();
+
+    protected override void OnInitialized()
+    {
+        // Clone the blog data to avoid modifying the original object directly
+        editBlog = new Blog
+        {
+            Id = Blog.Id,
+            Title = Blog.Title,
+            Content = Blog.Content,
+            ImageUrl = Blog.ImageUrl
+        };
+    }
+
+    private async Task EditBlog()
+    {
+        if (string.IsNullOrWhiteSpace(editBlog.Title))
+        {
+            Snackbar.Add("Title cannot be empty", Severity.Error);
+            return;
+        }
+
+        try
+        {
+            var blog = await DbContext.Blogs.FindAsync(editBlog.Id);
+            if (blog != null)
+            {
+                blog.Title = editBlog.Title;
+                blog.Content = editBlog.Content;
+                blog.ImageUrl = editBlog.ImageUrl;
+                await DbContext.SaveChangesAsync();
+                Snackbar.Add("Blog updated successfully", Severity.Success);
+                MudDialog.Close(DialogResult.Ok(editBlog));
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error updating blog: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+}
