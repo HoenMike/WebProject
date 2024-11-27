@@ -1,0 +1,22 @@
+@page "/blog_management"
+@using Microsoft.EntityFrameworkCore
+@using WebProject.Data
+@inject ApplicationDbContext DbContext
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+@using MudBlazor
+
+@rendermode InteractiveServer
+
+<PageTitle>Blog [admin]</PageTitle>
+
+<MudGrid>
+    <MudItem xs="6">
+        <MudTextField @bind-Value="TextValue" Label="Filled" Variant="Variant.Filled"></MudTextField>
+    </MudItem>
+</MudGrid>
+
+@code {
+    public string TextValue { get; set; }
+}
+

@@ -12,5 +12,7 @@ namespace WebProject.Data
     }
 
     public DbSet<Item> Items { get; set; }
+    public DbSet<Blog> Blogs { get; set; }
+
   }
 }
