@@ -13,7 +13,16 @@
         <MudTextField @bind-Value="newItem.Price" Label="Price" Required="true" InputType="InputType.Number" />
       </MudItem>
       <MudItem xs="12">
-        <MudTextField @bind-Value="newItem.ImageUrl" Label="Image URL" Required="true" />
+        <MudTextField @bind-Value="newItem.ThumbnailUrl" Label="Thumbnail URL" />
+      </MudItem>
+      <MudItem xs="12">
+        <MudTextField @bind-Value="newItem.Description" Label="Description" Textarea="true" Rows="3" />
+      </MudItem>
+      <MudItem xs="12">
+        <MudTextField @bind-Value="newItem.StockQuantity" Label="Stock Quantity" Required="true" InputType="InputType.Number" />
+      </MudItem>
+      <MudItem xs="12">
+        <MudTextField @bind-Value="newItem.CategoryId" Label="Category ID" Required="true" InputType="InputType.Number" />
       </MudItem>
     </MudGrid>
   </DialogContent>
@@ -29,9 +38,9 @@
 
   private async Task AddItem()
   {
-    if (string.IsNullOrWhiteSpace(newItem.Name) || string.IsNullOrWhiteSpace(newItem.ImageUrl))
+    if (string.IsNullOrWhiteSpace(newItem.Name))
     {
-      Snackbar.Add("Name and Image URL cannot be empty", Severity.Error);
+      Snackbar.Add("Name cannot be empty", Severity.Error);
       return;
     }
 
@@ -44,7 +53,8 @@
     }
     catch (Exception ex)
     {
-      Snackbar.Add($"Error adding item: {ex.Message}", Severity.Error);
+      var innerExceptionMessage = ex.InnerException?.Message ?? ex.Message;
+      Snackbar.Add($"Error adding item: {innerExceptionMessage}", Severity.Error);
     }
   }
 

@@ -1,0 +1,52 @@
+@inject ApplicationDbContext DbContext
+@inject ISnackbar Snackbar
+@using Microsoft.AspNetCore.Components.Forms
+@using MudBlazor
+<MudDialog>
+    <DialogContent>
+        <MudGrid>
+            <MudItem xs="12">
+                <MudTextField @bind-Value="newNews.Title" Label="Title" Required="true" />
+            </MudItem>
+            <MudItem xs="12">
+                <MudTextField @bind-Value="newNews.Content" Label="Content" Required="true" Textarea="true" Rows="5" />
+            </MudItem>
+        </MudGrid>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Filled" OnClick="AddNews" Color="Color.Success">Add</MudButton>
+        <MudButton OnClick="Cancel" Color="Color.Primary">Cancel</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = default!;
+    private News newNews = new() { Title = string.Empty };
+
+    private async Task AddNews()
+    {
+        if (string.IsNullOrWhiteSpace(newNews.Title))
+        {
+            Snackbar.Add("Title cannot be empty", Severity.Error);
+            return;
+        }
+
+        try
+        {
+            newNews.CreatedAt = DateTime.Now;
+            DbContext.News.Add(newNews);
+            await DbContext.SaveChangesAsync();
+            Snackbar.Add("News added successfully", Severity.Success);
+            MudDialog.Close(DialogResult.Ok(newNews));
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error adding news: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+}

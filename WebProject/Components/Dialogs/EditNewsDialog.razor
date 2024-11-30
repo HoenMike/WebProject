@@ -1,0 +1,72 @@
+@inject ApplicationDbContext DbContext
+@inject ISnackbar Snackbar
+@using MudBlazor
+
+<MudDialog>
+    <DialogContent>
+        <MudGrid>
+            <MudItem xs="12">
+                <MudTextField @bind-Value="editNews.Title" Label="Title" Required="true" />
+            </MudItem>
+            <MudItem xs="12">
+                <MudTextField @bind-Value="editNews.Content" Label="Content" Required="true" Textarea="true" Rows="5" />
+            </MudItem>
+        </MudGrid>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Filled" OnClick="EditNews" Color="Color.Success">Save</MudButton>
+        <MudButton OnClick="Cancel" Color="Color.Primary">Cancel</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = default!;
+    [Parameter] public News News { get; set; } = default!;
+    private News editNews = new() { Title = string.Empty, Content = string.Empty };
+
+    protected override void OnInitialized()
+    {
+        // Clone the news data to avoid modifying the original object directly
+        editNews = new News
+            {
+                Id = News.Id,
+                Title = News.Title,
+                Content = News.Content,
+                CreatedBy = News.CreatedBy,
+                CreatedAt = News.CreatedAt,
+                UpdatedAt = News.UpdatedAt
+            };
+    }
+
+    private async Task EditNews()
+    {
+        if (string.IsNullOrWhiteSpace(editNews.Title))
+        {
+            Snackbar.Add("Title cannot be empty", Severity.Error);
+            return;
+        }
+
+        try
+        {
+            var news = await DbContext.News.FindAsync(editNews.Id);
+            if (news != null)
+            {
+                news.Title = editNews.Title;
+                news.Content = editNews.Content;
+                news.UpdatedAt = DateTime.Now;
+                await DbContext.SaveChangesAsync();
+                Snackbar.Add("News updated successfully", Severity.Success);
+                MudDialog.Close(DialogResult.Ok(editNews));
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error updating news: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+}
