@@ -1,6 +1,7 @@
 @inject ApplicationDbContext DbContext
 @inject ISnackbar Snackbar
 @using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.EntityFrameworkCore
 @using MudBlazor
 
 <MudDialog>
@@ -22,7 +23,16 @@
         <MudTextField @bind-Value="editItem.StockQuantity" Label="Stock Quantity" Required="true" InputType="InputType.Number" />
       </MudItem>
       <MudItem xs="12">
-        <MudTextField @bind-Value="editItem.CategoryId" Label="Category ID" Required="true" InputType="InputType.Number" />
+        <MudAutocomplete T="string" @bind-Value="tagInput" Label="Tags" SearchFunc="SearchTags" ToStringFunc="@(tag => tag)" Clearable="true" />
+        <MudChipSet T="string" AllClosable OnClose="Closed">
+          @foreach (var value in selectedTags)
+          {
+            <MudChip Text="@value"></MudChip>
+          }
+        </MudChipSet>
+        <div class="d-flex flex-column align-center">
+          <MudButton StartIcon="@Icons.Material.Filled.Add" OnClick="AddTag">Add chip</MudButton>
+        </div>
       </MudItem>
     </MudGrid>
   </DialogContent>
@@ -36,6 +46,8 @@
   [CascadingParameter] MudDialogInstance MudDialog { get; set; } = default!;
   [Parameter] public Item Item { get; set; } = default!;
   private Item editItem = new();
+  private string tagInput = string.Empty;
+  private List<string> selectedTags = new();
 
   protected override void OnInitialized()
   {
@@ -46,9 +58,21 @@
         Price = Item.Price,
         ThumbnailUrl = Item.ThumbnailUrl,
         Description = Item.Description,
-        StockQuantity = Item.StockQuantity,
-        CategoryId = Item.CategoryId
+        StockQuantity = Item.StockQuantity
       };
+
+    selectedTags = Item.ItemTags.Select(it => it.Tag.Name).ToList();
+  }
+
+  private async Task<IEnumerable<string>> SearchTags(string value, CancellationToken cancellationToken)
+  {
+    if (string.IsNullOrEmpty(value))
+      return new List<string>();
+
+    return await DbContext.Tags
+    .Where(t => t.Name.Contains(value))
+    .Select(t => t.Name)
+    .ToListAsync(cancellationToken);
   }
 
   private async Task EditItem()
@@ -69,7 +93,23 @@
         item.ThumbnailUrl = editItem.ThumbnailUrl;
         item.Description = editItem.Description;
         item.StockQuantity = editItem.StockQuantity;
-        item.CategoryId = editItem.CategoryId;
+
+        DbContext.ItemTags.RemoveRange(item.ItemTags);
+
+        foreach (var tagName in selectedTags)
+        {
+          var tag = await DbContext.Tags.FirstOrDefaultAsync(t => t.Name == tagName);
+          if (tag == null)
+          {
+            tag = new Tag { Name = tagName, Type = "default" };
+            DbContext.Tags.Add(tag);
+            await DbContext.SaveChangesAsync();
+          }
+
+          var itemTag = new ItemTag { ItemId = item.Id, TagId = tag.Id };
+          DbContext.ItemTags.Add(itemTag);
+        }
+
         await DbContext.SaveChangesAsync();
         Snackbar.Add("Item updated successfully", Severity.Success);
         MudDialog.Close(DialogResult.Ok(editItem));
@@ -84,5 +124,19 @@
   private void Cancel()
   {
     MudDialog.Cancel();
+  }
+
+  private void AddTag()
+  {
+    if (!string.IsNullOrWhiteSpace(tagInput) && !selectedTags.Contains(tagInput))
+    {
+      selectedTags.Add(tagInput);
+      tagInput = string.Empty;
+    }
+  }
+
+  private void Closed(MudChip<string> chip)
+  {
+    selectedTags.Remove(chip.Text);
   }
 }

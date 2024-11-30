@@ -34,12 +34,14 @@ else
             <MudTh>Thumbnail</MudTh>
             <MudTh>Name</MudTh>
             <MudTh>Price</MudTh>
+            <MudTh>Tags</MudTh>
             <MudTh>Actions</MudTh>
         </HeaderContent>
         <RowTemplate Context="item">
             <MudTd><img src="@item.ThumbnailUrl" alt="@item.Name" style="width: 50px; height: 50px;" /></MudTd>
             <MudTd>@item.Name</MudTd>
             <MudTd>@item.Price.ToString("C")</MudTd>
+            <MudTd>@string.Join(", ", item.ItemTags.Select(it => it.Tag.Name))</MudTd>
             <MudTd>
                 <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="() => OpenEditItemDialog(item)" />
                 <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => OpenDeleteConfirmationDialog(item)" />
@@ -66,7 +68,7 @@ else
     {
         try
         {
-            items = await DbContext.Items.ToListAsync();
+            items = await DbContext.Items.Include(i => i.ItemTags).ThenInclude(it => it.Tag).ToListAsync();
             displayedItems = items;
         }
         catch (Exception ex)
@@ -89,7 +91,8 @@ else
         else
         {
             displayedItems = items.Where(item =>
-            item.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+            item.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+            item.ItemTags.Any(it => it.Tag.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
             ).ToList();
         }
     }

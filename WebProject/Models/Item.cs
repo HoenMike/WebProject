@@ -26,8 +26,6 @@ namespace WebProject.Models
 
     public int StockQuantity { get; set; }
 
-    [ForeignKey("Category")]
-    public int CategoryId { get; set; }
-
+    public ICollection<ItemTag> ItemTags { get; set; } = new List<ItemTag>();
   }
 }
