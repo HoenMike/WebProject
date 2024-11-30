@@ -23,16 +23,13 @@
         <MudTextField @bind-Value="editItem.StockQuantity" Label="Stock Quantity" Required="true" InputType="InputType.Number" />
       </MudItem>
       <MudItem xs="12">
-        <MudAutocomplete T="string" @bind-Value="tagInput" Label="Tags" SearchFunc="SearchTags" ToStringFunc="@(tag => tag)" Clearable="true" />
+        <MudAutocomplete T="string" @bind-Value="tagInput" Label="Tags" SearchFunc="SearchTags" ToStringFunc="@(tag => tag)" Clearable="true" OnKeyDown="HandleTagInputKeyDown" />
         <MudChipSet T="string" AllClosable OnClose="Closed">
           @foreach (var value in selectedTags)
           {
             <MudChip Text="@value"></MudChip>
           }
         </MudChipSet>
-        <div class="d-flex flex-column align-center">
-          <MudButton StartIcon="@Icons.Material.Filled.Add" OnClick="AddTag">Add chip</MudButton>
-        </div>
       </MudItem>
     </MudGrid>
   </DialogContent>
@@ -75,6 +72,16 @@
     .ToListAsync(cancellationToken);
   }
 
+  private void HandleTagInputKeyDown(KeyboardEventArgs e)
+  {
+    if (e.Key == "Enter" && !string.IsNullOrWhiteSpace(tagInput) && !selectedTags.Contains(tagInput))
+    {
+      selectedTags.Add(tagInput);
+      tagInput = string.Empty;
+      StateHasChanged();
+    }
+  }
+
   private async Task EditItem()
   {
     if (string.IsNullOrWhiteSpace(editItem.Name))
@@ -94,8 +101,10 @@
         item.Description = editItem.Description;
         item.StockQuantity = editItem.StockQuantity;
 
+        // Remove existing tags
         DbContext.ItemTags.RemoveRange(item.ItemTags);
 
+        // Add new tags
         foreach (var tagName in selectedTags)
         {
           var tag = await DbContext.Tags.FirstOrDefaultAsync(t => t.Name == tagName);
@@ -124,15 +133,6 @@
   private void Cancel()
   {
     MudDialog.Cancel();
-  }
-
-  private void AddTag()
-  {
-    if (!string.IsNullOrWhiteSpace(tagInput) && !selectedTags.Contains(tagInput))
-    {
-      selectedTags.Add(tagInput);
-      tagInput = string.Empty;
-    }
   }
 
   private void Closed(MudChip<string> chip)

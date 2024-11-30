@@ -12,8 +12,8 @@ using WebProject.Data;
 namespace WebProject.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241130052224_UpdateItemAndItemTag")]
-    partial class UpdateItemAndItemTag
+    [Migration("20241130054921_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -221,29 +221,6 @@ namespace WebProject.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("WebProject.Models.Category", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
-
-                    b.Property<int?>("ParentCategoryId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ParentCategoryId");
-
-                    b.ToTable("Categories");
-                });
-
             modelBuilder.Entity("WebProject.Models.Item", b =>
                 {
                     b.Property<int>("Id")
@@ -251,9 +228,6 @@ namespace WebProject.Migrations
                         .HasColumnType("int");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int?>("CategoryId")
-                        .HasColumnType("int");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -277,8 +251,6 @@ namespace WebProject.Migrations
                         .HasColumnType("varchar(500)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CategoryId");
 
                     b.ToTable("Items");
                 });
@@ -601,22 +573,6 @@ namespace WebProject.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("WebProject.Models.Category", b =>
-                {
-                    b.HasOne("WebProject.Models.Category", "ParentCategory")
-                        .WithMany("ChildCategories")
-                        .HasForeignKey("ParentCategoryId");
-
-                    b.Navigation("ParentCategory");
-                });
-
-            modelBuilder.Entity("WebProject.Models.Item", b =>
-                {
-                    b.HasOne("WebProject.Models.Category", null)
-                        .WithMany("Items")
-                        .HasForeignKey("CategoryId");
-                });
-
             modelBuilder.Entity("WebProject.Models.ItemTag", b =>
                 {
                     b.HasOne("WebProject.Models.Item", "Item")
@@ -653,13 +609,6 @@ namespace WebProject.Migrations
                     b.Navigation("News");
 
                     b.Navigation("Tag");
-                });
-
-            modelBuilder.Entity("WebProject.Models.Category", b =>
-                {
-                    b.Navigation("ChildCategories");
-
-                    b.Navigation("Items");
                 });
 
             modelBuilder.Entity("WebProject.Models.Item", b =>
