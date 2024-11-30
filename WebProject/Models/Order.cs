@@ -18,15 +18,18 @@ namespace WebProject.Models
 
     [Required]
     [StringLength(50)]
-    public string Status { get; set; }
+    public required string Status { get; set; }
 
     public DateTime CreatedAt { get; set; }
 
+    [Required]
     [StringLength(100)]
-    public string PaymentMethod { get; set; }
+    public required string PaymentMethod { get; set; }
+
+    [Required]
 
     [StringLength(500)]
-    public string ShippingAddress { get; set; }
+    public required string ShippingAddress { get; set; }
 
   }
 }

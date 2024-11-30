@@ -11,9 +11,8 @@ namespace WebProject.Models
     [ForeignKey("Item")]
     public int ItemId { get; set; }
 
-    [Required]
     [StringLength(500)]
-    public string ImageUrl { get; set; }
+    public string? ImageUrl { get; set; }
 
     public int DisplayOrder { get; set; }
 

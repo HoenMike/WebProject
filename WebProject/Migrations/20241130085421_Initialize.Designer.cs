@@ -12,8 +12,8 @@ using WebProject.Data;
 namespace WebProject.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241130054921_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20241130085421_Initialize")]
+    partial class Initialize
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -230,7 +230,6 @@ namespace WebProject.Migrations
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("varchar(1000)");
 
@@ -246,7 +245,6 @@ namespace WebProject.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("ThumbnailUrl")
-                        .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("varchar(500)");
 
@@ -267,7 +265,6 @@ namespace WebProject.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("ImageUrl")
-                        .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("varchar(500)");
 
@@ -277,23 +274,6 @@ namespace WebProject.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("ItemPhotos");
-                });
-
-            modelBuilder.Entity("WebProject.Models.ItemTag", b =>
-                {
-                    b.Property<int>("ItemId")
-                        .HasColumnType("int")
-                        .HasColumnOrder(0);
-
-                    b.Property<int>("TagId")
-                        .HasColumnType("int")
-                        .HasColumnOrder(1);
-
-                    b.HasKey("ItemId", "TagId");
-
-                    b.HasIndex("TagId");
-
-                    b.ToTable("ItemTags");
                 });
 
             modelBuilder.Entity("WebProject.Models.News", b =>
@@ -324,23 +304,6 @@ namespace WebProject.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("News");
-                });
-
-            modelBuilder.Entity("WebProject.Models.NewsTag", b =>
-                {
-                    b.Property<int>("NewsId")
-                        .HasColumnType("int")
-                        .HasColumnOrder(0);
-
-                    b.Property<int>("TagId")
-                        .HasColumnType("int")
-                        .HasColumnOrder(1);
-
-                    b.HasKey("NewsId", "TagId");
-
-                    b.HasIndex("TagId");
-
-                    b.ToTable("NewsTags");
                 });
 
             modelBuilder.Entity("WebProject.Models.Order", b =>
@@ -414,7 +377,6 @@ namespace WebProject.Migrations
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Comment")
-                        .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("varchar(1000)");
 
@@ -433,29 +395,6 @@ namespace WebProject.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Reviews");
-                });
-
-            modelBuilder.Entity("WebProject.Models.Tag", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Tags");
                 });
 
             modelBuilder.Entity("WebProject.Models.UserCard", b =>
@@ -477,7 +416,6 @@ namespace WebProject.Migrations
                         .HasColumnType("varchar(255)");
 
                     b.Property<string>("CardType")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("varchar(50)");
 
@@ -571,49 +509,6 @@ namespace WebProject.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("WebProject.Models.ItemTag", b =>
-                {
-                    b.HasOne("WebProject.Models.Item", "Item")
-                        .WithMany("ItemTags")
-                        .HasForeignKey("ItemId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("WebProject.Models.Tag", "Tag")
-                        .WithMany()
-                        .HasForeignKey("TagId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Item");
-
-                    b.Navigation("Tag");
-                });
-
-            modelBuilder.Entity("WebProject.Models.NewsTag", b =>
-                {
-                    b.HasOne("WebProject.Models.News", "News")
-                        .WithMany()
-                        .HasForeignKey("NewsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("WebProject.Models.Tag", "Tag")
-                        .WithMany()
-                        .HasForeignKey("TagId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("News");
-
-                    b.Navigation("Tag");
-                });
-
-            modelBuilder.Entity("WebProject.Models.Item", b =>
-                {
-                    b.Navigation("ItemTags");
                 });
 #pragma warning restore 612, 618
         }

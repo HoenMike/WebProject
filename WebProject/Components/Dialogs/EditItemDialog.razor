@@ -22,15 +22,6 @@
       <MudItem xs="12">
         <MudTextField @bind-Value="editItem.StockQuantity" Label="Stock Quantity" Required="true" InputType="InputType.Number" />
       </MudItem>
-      <MudItem xs="12">
-        <MudAutocomplete T="string" @bind-Value="tagInput" Label="Tags" SearchFunc="SearchTags" ToStringFunc="@(tag => tag)" Clearable="true" OnKeyDown="HandleTagInputKeyDown" />
-        <MudChipSet T="string" AllClosable OnClose="Closed">
-          @foreach (var value in selectedTags)
-          {
-            <MudChip Text="@value"></MudChip>
-          }
-        </MudChipSet>
-      </MudItem>
     </MudGrid>
   </DialogContent>
   <DialogActions>
@@ -42,9 +33,7 @@
 @code {
   [CascadingParameter] MudDialogInstance MudDialog { get; set; } = default!;
   [Parameter] public Item Item { get; set; } = default!;
-  private Item editItem = new();
-  private string tagInput = string.Empty;
-  private List<string> selectedTags = new();
+  private Item editItem = new() { Name = string.Empty };
 
   protected override void OnInitialized()
   {
@@ -57,29 +46,6 @@
         Description = Item.Description,
         StockQuantity = Item.StockQuantity
       };
-
-    selectedTags = Item.ItemTags.Select(it => it.Tag.Name).ToList();
-  }
-
-  private async Task<IEnumerable<string>> SearchTags(string value, CancellationToken cancellationToken)
-  {
-    if (string.IsNullOrEmpty(value))
-      return new List<string>();
-
-    return await DbContext.Tags
-    .Where(t => t.Name.Contains(value))
-    .Select(t => t.Name)
-    .ToListAsync(cancellationToken);
-  }
-
-  private void HandleTagInputKeyDown(KeyboardEventArgs e)
-  {
-    if (e.Key == "Enter" && !string.IsNullOrWhiteSpace(tagInput) && !selectedTags.Contains(tagInput))
-    {
-      selectedTags.Add(tagInput);
-      tagInput = string.Empty;
-      StateHasChanged();
-    }
   }
 
   private async Task EditItem()
@@ -101,24 +67,6 @@
         item.Description = editItem.Description;
         item.StockQuantity = editItem.StockQuantity;
 
-        // Remove existing tags
-        DbContext.ItemTags.RemoveRange(item.ItemTags);
-
-        // Add new tags
-        foreach (var tagName in selectedTags)
-        {
-          var tag = await DbContext.Tags.FirstOrDefaultAsync(t => t.Name == tagName);
-          if (tag == null)
-          {
-            tag = new Tag { Name = tagName, Type = "default" };
-            DbContext.Tags.Add(tag);
-            await DbContext.SaveChangesAsync();
-          }
-
-          var itemTag = new ItemTag { ItemId = item.Id, TagId = tag.Id };
-          DbContext.ItemTags.Add(itemTag);
-        }
-
         await DbContext.SaveChangesAsync();
         Snackbar.Add("Item updated successfully", Severity.Success);
         MudDialog.Close(DialogResult.Ok(editItem));
@@ -133,10 +81,5 @@
   private void Cancel()
   {
     MudDialog.Cancel();
-  }
-
-  private void Closed(MudChip<string> chip)
-  {
-    selectedTags.Remove(chip.Text);
   }
 }

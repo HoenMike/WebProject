@@ -15,23 +15,22 @@ namespace WebProject.Models
 
     [Required]
     [StringLength(100)]
-    public string CardHolderName { get; set; }
+    public required string CardHolderName { get; set; }
 
     [Required]
     [StringLength(255)]
-    public string CardNumber { get; set; }
+    public required string CardNumber { get; set; }
 
     [Required]
     [Column(TypeName = "date")]
-    public DateTime ExpiryDate { get; set; }
+    public required DateTime ExpiryDate { get; set; }
 
     [Required]
     [StringLength(255)]
-    public string Cvv { get; set; }
+    public required string Cvv { get; set; }
 
-    [Required]
     [StringLength(50)]
-    public string CardType { get; set; }
+    public string? CardType { get; set; }
 
     public bool IsPrimary { get; set; }
 
