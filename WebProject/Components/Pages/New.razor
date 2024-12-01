@@ -1,28 +1,156 @@
 @page "/new"
 @using Microsoft.EntityFrameworkCore
-@using WebProject.Data
+@using WebProject.Models
 @inject ApplicationDbContext DbContext
 @inject ISnackbar Snackbar
+@inject IDialogService DialogService
 @using MudBlazor
 
 @rendermode InteractiveServer
 
-<PageTitle>New Item</PageTitle>
+<PageTitle>News</PageTitle>
 
-<h3>New Item</h3>
+<MudPaper Class="pa-4 mb-4">
+            <MudTextField Variant="Variant.Outlined" @bind-Value="searchTerm" Label="Search News" AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" Immediate="true" Clearable="true" OnClearButtonClick="ClearSearch" OnKeyUp="FilterBlogs" />
+</MudPaper>
 
-<MudSlider Color="Color.Error" T="int" @bind-Value="@_value" @bind-NullableValue="@_nullableValue" />
-
-<div class="d-flex flex-column align-center">
-  <MudText Class="pb-4">@_value</MudText>
-  <MudText Class="pb-4">Nullable Value: @(_nullableValue is null ? "null" : _nullableValue)</MudText>
-  <MudButton @onclick="Reset" Variant="Variant.Filled" Color="Color.Primary">Reset to Null</MudButton>
-</div>
-
+@if (isLoading)
+{
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" Style="margin-bottom: 20px;" />
+}
+else
+{
+        @foreach (var news in displayedBlogs)
+        {
+                <MudExpansionPanel Style="margin: 10px; word-break: break-word">
+                    <TitleContent>
+                        <MudText Typo="Typo.h6" GutterBottom="true">@news.Title</MudText>
+                        <MudText Typo="Typo.caption" Style="font-style: italic; margin-bottom: 4px; display: block">Created By: @news.CreatedBy - @news.CreatedAt</MudText>
+                        @if (news.UpdatedAt.HasValue)
+                        {
+                            <MudText Typo="Typo.caption"Style="font-style: italic;">Latest Update: @news.UpdatedAt.Value.ToString("g")</MudText>
+                        }
+                       
+                    </TitleContent>
+                    <ChildContent>
+                        <MudText Typo="Typo.body1">@news.Content</MudText>
+                    </ChildContent>
+                </MudExpansionPanel>
+        }
+}
 
 @code {
-  private int _value;
-  private int? _nullableValue;
+    private List<News> blogs = new();
+    private List<News> displayedBlogs = new();
+    private bool isLoading = true;
+    private string searchTerm = string.Empty;
 
-  private void Reset() => _nullableValue = null;
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await LoadNews();
+        }
+    }
+
+    private async Task LoadNews()
+    {
+        try
+        {
+            blogs = await DbContext.News.ToListAsync();
+            displayedBlogs = blogs.OrderByDescending(news => news.CreatedAt).ToList();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error loading news: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private void FilterBlogs()
+    {
+        if (string.IsNullOrEmpty(searchTerm))
+        {
+            displayedBlogs = blogs;
+        }
+        else
+        {
+            displayedBlogs = blogs.Where(news =>
+            news.Title.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+            ).ToList();
+        }
+    }
+
+    private void ClearSearch()
+    {
+        searchTerm = string.Empty;
+        displayedBlogs = blogs;
+        StateHasChanged();
+    }
+
+    private async Task OpenAddNewsDialog()
+    {
+        var parameters = new DialogParameters();
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+        var dialog = DialogService.Show<AddNewsDialog>("Add News", parameters, options);
+        var result = await dialog.Result;
+
+        if (result != null && !result.Canceled)
+        {
+            await LoadNews();
+        }
+    }
+
+    private async Task OpenDeleteConfirmationDialog(News news)
+    {
+        var parameters = new DialogParameters
+            {
+                ["Message"] = $"Are you sure you want to delete the news '{news.Title}'?"
+            };
+        var options = new DialogOptions
+            {
+                CloseButton = true,
+                MaxWidth = MaxWidth.Small,
+                FullWidth = true
+            };
+        var dialog = DialogService.Show<ConfirmationDialog>("Delete News", parameters, options);
+        var result = await dialog.Result;
+
+        if (result != null && result.Data is bool confirmed && confirmed)
+        {
+            await DeleteNews(news);
+        }
+    }
+
+    private async Task OpenEditNewsDialog(News news)
+    {
+        var parameters = new DialogParameters { ["News"] = news };
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+        var dialog = DialogService.Show<EditNewsDialog>("Edit News", parameters, options);
+        var result = await dialog.Result;
+
+        if (result != null && !result.Canceled)
+        {
+            await LoadNews();
+        }
+    }
+
+    private async Task DeleteNews(News news)
+    {
+        try
+        {
+            DbContext.News.Remove(news);
+            await DbContext.SaveChangesAsync();
+            Snackbar.Add("News deleted successfully", Severity.Success);
+            await LoadNews();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error deleting news: {ex.Message}", Severity.Error);
+        }
+    }
 }
