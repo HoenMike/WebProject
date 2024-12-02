@@ -1,4 +1,4 @@
-@page "/news_management"
+@page "/new"
 @using Microsoft.EntityFrameworkCore
 @using WebProject.Models
 @inject ApplicationDbContext DbContext
@@ -10,37 +10,9 @@
 
 <PageTitle>News</PageTitle>
 
-
 <MudPaper Class="pa-4 mb-4">
-    <MudGrid>
-        <MudItem xs="12">
             <MudTextField Variant="Variant.Outlined" @bind-Value="searchTerm" Label="Search News" AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" Immediate="true" Clearable="true" OnClearButtonClick="ClearSearch" OnKeyUp="FilterBlogs" />
-        </MudItem>
-        <MudItem xs="4">
-            <MudButton Variant="Variant.Filled" OnClick="OpenAddNewsDialog" Color="Color.Secondary" Class="ml-2">Add News</MudButton>
-        </MudItem>
-    </MudGrid>
 </MudPaper>
-
-@* <MudPaper Class="pa-4 mb-4">
-    <MudGrid>
-        <MudItem xs="8">
-            <MudTextField Variant="Variant.Outlined" @bind-Value="searchTerm" Label="Search News" 
-                          AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" 
-                          Immediate="true" Clearable="true" OnClearButtonClick="ClearSearch" OnKeyUp="FilterBlogs" />
-        </MudItem>
-        <MudItem xs="4">
-            <MudSelect T="string" Label="Sort By" @bind-Value="selectedSortOption" OnValueChanged="SortBlogs">
-                <MudSelectItem Value="@("Newest")">Newest</MudSelectItem>
-                <MudSelectItem Value="@("Oldest")">Oldest</MudSelectItem>
-            </MudSelect>
-        </MudItem>
-        <MudItem xs="4">
-            <MudButton Variant="Variant.Filled" OnClick="OpenAddNewsDialog" Color="Color.Secondary" Class="ml-2">Add News</MudButton>
-        </MudItem>
-    </MudGrid>
-</MudPaper> *@
-
 
 @if (isLoading)
 {
@@ -50,22 +22,15 @@ else
 {
         @foreach (var news in displayedBlogs)
         {
-                <MudExpansionPanel Style="margin: 10px; word-break: break-word" HideIcon="true">
+                <MudExpansionPanel Style="margin: 10px; word-break: break-word">
                     <TitleContent>
-                    <MudGrid xs="12">
-                    <MudItem xs="10">
                         <MudText Typo="Typo.h6" GutterBottom="true">@news.Title</MudText>
                         <MudText Typo="Typo.caption" Style="font-style: italic; margin-bottom: 4px; display: block">Created By: @news.CreatedBy - @news.CreatedAt</MudText>
                         @if (news.UpdatedAt.HasValue)
                         {
                             <MudText Typo="Typo.caption"Style="font-style: italic;">Latest Update: @news.UpdatedAt.Value.ToString("g")</MudText>
                         }
-                    </MudItem>
-                    <MudItem xs="2">
-                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="() => OpenEditNewsDialog(news)" />
-                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => OpenDeleteConfirmationDialog(news)" />
-                </MudItem>
-                </MudGrid>
+                       
                     </TitleContent>
                     <ChildContent>
                         <MudText Typo="Typo.body1">@news.Content</MudText>
@@ -188,5 +153,4 @@ else
             Snackbar.Add($"Error deleting news: {ex.Message}", Severity.Error);
         }
     }
-
 }
