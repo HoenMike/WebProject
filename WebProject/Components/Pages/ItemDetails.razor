@@ -1,0 +1,63 @@
+@page "/item-details/{Id:int}"
+@inject ApplicationDbContext DbContext
+@using Microsoft.EntityFrameworkCore
+
+<h3>Item Detail</h3>
+<div class="item-details-container">
+    @if (item != null)
+    {
+        <div class="item-image-container">
+            <img src="@item.ImageUrl" alt="@item.Name" />
+        </div>
+        <div class="item-info-container">
+            <h2>@item.Name</h2>
+            <p class="item-price">@item.Price.ToString("C")</p>
+            <p class="item-description">@item.Description</p>
+
+            <div class="item-actions">
+                <!-- Nút giảm số lượng -->
+                <button class="quantity-btn" @onclick="DecreaseQuantity">-</button>
+                
+                <!-- Input chỉnh sửa số lượng -->
+                <input type="number" class="quantity-input" @bind="quantity" min="1" />
+
+                <!-- Nút tăng số lượng -->
+                <button class="quantity-btn" @onclick="IncreaseQuantity">+</button>
+
+                <!-- Nút thêm vào giỏ hàng -->
+                <button class="add-to-cart-btn">Add to cart</button>
+                <button class="buy-now-btn">Buy Now</button>
+            </div>
+        </div>
+    }
+    else
+    {
+        <p>Item not found</p>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private Item? item;
+    private int quantity = 1;  // Mặc định là 1 sản phẩm
+
+    protected override async Task OnInitializedAsync()
+    {
+        item = await DbContext.Items.FirstOrDefaultAsync(i => i.Id == Id);
+    }
+
+    private void IncreaseQuantity()
+    {
+        quantity++;
+    }
+
+    private void DecreaseQuantity()
+    {
+        if (quantity > 1)
+        {
+            quantity--;
+        }
+    }
+}

@@ -26,9 +26,11 @@
 }
 .text-pink {
   color: #FF66A1; 
+  font-weight: bold;
 }
 .text-black {
   color: black; 
+  font-weight: bold;
 }
 /* .navbar-brand:hover {
   color: red;
@@ -78,7 +80,7 @@
 }
 
 .nav-item {
-  font-size: 0.9rem;
+  font-size: 1.1rem;
   padding-bottom: 0.5rem;
 }
 
@@ -107,7 +109,7 @@
 }
 
 .nav-item ::deep a.active {
-  background-color: pink;
+  background-color: #FF66A1;
   color: white;
 }
 

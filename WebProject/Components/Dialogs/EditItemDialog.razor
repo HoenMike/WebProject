@@ -13,6 +13,9 @@
         <MudTextField @bind-Value="editItem.Price" Label="Price" Required="true" InputType="InputType.Number" />
       </MudItem>
       <MudItem xs="12">
+        <MudTextField @bind-Value="editItem.Description" Label="Description" Required="true" />
+      </MudItem>
+      <MudItem xs="12">
         <MudTextField @bind-Value="editItem.ImageUrl" Label="Image URL" />
       </MudItem>
     </MudGrid>
@@ -35,6 +38,7 @@
       Id = Item.Id,
       Name = Item.Name,
       Price = Item.Price,
+      Description = Item.Description,
       ImageUrl = Item.ImageUrl
     };
   }
@@ -54,6 +58,7 @@
       {
         item.Name = editItem.Name;
         item.Price = editItem.Price;
+        item.Description = editItem.Description;
         item.ImageUrl = editItem.ImageUrl;
         await DbContext.SaveChangesAsync();
         Snackbar.Add("Item updated successfully", Severity.Success);

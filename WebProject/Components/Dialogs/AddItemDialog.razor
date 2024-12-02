@@ -13,6 +13,9 @@
         <MudTextField @bind-Value="newItem.Price" Label="Price" Required="true" InputType="InputType.Number" />
       </MudItem>
       <MudItem xs="12">
+        <MudTextField @bind-Value="newItem.Description" Label="Description" Required="true" />
+      </MudItem>
+      <MudItem xs="12">
         <MudTextField @bind-Value="newItem.ImageUrl" Label="Image URL" Required="true" />
       </MudItem>
     </MudGrid>
