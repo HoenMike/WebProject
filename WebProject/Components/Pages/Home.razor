@@ -12,9 +12,15 @@
 <PageTitle>Home</PageTitle>
 
 <MudPaper Class="pa-4 mb-4">
-
+    <MudCarousel T="Promote" AutoCycle="true" CycleInterval="3000">
+        @foreach (var promote in activePromotes)
+        {
+        <MudCarouselItem>
+            <MudImage Src="@promote.ImageUrl" Alt="Promotion Image" Style="width: 100%; height: auto;" />
+        </MudCarouselItem>
+        }
+    </MudCarousel>
 </MudPaper>
-
 
 <MudPaper Class="pa-4 mb-4">
     <MudGrid>
@@ -57,16 +63,11 @@ else
         </RowTemplate>
     </MudTable>
 }
-@code {
-    // Thêm phương thức này vào code block hiện có
-    private void NavigateToItemDetails(int itemId)
-    {
-        NavigationManager.NavigateTo($"/item-details/{itemId}");
-    }
-}
+
 @code {
     private List<Item> items = new();
     private List<Item> displayedItems = new();
+    private List<Promote> activePromotes = new();
     private bool isLoading = true;
     private string searchTerm = string.Empty;
 
@@ -75,6 +76,7 @@ else
         if (firstRender)
         {
             await LoadItems();
+            await LoadActivePromotes();
         }
     }
 
@@ -93,6 +95,23 @@ else
         {
             isLoading = false;
             StateHasChanged();
+        }
+    }
+
+    private async Task LoadActivePromotes()
+    {
+        try
+        {
+            var promotes = await DbContext.Promotes
+            .Where(p => p.IsActive)
+            .OrderByDescending(p => p.Id)
+            .Take(10)
+            .ToListAsync();
+            activePromotes = promotes;
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error loading promotes: {ex.Message}", Severity.Error);
         }
     }
 
@@ -178,4 +197,5 @@ else
             Snackbar.Add($"Error deleting item: {ex.Message}", Severity.Error);
         }
     }
+
 }
