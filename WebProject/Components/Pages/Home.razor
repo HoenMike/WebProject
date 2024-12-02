@@ -11,22 +11,6 @@
 
 <PageTitle>Home</PageTitle>
 
-<div style="height: 200px; display: flex; justify-content: center; align-items: center;">
-    <MudPaper Class="pa-4 mb-4"
-        Style="height: 100%; width: 600px;display: flex; justify-content: center; align-items: center; ">
-        <MudCarousel TData="Promote" ShowArrows="true" ShowDelimiters="true" AutoCycle="true" CycleInterval="3000"
-            Class="my-4" Style="height: 100%; width: 600px;">
-            @foreach (var promote in activePromotes)
-            {
-                <MudCarouselItem>
-                    <MudImage Src=" @promote.ImageUrl" Alt="Promotion Image" ObjectFit="ObjectFit.Contain"
-                        Class="rounded-lg" Style="width: 100%; height: 100%;" />
-                </MudCarouselItem>
-            }
-        </MudCarousel>
-    </MudPaper>
-</div>
-
 <MudPaper Class="pa-4 mb-4">
     <MudGrid>
         <MudItem xs="12">
@@ -36,6 +20,34 @@
         </MudItem>
     </MudGrid>
 </MudPaper>
+
+<div style="height: 200px; display: flex; justify-content: center; align-items: center;">
+    <MudPaper Class="pa-4 mb-4"
+        Style="height: 100%; width: 600px;display: flex; justify-content: center; align-items: center; ">
+        @if (isPromotesLoading)
+        {
+            <MudProgressCircular Color="Color.Default" Indeterminate="true" />
+        }
+        else if (activePromotes != null && activePromotes.Count > 0)
+        {
+            <MudCarousel TData="Promote" ShowArrows="true" ShowDelimiters="true" AutoCycle="true" CycleInterval="3000"
+                Class="my-4" Style="height: 100%; width: 600px;">
+                @foreach (var promote in activePromotes)
+                {
+                    <MudCarouselItem>
+                        <MudImage Src=" @promote.ImageUrl" Alt="Promotion Image" ObjectFit="ObjectFit.Contain"
+                            Class="rounded-lg" Style="width: 100%; height: 100%;" />
+                    </MudCarouselItem>
+                }
+            </MudCarousel>
+        }
+        else
+        {
+            <MudTypography Typo="Typo.h5" Class="text-center">No active promotions</MudTypography>
+        }
+    </MudPaper>
+</div>
+
 
 @if (isLoading)
 {
@@ -72,6 +84,7 @@ else
     private List<Item> displayedItems = new();
     private List<Promote> activePromotes = new();
     private bool isLoading = true;
+    private bool isPromotesLoading = true;
     private string searchTerm = string.Empty;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -121,6 +134,11 @@ else
         {
             Snackbar.Add($"Error loading promotes: {ex.Message}", Severity.Error);
         }
+        finally
+        {
+            isPromotesLoading = false;
+            StateHasChanged();
+        }
     }
 
     private void FilterItems()
@@ -143,8 +161,6 @@ else
         displayedItems = items;
         StateHasChanged();
     }
-
-
 
     private async Task OpenAddItemDialog()
     {
@@ -207,5 +223,4 @@ else
             Snackbar.Add($"Error deleting item: {ex.Message}", Severity.Error);
         }
     }
-
 }
