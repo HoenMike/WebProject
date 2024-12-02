@@ -1,0 +1,87 @@
+@using Microsoft.EntityFrameworkCore
+@using WebProject.Models
+@inherits MudComponentBase
+@inject ApplicationDbContext DbContext
+@inject ISnackbar Snackbar
+
+<MudDialog>
+  <DialogContent>
+    <MudForm @ref="form" @bind-IsValid="@success">
+      <MudTextField T="string" Label="Image URL" @bind-Value="imageUrl" Required="true" RequiredError="Image URL is required!" Validation="@(new Func<string, string>(ValidateImageUrl))" />
+
+      <div class="d-flex align-center mt-4">
+        <MudSwitch T="bool" @bind-Checked="@isActive" Color="Color.Primary" Label="Active" />
+      </div>
+
+      @if (!string.IsNullOrEmpty(imageUrl))
+      {
+        <MudImage Src="@imageUrl" Alt="Preview" Class="mt-4" Height="200" />
+      }
+    </MudForm>
+  </DialogContent>
+  <DialogActions>
+    <MudButton OnClick="Cancel">Cancel</MudButton>
+    <MudButton Color="Color.Primary" Disabled="!success" OnClick="Submit">Update</MudButton>
+  </DialogActions>
+</MudDialog>
+
+@code {
+  [CascadingParameter] MudDialogInstance MudDialog { get; set; } = default!;
+  [Parameter]
+  public Promote Promote { get; set; }
+
+  private MudForm form;
+  private string imageUrl;
+  private bool isActive;
+  private bool success;
+
+  protected override void OnInitialized()
+  {
+    // Initialize with existing promote values
+    imageUrl = Promote.ImageUrl;
+    isActive = Promote.IsActive;
+  }
+
+  private string ValidateImageUrl(string url)
+  {
+    if (string.IsNullOrWhiteSpace(url))
+      return "Image URL is required";
+
+    // Basic URL validation
+    if (!Uri.TryCreate(url, UriKind.Absolute, out var uriResult))
+      return "Invalid URL format";
+
+    // Optional: Add more specific image URL validation if needed
+    return null;
+  }
+
+  private async Task Submit()
+  {
+    await form.Validate();
+
+    if (success)
+    {
+      try
+      {
+        // Update existing promotion
+        Promote.ImageUrl = imageUrl;
+        Promote.IsActive = isActive;
+
+        DbContext.Promotes.Update(Promote);
+        await DbContext.SaveChangesAsync();
+
+        Snackbar.Add("Promotion updated successfully", Severity.Success);
+        MudDialog.Close(DialogResult.Ok(true));
+      }
+      catch (Exception ex)
+      {
+        Snackbar.Add($"Error updating promotion: {ex.Message}", Severity.Error);
+      }
+    }
+  }
+
+  private void Cancel()
+  {
+    MudDialog.Cancel();
+  }
+}

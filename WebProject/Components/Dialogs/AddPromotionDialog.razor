@@ -1,0 +1,72 @@
+@using Microsoft.EntityFrameworkCore
+@using WebProject.Models
+@inject ApplicationDbContext DbContext
+@inject ISnackbar Snackbar
+@using MudBlazor
+
+<MudDialog>
+  <DialogContent>
+    <MudForm @ref="form" @bind-IsValid="@success">
+      <MudTextField T="string" Label="Image URL" @bind-Value="newPromotion.ImageUrl" Required="true" RequiredError="Image URL is required!" Validation="@(new Func<string, string>(ValidateImageUrl))" />
+
+      <div class="d-flex align-center mt-4">
+        <MudSwitch T="bool" @bind-Checked="newPromotion.IsActive" Color="Color.Primary" Label="Active" />
+      </div>
+
+      @if (!string.IsNullOrEmpty(newPromotion.ImageUrl))
+      {
+        <MudImage Src="@newPromotion.ImageUrl" Alt="Preview" Class="mt-4" Height="200" />
+      }
+    </MudForm>
+  </DialogContent>
+  <DialogActions>
+    <MudButton OnClick="Cancel">Cancel</MudButton>
+    <MudButton Color="Color.Primary" Disabled="!success" OnClick="Submit">Save</MudButton>
+  </DialogActions>
+</MudDialog>
+
+@code {
+  [CascadingParameter] MudDialogInstance MudDialog { get; set; } = default!;
+  private Promote newPromotion = new() { ImageUrl = string.Empty, IsActive = false };
+  private MudForm form;
+  private bool success;
+
+  private string ValidateImageUrl(string url)
+  {
+    if (string.IsNullOrWhiteSpace(url))
+      return "Image URL is required";
+
+    // Basic URL validation
+    if (!Uri.TryCreate(url, UriKind.Absolute, out var uriResult))
+      return "Invalid URL format";
+
+    // Optional: Add more specific image URL validation if needed
+    return null;
+  }
+
+  private async Task Submit()
+  {
+    await form.Validate();
+
+    if (success)
+    {
+      try
+      {
+        DbContext.Promotes.Add(newPromotion);
+        await DbContext.SaveChangesAsync();
+
+        Snackbar.Add("Promotion added successfully", Severity.Success);
+        MudDialog.Close(DialogResult.Ok(newPromotion));
+      }
+      catch (Exception ex)
+      {
+        Snackbar.Add($"Error adding promotion: {ex.Message}", Severity.Error);
+      }
+    }
+  }
+
+  private void Cancel()
+  {
+    MudDialog.Cancel();
+  }
+}

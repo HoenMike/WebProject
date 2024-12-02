@@ -11,11 +11,10 @@
 
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
+<MudPaper Class="pa-4 mb-4">
 
-Welcome to your new app.
+</MudPaper>
 
-<h3>Items</h3>
 
 <MudPaper Class="pa-4 mb-4">
     <MudGrid>
@@ -30,25 +29,20 @@ Welcome to your new app.
 
 @if (isLoading)
 {
-        <MudProgressLinear Indeterminate="true" Color="Color.Primary" Style="margin-bottom: 20px;" />
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" Style="margin-bottom: 20px;" />
 }
 else
 {
-        <MudTable Items="@displayedItems" Hover="true" Striped="true">
-            <HeaderContent>
-                <MudTh>Image</MudTh>
-                <MudTh>Name</MudTh>
-                <MudTh>Price</MudTh>
-                <MudTh>Actions</MudTh>
-            </HeaderContent>
-            <RowTemplate Context="item">
+    <MudTable Items="@displayedItems" Hover="true" Striped="true">
+        <HeaderContent>
+            <MudTh>Image</MudTh>
+            <MudTh>Name</MudTh>
+            <MudTh>Price</MudTh>
+            <MudTh>Actions</MudTh>
+        </HeaderContent>
+        <RowTemplate Context="item">
             <MudTd>
-                <MudImage 
-                    Src="@item.ThumbnailUrl" 
-                    Alt="@item.Name" 
-                    Style="width: 50px; height: 50px; cursor: pointer;" 
-                    @onclick="@(() => NavigateToItemDetails(item.Id))" 
-                />
+                <MudImage Src="@item.ThumbnailUrl" Alt="@item.Name" Style="width: 50px; height: 50px; cursor: pointer;" @onclick="@(() => NavigateToItemDetails(item.Id))" />
             </MudTd>
             <MudTd>
                 <MudLink Href="@($"/item-details/{item.Id}")">
@@ -61,7 +55,7 @@ else
                 <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => OpenDeleteConfirmationDialog(item)" />
             </MudTd>
         </RowTemplate>
-        </MudTable>
+    </MudTable>
 }
 @code {
     // Thêm phương thức này vào code block hiện có

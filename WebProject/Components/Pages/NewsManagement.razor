@@ -22,25 +22,6 @@
     </MudGrid>
 </MudPaper>
 
-@* <MudPaper Class="pa-4 mb-4">
-    <MudGrid>
-        <MudItem xs="8">
-            <MudTextField Variant="Variant.Outlined" @bind-Value="searchTerm" Label="Search News" 
-                          AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" 
-                          Immediate="true" Clearable="true" OnClearButtonClick="ClearSearch" OnKeyUp="FilterBlogs" />
-        </MudItem>
-        <MudItem xs="4">
-            <MudSelect T="string" Label="Sort By" @bind-Value="selectedSortOption" OnValueChanged="SortBlogs">
-                <MudSelectItem Value="@("Newest")">Newest</MudSelectItem>
-                <MudSelectItem Value="@("Oldest")">Oldest</MudSelectItem>
-            </MudSelect>
-        </MudItem>
-        <MudItem xs="4">
-            <MudButton Variant="Variant.Filled" OnClick="OpenAddNewsDialog" Color="Color.Secondary" Class="ml-2">Add News</MudButton>
-        </MudItem>
-    </MudGrid>
-</MudPaper> *@
-
 
 @if (isLoading)
 {

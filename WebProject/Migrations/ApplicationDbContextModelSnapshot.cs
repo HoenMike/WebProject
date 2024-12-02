@@ -364,6 +364,26 @@ namespace WebProject.Migrations
                     b.ToTable("OrderItems");
                 });
 
+            modelBuilder.Entity("WebProject.Models.Promote", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("tinyint(1)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Promotes");
+                });
+
             modelBuilder.Entity("WebProject.Models.Review", b =>
                 {
                     b.Property<int>("Id")

@@ -19,6 +19,7 @@ namespace WebProject.Data
     public DbSet<Order> Orders { get; set; }
     public DbSet<ItemPhoto> ItemPhotos { get; set; }
     public DbSet<WishList> WishLists { get; set; }
+    public DbSet<Promote> Promotes { get; set; }
 
 
   }

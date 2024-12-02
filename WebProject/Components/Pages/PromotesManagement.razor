@@ -1,0 +1,186 @@
+@page "/promote_management"
+@using Microsoft.EntityFrameworkCore
+@inject ApplicationDbContext DbContext
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+
+@rendermode InteractiveServer
+
+<PageTitle>Promote Management</PageTitle>
+
+<MudPaper Class="pa-4 mb-4">
+  <MudGrid>
+    <MudItem xs="12" sm="6">
+      <MudTextField Variant="Variant.Outlined" @bind-Value="searchTerm" Label="Search Promotions" AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" Immediate="true" Clearable="true" OnClearButtonClick="ClearSearch" OnKeyUp="FilterPromotions" />
+    </MudItem>
+    <MudItem xs="12" sm="6" Class="d-flex justify-end">
+      <MudButton Variant="Variant.Filled" OnClick="OpenAddPromotionDialog" Color="Color.Secondary">
+        Add Promotion
+      </MudButton>
+    </MudItem>
+  </MudGrid>
+</MudPaper>
+
+@if (isLoading)
+{
+  <MudProgressLinear Indeterminate="true" Color="Color.Primary" Style="margin-bottom: 20px;" />
+}
+else
+{
+  <MudGrid>
+    @foreach (var promote in displayedPromotions)
+    {
+      <MudItem xs="12" sm="6" md="4">
+        <MudCard Class="mb-4">
+          <MudCardMedia Image="@promote.ImageUrl" Height="200" />
+          <MudCardContent>
+            <div class="d-flex justify-space-between align-center">
+              <MudSwitch T="bool" @bind-Value="promote.IsActive" Label="Active" @bind-Value:after="() => UpdatePromotionStatus(promote)" />
+              <div>
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="() => OpenEditPromotionDialog(promote)" />
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => OpenDeleteConfirmationDialog(promote)" />
+              </div>
+            </div>
+          </MudCardContent>
+        </MudCard>
+      </MudItem>
+    }
+  </MudGrid>
+}
+
+@code {
+  private List<Promote> promotions = new();
+  private List<Promote> displayedPromotions = new();
+  private bool isLoading = true;
+  private string searchTerm = string.Empty;
+
+  protected override async Task OnAfterRenderAsync(bool firstRender)
+  {
+    if (firstRender)
+    {
+      try
+      {
+        await LoadPromotions();
+      }
+      catch (Exception ex)
+      {
+        Snackbar.Add($"Error during OnAfterRenderAsync: {ex.Message}", Severity.Error);
+      }
+    }
+  }
+
+  private async Task LoadPromotions()
+  {
+    try
+    {
+      promotions = await DbContext.Promotes.ToListAsync();
+      displayedPromotions = promotions.OrderByDescending(p => p.Id).ToList();
+    }
+    catch (Exception ex)
+    {
+      Snackbar.Add($"Error loading promotions: {ex.Message}", Severity.Error);
+    }
+    finally
+    {
+      isLoading = false;
+      StateHasChanged();
+    }
+  }
+
+  private async Task UpdatePromotionStatus(Promote promote)
+  {
+    try
+    {
+      DbContext.Promotes.Update(promote);
+      await DbContext.SaveChangesAsync();
+      Snackbar.Add($"Promotion status updated to {(promote.IsActive ? "Active" : "Inactive")}", Severity.Success);
+    }
+    catch (Exception ex)
+    {
+      Snackbar.Add($"Error updating promotion status: {ex.Message}", Severity.Error);
+    }
+  }
+
+  private void FilterPromotions()
+  {
+    if (string.IsNullOrEmpty(searchTerm))
+    {
+      displayedPromotions = promotions;
+    }
+    else
+    {
+      displayedPromotions = promotions.Where(p =>
+      p.ImageUrl.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+      ).ToList();
+    }
+  }
+
+  private void ClearSearch()
+  {
+    searchTerm = string.Empty;
+    displayedPromotions = promotions;
+    StateHasChanged();
+  }
+
+  private async Task OpenAddPromotionDialog()
+  {
+    var parameters = new DialogParameters();
+    var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+    var dialog = DialogService.Show<AddPromotionDialog>("Add Promotion", parameters, options);
+    var result = await dialog.Result;
+
+    if (result != null && !result.Canceled)
+    {
+      await LoadPromotions();
+    }
+  }
+
+  private async Task OpenEditPromotionDialog(Promote promote)
+  {
+    var parameters = new DialogParameters { ["Promote"] = promote };
+    var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+    var dialog = DialogService.Show<EditPromotionDialog>("Edit Promotion", parameters, options);
+    var result = await dialog.Result;
+
+    if (result != null && !result.Canceled)
+    {
+      await LoadPromotions();
+    }
+  }
+
+  private async Task OpenDeleteConfirmationDialog(Promote promote)
+  {
+    var parameters = new DialogParameters
+      {
+        ["Message"] = $"Are you sure you want to delete this promotion?"
+      };
+    var options = new DialogOptions
+      {
+        CloseButton = true,
+        MaxWidth = MaxWidth.Small,
+        FullWidth = true
+      };
+    var dialog = DialogService.Show<ConfirmationDialog>("Delete Promotion", parameters, options);
+    var result = await dialog.Result;
+
+    if (result != null && result.Data is bool confirmed && confirmed)
+    {
+      await DeletePromotion(promote);
+    }
+  }
+
+  private async Task DeletePromotion(Promote promote)
+  {
+    try
+    {
+      DbContext.Promotes.Remove(promote);
+      await DbContext.SaveChangesAsync();
+      Snackbar.Add("Promotion deleted successfully", Severity.Success);
+      await LoadPromotions();
+    }
+    catch (Exception ex)
+    {
+      Snackbar.Add($"Error deleting promotion: {ex.Message}", Severity.Error);
+    }
+  }
+}

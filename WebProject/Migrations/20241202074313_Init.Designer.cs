@@ -12,8 +12,8 @@ using WebProject.Data;
 namespace WebProject.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241202043655_Initialize")]
-    partial class Initialize
+    [Migration("20241202074313_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -365,6 +365,26 @@ namespace WebProject.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("OrderItems");
+                });
+
+            modelBuilder.Entity("WebProject.Models.Promote", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("tinyint(1)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Promotes");
                 });
 
             modelBuilder.Entity("WebProject.Models.Review", b =>
