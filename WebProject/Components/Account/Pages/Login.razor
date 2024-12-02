@@ -14,24 +14,32 @@
 <div class="login-container">
     <div class="login-form">
         <h1>Sign in</h1>
-        <form>
+        <StatusMessage Message="@errorMessage" />
+        <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert" />
             <div class="form-group">
-                <input type="text" class="form-control" placeholder="Username" required>
+                <InputText @bind-Value="Input.Username" class="form-control" autocomplete="username" aria-required="true" placeholder="Username" required />
+                <ValidationMessage For="() => Input.Username" class="text-danger" />
             </div>
             <div class="form-group">
-                <input type="password" class="form-control" placeholder="Password" required>
+                <InputText type="password" @bind-Value="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="Password" required />
+                <ValidationMessage For="() => Input.Password" class="text-danger" />
             </div>
             <div class="form-check">
-                <input class="form-check-input" type="checkbox" value="" id="rememberMe">
+                <InputCheckbox @bind-Value="Input.RememberMe" class="form-check-input" id="rememberMe" />
                 <label class="form-check-label" for="rememberMe">
                     Remember me
                 </label>
             </div>
             <button type="submit" class="btn btn-primary">Login</button>
             <div class="form-links">
-                <a href="#">Don't have an account? Sign up</a>
+                <a href="Account/ForgotPassword">Forgot your password?</a>
+                <a href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">
+                    Don't have an account? Sign up
+                </a>
             </div>
-        </form>
+        </EditForm>
     </div>
 </div>
 
@@ -60,8 +68,7 @@
     {
         // This doesn't count login failures towards account lockout
         // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-        var result = await SignInManager.PasswordSignInAsync(Input.Username, Input.Password, Input.RememberMe, lockoutOnFailure:
-        false);
+        var result = await SignInManager.PasswordSignInAsync(Input.Username, Input.Password, Input.RememberMe, lockoutOnFailure: false);
         if (result.Succeeded)
         {
             Logger.LogInformation("User logged in.");
