@@ -11,17 +11,21 @@
 
 <PageTitle>Home</PageTitle>
 
-<MudPaper Class="pa-4 mb-4">
-    @* <MudCarousel T="Promote" AutoCycle="true" CycleInterval="3000">
-        @foreach (var promote in activePromotes)
-        {
-        <MudCarouselItem>
-            <MudImage Src="@promote.ImageUrl" Alt="Promotion Image" Style="width: 100%; height: auto;" />
-        </MudCarouselItem>
-
-        }
-    </MudCarousel> *@
-</MudPaper>
+<div style="height: 200px; display: flex; justify-content: center; align-items: center;">
+    <MudPaper Class="pa-4 mb-4"
+        Style="height: 100%; width: 600px;display: flex; justify-content: center; align-items: center; ">
+        <MudCarousel TData="Promote" ShowArrows="true" ShowDelimiters="true" AutoCycle="true" CycleInterval="3000"
+            Class="my-4" Style="height: 100%; width: 600px;">
+            @foreach (var promote in activePromotes)
+            {
+                <MudCarouselItem>
+                    <MudImage Src=" @promote.ImageUrl" Alt="Promotion Image" ObjectFit="ObjectFit.Contain"
+                        Class="rounded-lg" Style="width: 100%; height: 100%;" />
+                </MudCarouselItem>
+            }
+        </MudCarousel>
+    </MudPaper>
+</div>
 
 <MudPaper Class="pa-4 mb-4">
     <MudGrid>
@@ -29,10 +33,6 @@
             <MudTextField Variant="Variant.Outlined" @bind-Value="searchTerm" Label="Search Items"
                 AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" Immediate="true"
                 Clearable="true" OnClearButtonClick="ClearSearch" OnKeyUp="FilterItems" />
-        </MudItem>
-        <MudItem xs="2">
-            <MudButton Variant="Variant.Filled" OnClick="OpenAddItemDialog" Color="Color.Secondary" Class="ml-2">Add
-                Item</MudButton>
         </MudItem>
     </MudGrid>
 </MudPaper>
@@ -48,7 +48,7 @@ else
             <MudTh>Image</MudTh>
             <MudTh>Name</MudTh>
             <MudTh>Price</MudTh>
-            <MudTh>Actions</MudTh>
+            <MudTh>Description</MudTh>
         </HeaderContent>
         <RowTemplate Context="item">
             <MudTd>
@@ -61,12 +61,8 @@ else
                 </MudLink>
             </MudTd>
             <MudTd>@item.Price.ToString("C")</MudTd>
-            <MudTd>
-                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary"
-                    OnClick="() => OpenEditItemDialog(item)" />
-                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error"
-                    OnClick="() => OpenDeleteConfirmationDialog(item)" />
-            </MudTd>
+            <MudTd>@item.Description</MudTd>
+
         </RowTemplate>
     </MudTable>
 }
@@ -148,10 +144,7 @@ else
         StateHasChanged();
     }
 
-    private void NavigateToItemDetails(int itemId)
-    {
-        NavigationManager.NavigateTo($"/item-details/{itemId}");
-    }
+
 
     private async Task OpenAddItemDialog()
     {

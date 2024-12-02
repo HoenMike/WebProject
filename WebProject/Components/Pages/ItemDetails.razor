@@ -122,16 +122,12 @@
             <p class="item-description">@item.Description</p>
 
             <div class="item-actions">
-                <!-- Nút giảm số lượng -->
                 <button class="quantity-btn" @onclick="DecreaseQuantity">-</button>
 
-                <!-- Input chỉnh sửa số lượng -->
                 <input type="number" class="quantity-input" @bind="quantity" min="1" />
 
-                <!-- Nút tăng số lượng -->
                 <button class="quantity-btn" @onclick="IncreaseQuantity">+</button>
 
-                <!-- Nút thêm vào giỏ hàng -->
                 <button class="add-to-cart-btn">Add to cart</button>
                 <button class="buy-now-btn">Buy Now</button>
             </div>
