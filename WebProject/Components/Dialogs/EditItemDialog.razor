@@ -16,7 +16,7 @@
         <MudTextField @bind-Value="editItem.Description" Label="Description" Required="true" />
       </MudItem>
       <MudItem xs="12">
-        <MudTextField @bind-Value="editItem.ImageUrl" Label="Image URL" />
+        <MudTextField @bind-Value="editItem.ThumbnailUrl" Label="Image URL" />
       </MudItem>
     </MudGrid>
   </DialogContent>
@@ -34,13 +34,13 @@
   protected override void OnInitialized()
   {
     editItem = new Item
-    {
-      Id = Item.Id,
-      Name = Item.Name,
-      Price = Item.Price,
-      Description = Item.Description,
-      ImageUrl = Item.ImageUrl
-    };
+      {
+        Id = Item.Id,
+        Name = Item.Name,
+        Price = Item.Price,
+        Description = Item.Description,
+        ThumbnailUrl = Item.ThumbnailUrl
+      };
   }
 
   private async Task EditItem()
@@ -59,7 +59,7 @@
         item.Name = editItem.Name;
         item.Price = editItem.Price;
         item.Description = editItem.Description;
-        item.ImageUrl = editItem.ImageUrl;
+        item.ThumbnailUrl = editItem.ThumbnailUrl;
         await DbContext.SaveChangesAsync();
         Snackbar.Add("Item updated successfully", Severity.Success);
         MudDialog.Close(DialogResult.Ok(editItem));

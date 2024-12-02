@@ -85,7 +85,6 @@ StyleCopReport.xml
 *.blazor
 *.razor.g.cs
 *.razor.g.i.cs
-*.razor.css
 *.razor.css.g.cs
 *.razor.css.g.i.cs
 

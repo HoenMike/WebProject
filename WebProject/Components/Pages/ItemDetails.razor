@@ -2,12 +2,119 @@
 @inject ApplicationDbContext DbContext
 @using Microsoft.EntityFrameworkCore
 
+<style>
+    .item-details-container {
+        display: flex;
+        background-color: #f8f8f8;
+        border-radius: 10px;
+        padding: 20px;
+        margin: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .item-image-container img {
+        width: 250px;
+        height: auto;
+        border-radius: 10px;
+    }
+
+    .item-info-container {
+        margin-left: 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .item-info-container h2 {
+        font-size: 24px;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .item-rating {
+        display: flex;
+        align-items: center;
+        margin-top: 10px;
+    }
+
+    .star {
+        color: #ffd700;
+        font-size: 16px;
+    }
+
+    .rating-text {
+        margin-left: 8px;
+        font-size: 14px;
+        color: #555;
+    }
+
+    .item-description {
+        margin-top: 10px;
+        font-size: 16px;
+        color: #666;
+    }
+
+    .item-price {
+        font-size: 20px;
+        font-weight: bold;
+        color: #e74c3c;
+        margin-top: 15px;
+    }
+
+    .item-actions {
+        margin-top: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .quantity-btn {
+        background-color: #e2e2e2;
+        border: none;
+        border-radius: 5px;
+        width: 30px;
+        height: 30px;
+        text-align: center;
+        font-size: 20px;
+        cursor: pointer;
+    }
+
+    .quantity {
+        font-size: 18px;
+        margin: 0 10px;
+    }
+
+    .add-to-cart-btn,
+    .buy-now-btn {
+        background-color: #ff69b4;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        cursor: pointer;
+    }
+
+    .add-to-cart-btn:hover,
+    .buy-now-btn:hover {
+        background-color: #f04276;
+    }
+
+    .buy-now-btn {
+        background-color: #ff6347;
+    }
+
+    .buy-now-btn:hover {
+        background-color: #e84c38;
+    }
+</style>
+
 <h3>Item Detail</h3>
 <div class="item-details-container">
     @if (item != null)
     {
         <div class="item-image-container">
-            <img src="@item.ImageUrl" alt="@item.Name" />
+            <img src="@item.ThumbnailUrl" alt="@item.Name" />
         </div>
         <div class="item-info-container">
             <h2>@item.Name</h2>
@@ -17,7 +124,7 @@
             <div class="item-actions">
                 <!-- Nút giảm số lượng -->
                 <button class="quantity-btn" @onclick="DecreaseQuantity">-</button>
-                
+
                 <!-- Input chỉnh sửa số lượng -->
                 <input type="number" class="quantity-input" @bind="quantity" min="1" />
 
@@ -41,7 +148,7 @@
     public int Id { get; set; }
 
     private Item? item;
-    private int quantity = 1;  // Mặc định là 1 sản phẩm
+    private int quantity = 1; // Mặc định là 1 sản phẩm
 
     protected override async Task OnInitializedAsync()
     {
