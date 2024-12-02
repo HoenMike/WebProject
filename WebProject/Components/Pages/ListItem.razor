@@ -34,12 +34,14 @@ else
             <MudTh>Thumbnail</MudTh>
             <MudTh>Name</MudTh>
             <MudTh>Price</MudTh>
+            <MudTh>Description</MudTh>
             <MudTh>Actions</MudTh>
         </HeaderContent>
         <RowTemplate Context="item">
             <MudTd><img src="@item.ThumbnailUrl" alt="@item.Name" style="width: 50px; height: 50px;" /></MudTd>
             <MudTd>@item.Name</MudTd>
             <MudTd>@item.Price.ToString("C")</MudTd>
+            <MudTd>@item.Description</MudTd>
             <MudTd>
                 <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="() => OpenEditItemDialog(item)" />
                 <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => OpenDeleteConfirmationDialog(item)" />

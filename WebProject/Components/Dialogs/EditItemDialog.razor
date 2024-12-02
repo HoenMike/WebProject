@@ -1,7 +1,6 @@
 @inject ApplicationDbContext DbContext
 @inject ISnackbar Snackbar
 @using Microsoft.AspNetCore.Components.Forms
-@using Microsoft.EntityFrameworkCore
 @using MudBlazor
 
 <MudDialog>
@@ -14,13 +13,10 @@
         <MudTextField @bind-Value="editItem.Price" Label="Price" Required="true" InputType="InputType.Number" />
       </MudItem>
       <MudItem xs="12">
-        <MudTextField @bind-Value="editItem.ThumbnailUrl" Label="Thumbnail URL" />
+        <MudTextField @bind-Value="editItem.Description" Label="Description" Required="true" />
       </MudItem>
       <MudItem xs="12">
-        <MudTextField @bind-Value="editItem.Description" Label="Description" Textarea="true" Rows="3" />
-      </MudItem>
-      <MudItem xs="12">
-        <MudTextField @bind-Value="editItem.StockQuantity" Label="Stock Quantity" Required="true" InputType="InputType.Number" />
+        <MudTextField @bind-Value="editItem.ImageUrl" Label="Image URL" />
       </MudItem>
     </MudGrid>
   </DialogContent>
@@ -33,19 +29,18 @@
 @code {
   [CascadingParameter] MudDialogInstance MudDialog { get; set; } = default!;
   [Parameter] public Item Item { get; set; } = default!;
-  private Item editItem = new() { Name = string.Empty };
+  private Item editItem = new();
 
   protected override void OnInitialized()
   {
     editItem = new Item
-      {
-        Id = Item.Id,
-        Name = Item.Name,
-        Price = Item.Price,
-        ThumbnailUrl = Item.ThumbnailUrl,
-        Description = Item.Description,
-        StockQuantity = Item.StockQuantity
-      };
+    {
+      Id = Item.Id,
+      Name = Item.Name,
+      Price = Item.Price,
+      Description = Item.Description,
+      ImageUrl = Item.ImageUrl
+    };
   }
 
   private async Task EditItem()
@@ -63,10 +58,8 @@
       {
         item.Name = editItem.Name;
         item.Price = editItem.Price;
-        item.ThumbnailUrl = editItem.ThumbnailUrl;
         item.Description = editItem.Description;
-        item.StockQuantity = editItem.StockQuantity;
-
+        item.ImageUrl = editItem.ImageUrl;
         await DbContext.SaveChangesAsync();
         Snackbar.Add("Item updated successfully", Severity.Success);
         MudDialog.Close(DialogResult.Ok(editItem));
