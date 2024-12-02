@@ -12,23 +12,27 @@
 <PageTitle>Home</PageTitle>
 
 <MudPaper Class="pa-4 mb-4">
-    <MudCarousel T="Promote" AutoCycle="true" CycleInterval="3000">
+    @* <MudCarousel T="Promote" AutoCycle="true" CycleInterval="3000">
         @foreach (var promote in activePromotes)
         {
         <MudCarouselItem>
             <MudImage Src="@promote.ImageUrl" Alt="Promotion Image" Style="width: 100%; height: auto;" />
         </MudCarouselItem>
+
         }
-    </MudCarousel>
+    </MudCarousel> *@
 </MudPaper>
 
 <MudPaper Class="pa-4 mb-4">
     <MudGrid>
         <MudItem xs="12">
-            <MudTextField Variant="Variant.Outlined" @bind-Value="searchTerm" Label="Search Items" AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" Immediate="true" Clearable="true" OnClearButtonClick="ClearSearch" OnKeyUp="FilterItems" />
+            <MudTextField Variant="Variant.Outlined" @bind-Value="searchTerm" Label="Search Items"
+                AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" Immediate="true"
+                Clearable="true" OnClearButtonClick="ClearSearch" OnKeyUp="FilterItems" />
         </MudItem>
         <MudItem xs="2">
-            <MudButton Variant="Variant.Filled" OnClick="OpenAddItemDialog" Color="Color.Secondary" Class="ml-2">Add Item</MudButton>
+            <MudButton Variant="Variant.Filled" OnClick="OpenAddItemDialog" Color="Color.Secondary" Class="ml-2">Add
+                Item</MudButton>
         </MudItem>
     </MudGrid>
 </MudPaper>
@@ -48,7 +52,8 @@ else
         </HeaderContent>
         <RowTemplate Context="item">
             <MudTd>
-                <MudImage Src="@item.ThumbnailUrl" Alt="@item.Name" Style="width: 50px; height: 50px; cursor: pointer;" @onclick="@(() => NavigateToItemDetails(item.Id))" />
+                <MudImage Src="@item.ThumbnailUrl" Alt="@item.Name" Style="width: 50px; height: 50px; cursor: pointer;"
+                    @onclick="@(() => NavigateToItemDetails(item.Id))" />
             </MudTd>
             <MudTd>
                 <MudLink Href="@($"/item-details/{item.Id}")">
@@ -57,8 +62,10 @@ else
             </MudTd>
             <MudTd>@item.Price.ToString("C")</MudTd>
             <MudTd>
-                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="() => OpenEditItemDialog(item)" />
-                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => OpenDeleteConfirmationDialog(item)" />
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary"
+                    OnClick="() => OpenEditItemDialog(item)" />
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error"
+                    OnClick="() => OpenDeleteConfirmationDialog(item)" />
             </MudTd>
         </RowTemplate>
     </MudTable>
@@ -78,6 +85,11 @@ else
             await LoadItems();
             await LoadActivePromotes();
         }
+    }
+
+    private void NavigateToItemDetails(int itemId)
+    {
+        NavigationManager.NavigateTo($"/item-details/{itemId}");
     }
 
     private async Task LoadItems()
@@ -134,6 +146,11 @@ else
         searchTerm = string.Empty;
         displayedItems = items;
         StateHasChanged();
+    }
+
+    private void NavigateToItemDetails(int itemId)
+    {
+        NavigationManager.NavigateTo($"/item-details/{itemId}");
     }
 
     private async Task OpenAddItemDialog()

@@ -16,12 +16,11 @@ namespace WebProject.Models
     public int ItemId { get; set; }
 
     [Range(1, 5)]
-    public int Rating { get; set; }
+    public int Rating { get; set; } = 0;
 
     [StringLength(1000)]
-    public string? Comment { get; set; }
+    public string Comment { get; set; } = string.Empty;
 
-    public DateTime CreatedAt { get; set; }
-
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
   }
 }
