@@ -12,13 +12,16 @@
 
 <h3>Items</h3>
 
-<MudPaper Class="pa-4 mb-4">
+<MudPaper Class="pa-4 mb-4" Style="border-radius: 0;">
     <MudGrid>
         <MudItem xs="12">
-            <MudTextField Variant="Variant.Outlined" @bind-Value="searchTerm" Label="Search Items" AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" Immediate="true" Clearable="true" OnClearButtonClick="ClearSearch" OnKeyUp="FilterItems" />
+            <MudTextField Variant="Variant.Outlined" @bind-Value="searchTerm" Label="Search Items"
+                AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" Immediate="true"
+                Clearable="true" OnClearButtonClick="ClearSearch" OnKeyUp="FilterItems" />
         </MudItem>
         <MudItem xs="2">
-            <MudButton Variant="Variant.Filled" OnClick="OpenAddItemDialog" Color="Color.Secondary" Class="ml-2">Add Item</MudButton>
+            <MudButton Variant="Variant.Filled" OnClick="OpenAddItemDialog" Color="Color.Secondary" Class="ml-2">Add
+                Item</MudButton>
         </MudItem>
     </MudGrid>
 </MudPaper>
@@ -29,7 +32,7 @@
 }
 else
 {
-    <MudTable Items="@displayedItems" Hover="true" Striped="true">
+    <MudTable Items="@displayedItems" Hover="true" Striped="true" Style="border-radius: 0;">
         <HeaderContent>
             <MudTh>Image</MudTh>
             <MudTh>Name</MudTh>
@@ -43,8 +46,10 @@ else
             <MudTd>@item.Price.ToString("C")</MudTd>
             <MudTd>@item.Description</MudTd>
             <MudTd>
-                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="() => OpenEditItemDialog(item)" />
-                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => OpenDeleteConfirmationDialog(item)" />
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary"
+                    OnClick="() => OpenEditItemDialog(item)" />
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error"
+                    OnClick="() => OpenDeleteConfirmationDialog(item)" />
             </MudTd>
         </RowTemplate>
     </MudTable>
