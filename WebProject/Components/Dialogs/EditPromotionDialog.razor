@@ -7,7 +7,8 @@
 <MudDialog>
   <DialogContent>
     <MudForm @ref="form" @bind-IsValid="@success">
-      <MudTextField T="string" Label="Image URL" @bind-Value="imageUrl" Required="true" RequiredError="Image URL is required!" Validation="@(new Func<string, string>(ValidateImageUrl))" />
+      <MudTextField T="string" Label="Image URL" @bind-Value="imageUrl" Required="true"
+        RequiredError="Image URL is required!" Validation="@(new Func<string, string>(ValidateImageUrl))" />
 
       <div class="d-flex align-center mt-4">
         <MudSwitch T="bool" @bind-Checked="@isActive" Color="Color.Primary" Label="Active" />
@@ -47,12 +48,10 @@
     if (string.IsNullOrWhiteSpace(url))
       return "Image URL is required";
 
-    // Basic URL validation
     if (!Uri.TryCreate(url, UriKind.Absolute, out var uriResult))
       return "Invalid URL format";
 
-    // Optional: Add more specific image URL validation if needed
-    return null;
+    return null!;
   }
 
   private async Task Submit()

@@ -11,27 +11,21 @@
 
 <PageTitle>Home</PageTitle>
 
-<MudPaper Class="pa-4 mb-4" Style="border-radius: 0;">
-    <MudGrid>
-        <MudItem xs="12">
-            <MudTextField Variant="Variant.Outlined" @bind-Value="searchTerm" Label="Search Items"
-                AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" Immediate="true"
-                Clearable="true" OnClearButtonClick="ClearSearch" OnKeyUp="FilterItems" />
-        </MudItem>
-    </MudGrid>
-</MudPaper>
-
-<div style="height: 200px; display: flex; justify-content: center; align-items: center;">
+<div style="height: 400px; display: flex; justify-content: center; align-items: center;">
     <MudPaper Class="pa-4 mb-4"
         Style="height: 100%; width: 600px;display: flex; justify-content: center; align-items: center; ">
         @if (isPromotesLoading)
         {
             <MudProgressCircular Color="Color.Default" Indeterminate="true" />
         }
-        else if (activePromotes != null && activePromotes.Count > 0)
+        else if (!activePromotes.Any())
         {
-            <MudCarousel TData="Promote" ShowArrows="true" ShowDelimiters="true" AutoCycle="true" CycleInterval="3000"
-                Class="my-4" Style="height: 100%; width: 600px;">
+            <MudText>No Promotion available</MudText>
+        }
+        else
+        {
+            <MudCarousel TData="Promote" ShowArrows="true" ShowBullets="true" AutoCycle="true"
+                AutoCycleTime="TimeSpan.FromMilliseconds(3000)" Class="my-4" Style="height: 100%; width: 600px;">
                 @foreach (var promote in activePromotes)
                 {
                     <MudCarouselItem>
@@ -41,13 +35,18 @@
                 }
             </MudCarousel>
         }
-        else
-        {
-            <MudTypography Typo="Typo.h5" Class="text-center">No active promotions</MudTypography>
-        }
     </MudPaper>
 </div>
 
+<MudPaper Class="pa-4 mb-4">
+    <MudGrid>
+        <MudItem xs="12">
+            <MudTextField Variant="Variant.Outlined" @bind-Value="searchTerm" Label="Search Items"
+                AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" Immediate="true"
+                Clearable="true" OnClearButtonClick="ClearSearch" OnKeyUp="FilterItems" />
+        </MudItem>
+    </MudGrid>
+</MudPaper>
 
 @if (isLoading)
 {
@@ -55,7 +54,7 @@
 }
 else
 {
-    <MudTable Items="@displayedItems" Hover="true" Striped="true" Style="border-radius: 0;">
+    <MudTable Items="@displayedItems" Hover="true" Striped="true">
         <HeaderContent>
             <MudTh>Image</MudTh>
             <MudTh>Name</MudTh>
