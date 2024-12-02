@@ -11,7 +11,7 @@
 <PageTitle>News</PageTitle>
 
 <MudPaper Class="pa-4 mb-4">
-            <MudTextField Variant="Variant.Outlined" @bind-Value="searchTerm" Label="Search News" AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" Immediate="true" Clearable="true" OnClearButtonClick="ClearSearch" OnKeyUp="FilterBlogs" />
+    <MudTextField Variant="Variant.Outlined" @bind-Value="searchTerm" Label="Search News" AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" Immediate="true" Clearable="true" OnClearButtonClick="ClearSearch" OnKeyUp="FilterNews" />
 </MudPaper>
 
 @if (isLoading)
@@ -20,28 +20,28 @@
 }
 else
 {
-        @foreach (var news in displayedBlogs)
-        {
-                <MudExpansionPanel Style="margin: 10px; word-break: break-word">
-                    <TitleContent>
-                        <MudText Typo="Typo.h6" GutterBottom="true">@news.Title</MudText>
-                        <MudText Typo="Typo.caption" Style="font-style: italic; margin-bottom: 4px; display: block">Created By: @news.CreatedBy - @news.CreatedAt</MudText>
-                        @if (news.UpdatedAt.HasValue)
-                        {
-                            <MudText Typo="Typo.caption"Style="font-style: italic;">Latest Update: @news.UpdatedAt.Value.ToString("g")</MudText>
-                        }
-                       
-                    </TitleContent>
-                    <ChildContent>
-                        <MudText Typo="Typo.body1">@news.Content</MudText>
-                    </ChildContent>
-                </MudExpansionPanel>
-        }
+    @foreach (var news in displayedNews)
+    {
+        <MudExpansionPanel Style="margin: 10px; word-break: break-word">
+            <TitleContent>
+                <MudText Typo="Typo.h6" GutterBottom="true">@news.Title</MudText>
+                <MudText Typo="Typo.caption" Style="font-style: italic; margin-bottom: 4px; display: block">Created By: @news.CreatedBy - @news.CreatedAt</MudText>
+                @if (news.UpdatedAt.HasValue)
+                {
+                    <MudText Typo="Typo.caption" Style="font-style: italic;">Latest Update: @news.UpdatedAt.Value.ToString("g")</MudText>
+                }
+
+            </TitleContent>
+            <ChildContent>
+                <MudText Typo="Typo.body1">@news.Content</MudText>
+            </ChildContent>
+        </MudExpansionPanel>
+    }
 }
 
 @code {
-    private List<News> blogs = new();
-    private List<News> displayedBlogs = new();
+    private List<News> news = new();
+    private List<News> displayedNews = new();
     private bool isLoading = true;
     private string searchTerm = string.Empty;
 
@@ -57,8 +57,8 @@ else
     {
         try
         {
-            blogs = await DbContext.News.ToListAsync();
-            displayedBlogs = blogs.OrderByDescending(news => news.CreatedAt).ToList();
+            news = await DbContext.News.ToListAsync();
+            displayedNews = news.OrderByDescending(news => news.CreatedAt).ToList();
         }
         catch (Exception ex)
         {
@@ -71,15 +71,15 @@ else
         }
     }
 
-    private void FilterBlogs()
+    private void FilterNews()
     {
         if (string.IsNullOrEmpty(searchTerm))
         {
-            displayedBlogs = blogs;
+            displayedNews = news;
         }
         else
         {
-            displayedBlogs = blogs.Where(news =>
+            displayedNews = news.Where(news =>
             news.Title.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
             ).ToList();
         }
@@ -88,7 +88,7 @@ else
     private void ClearSearch()
     {
         searchTerm = string.Empty;
-        displayedBlogs = blogs;
+        displayedNews = news;
         StateHasChanged();
     }
 
