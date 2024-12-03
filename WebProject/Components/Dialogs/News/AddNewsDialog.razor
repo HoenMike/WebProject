@@ -1,4 +1,4 @@
-
+@using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Components.Forms
 <MudDialog>
     <DialogContent>
@@ -19,7 +19,8 @@
 
 @code {
     [CascadingParameter] MudDialogInstance MudDialog { get; set; } = default!;
-    private News newNews = new() { Title = string.Empty };
+    [Inject] AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
+    private News newNews = new() { Title = string.Empty, CreatedBy = string.Empty };
 
     private async Task AddNews()
     {
@@ -31,7 +32,11 @@
 
         try
         {
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var userName = authState.User.Identity?.Name;
+
             newNews.CreatedAt = DateTime.Now;
+            newNews.CreatedBy = userName;
             DbContext.News.Add(newNews);
             await DbContext.SaveChangesAsync();
             Snackbar.Add("News added successfully", Severity.Success);

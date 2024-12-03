@@ -14,9 +14,7 @@
 <MudPaper Class="pa-4 mb-4" Style="border-radius: 0;">
     <MudGrid>
         <MudItem xs="12">
-            <MudTextField Variant="Variant.Outlined" @bind-Value="searchTerm" Label="Search News"
-                AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" Immediate="true"
-                Clearable="true" OnClearButtonClick="ClearSearch" OnKeyUp="FilterNews" />
+            <MudTextField Variant="Variant.Outlined" @bind-Value="searchTerm" Label="Search News" AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" Immediate="true" Clearable="true" OnClearButtonClick="ClearSearch" OnKeyUp="FilterNews" />
         </MudItem>
         <MudItem xs="4">
             <MudButton Variant="Variant.Filled" OnClick="OpenAddNewsDialog" Color="Color.Secondary" Class="ml-2">Add
@@ -39,19 +37,19 @@ else
                 <MudGrid xs="12">
                     <MudItem xs="10">
                         <MudText Typo="Typo.h6" GutterBottom="true">@news.Title</MudText>
-                        <MudText Typo="Typo.caption" Style="font-style: italic; margin-bottom: 4px; display: block">Created By:
-                            @news.CreatedBy - @news.CreatedAt</MudText>
+                        <MudText Typo="Typo.caption" Style="font-style: italic; margin-bottom: 4px; display: block">
+                            Created at: @news.CreatedAt - by @news.CreatedBy
+                        </MudText>
                         @if (news.UpdatedAt.HasValue)
                         {
-                            <MudText Typo="Typo.caption" Style="font-style: italic;">Latest Update:
-                                @news.UpdatedAt.Value.ToString("g")</MudText>
+                            <MudText Typo="Typo.caption" Style="font-style: italic;">
+                                Updated at: @news.UpdatedAt.Value.ToString("g") - by @news.UpdatedBy
+                            </MudText>
                         }
                     </MudItem>
                     <MudItem xs="2">
-                        <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary"
-                            OnClick="() => OpenEditNewsDialog(news)" />
-                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error"
-                            OnClick="() => OpenDeleteConfirmationDialog(news)" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="() => OpenEditNewsDialog(news)" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => OpenDeleteConfirmationDialog(news)" />
                     </MudItem>
                 </MudGrid>
             </TitleContent>

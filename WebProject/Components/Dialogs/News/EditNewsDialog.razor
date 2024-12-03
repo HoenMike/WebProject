@@ -1,3 +1,4 @@
+@using Microsoft.AspNetCore.Components.Authorization
 <MudDialog>
     <DialogContent>
         <MudGrid>
@@ -18,7 +19,8 @@
 @code {
     [CascadingParameter] MudDialogInstance MudDialog { get; set; } = default!;
     [Parameter] public News News { get; set; } = default!;
-    private News editNews = new() { Title = string.Empty, Content = string.Empty };
+    [Inject] AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
+    private News editNews = new() { Title = string.Empty, Content = string.Empty, CreatedBy = string.Empty };
 
     protected override void OnInitialized()
     {
@@ -44,12 +46,16 @@
 
         try
         {
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var userName = authState.User.Identity?.Name;
+
             var news = await DbContext.News.FindAsync(editNews.Id);
             if (news != null)
             {
                 news.Title = editNews.Title;
                 news.Content = editNews.Content;
                 news.UpdatedAt = DateTime.Now;
+                news.UpdatedBy = userName;
                 await DbContext.SaveChangesAsync();
                 Snackbar.Add("News updated successfully", Severity.Success);
                 MudDialog.Close(DialogResult.Ok(editNews));

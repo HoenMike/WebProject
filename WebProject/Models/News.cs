@@ -17,10 +17,13 @@ namespace WebProject.Models
     public string? Content { get; set; }
 
     [ForeignKey("User")]
-    public int CreatedBy { get; set; }
+    public required string CreatedBy { get; set; }
 
     [Required]
     public DateTime CreatedAt { get; set; }
+
+    [ForeignKey("User")]
+    public string? UpdatedBy { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
 
