@@ -1,7 +1,8 @@
-@page "/Account/Manage/PaymentInfo"
+@page "/paymentinfo"
 
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.Identity
+@using WebProject.Components.Account
 @using WebProject.Data
 @using WebProject.Models
 @using Microsoft.EntityFrameworkCore
@@ -15,100 +16,79 @@
 @inject NavigationManager NavigationManager
 @inject IHttpContextAccessor HttpContextAccessor
 
+@rendermode InteractiveServer
+
 <PageTitle>Payment Information</PageTitle>
 
-<div class="container">
-  <h3>Payment Information</h3>
+<MudContainer MaxWidth="MaxWidth.Medium">
+  <MudText Typo="Typo.h3">Payment Information</MudText>
 
   @if (!string.IsNullOrEmpty(StatusMessage))
   {
-    <div class="alert @(StatusMessageType)" role="alert">
+    <MudAlert Severity="@(StatusMessageType == "alert-success" ? Severity.Success : Severity.Error)">
       @StatusMessage
-    </div>
+    </MudAlert>
   }
 
-  <div class="alert alert-warning" role="alert">
+  <MudAlert Severity="Severity.Warning">
     <strong>Demo Version Warning:</strong> This is a demonstration version. Card details are stored in plain text
     and are not validated or encrypted. <strong>DO NOT</strong> use real credit card information.
-  </div>
+  </MudAlert>
 
-  <div class="row">
-    <div class="col-md-6">
-      <EditForm Model="Input" FormName="payment-info" OnValidSubmit="OnValidSubmitAsync" method="post">
-        <DataAnnotationsValidator />
-        <ValidationSummary class="text-danger" role="alert" />
-
-        <div class="form-floating mb-3">
-          <InputText @bind-Value="Input.CardHolderName" class="form-control" placeholder="Card Holder Name" />
-          <label for="card-holder-name" class="form-label">Card Holder Name</label>
-          <ValidationMessage For="() => Input.CardHolderName" class="text-danger" />
-        </div>
-
-        <div class="form-floating mb-3">
-          <InputText @bind-Value="Input.CardNumber" class="form-control" placeholder="Card Number" />
-          <label for="card-number" class="form-label">Card Number</label>
-          <ValidationMessage For="() => Input.CardNumber" class="text-danger" />
-        </div>
-
-        <div class="row">
-          <div class="col-md-6 form-floating mb-3">
-            <InputDate @bind-Value="Input.ExpiryDate" class="form-control" placeholder="Expiry Date" />
-            <label for="expiry-date" class="form-label">Expiry Date</label>
-            <ValidationMessage For="() => Input.ExpiryDate" class="text-danger" />
-          </div>
-
-          <div class="col-md-6 form-floating mb-3">
-            <InputText @bind-Value="Input.Cvv" class="form-control" placeholder="CVV" />
-            <label for="cvv" class="form-label">CVV</label>
-            <ValidationMessage For="() => Input.Cvv" class="text-danger" />
-          </div>
-        </div>
-
-        <div class="form-check mb-3">
-          <InputCheckbox @bind-Value="Input.IsPrimary" class="form-check-input" id="is-primary" />
-          <label class="form-check-label" for="is-primary">Set as Primary Card</label>
-        </div>
-
-        <button type="submit" class="w-100 btn btn-lg btn-primary">Save Payment Information</button>
-      </EditForm>
-    </div>
+  <MudGrid>
+    <MudItem xs="12" md="6">
+      <MudForm Model="Input" @ref="form" OnValidSubmit="OnValidSubmitAsync">
+        <MudTextField @bind-Value="Input.CardHolderName" Label="Card Holder Name" Required="true" RequiredError="Card Holder Name is required" />
+        <MudTextField @bind-Value="Input.CardNumber" Label="Card Number" Required="true" RequiredError="Card Number is required" />
+        <MudGrid>
+          <MudItem xs="12" md="6">
+            <MudDatePicker @bind-Value="Input.ExpiryDate" Label="Expiry Date" Required="true" RequiredError="Expiry Date is required" />
+          </MudItem>
+          <MudItem xs="12" md="6">
+            <MudTextField @bind-Value="Input.Cvv" Label="CVV" Required="true" RequiredError="CVV is required" />
+          </MudItem>
+        </MudGrid>
+        <MudCheckBox T="bool" @bind-Checked="Input.IsPrimary" Label="Set as Primary Card" />
+        <MudButton Type="Submit" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">Save Payment Information</MudButton>
+      </MudForm>
+    </MudItem>
 
     @if (ExistingCards.Any())
     {
-      <div class="col-md-6">
-        <h4>Existing Cards</h4>
-        <div class="list-group">
+      <MudItem xs="12" md="6">
+        <MudText Typo="Typo.h4">Existing Cards</MudText>
+        <MudList T="UserCard">
           @foreach (var card in ExistingCards)
           {
-            <div class="list-group-item list-group-item-action">
-              <div class="d-flex w-100 justify-content-between">
-                <h5 class="mb-1">@card.CardHolderName</h5>
-                @if (card.IsPrimary)
-                {
-                  <small class="text-success">Primary Card</small>
-                }
-              </div>
-              <p class="mb-1">
-                **** **** **** @card.CardNumber.Substring(Math.Max(0, card.CardNumber.Length - 4))
-                <br />
-                Expires: @card.ExpiryDate.ToString("MM/yyyy")
-              </p>
-              <div class="mt-2">
-                <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteCardAsync(card.Id)">Remove</button>
-              </div>
-            </div>
+            <MudListItem T="UserCard">
+              <MudGrid>
+                <MudItem xs="8">
+                  <MudText Typo="Typo.h6">@card.CardHolderName</MudText>
+                  <MudText>**** **** **** @card.CardNumber.Substring(Math.Max(0, card.CardNumber.Length - 4))</MudText>
+                  <MudText>Expires: @card.ExpiryDate.ToString("MM/yyyy")</MudText>
+                  @if (card.IsPrimary)
+                  {
+                    <MudText Color="Color.Success">Primary Card</MudText>
+                  }
+                </MudItem>
+                <MudItem xs="4" Align="Align.End">
+                  <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="() => DeleteCardAsync(card.Id)">Remove</MudButton>
+                </MudItem>
+              </MudGrid>
+            </MudListItem>
           }
-        </div>
-      </div>
+        </MudList>
+      </MudItem>
     }
-  </div>
-</div>
+  </MudGrid>
+</MudContainer>
 
 @code {
   private ApplicationUser user = default!;
   private List<UserCard> ExistingCards = new();
   private string StatusMessage = string.Empty;
   private string StatusMessageType = "alert-success";
+  private MudForm? form;
 
   [SupplyParameterFromForm]
   private InputModel Input { get; set; } = new();
@@ -117,7 +97,13 @@
   {
     try
     {
-      user = await UserAccessor.GetRequiredUserAsync(HttpContextAccessor.HttpContext);
+      var httpContext = HttpContextAccessor.HttpContext;
+      if (httpContext == null)
+      {
+        throw new InvalidOperationException("HttpContext is null");
+      }
+
+      user = await UserAccessor.GetRequiredUserAsync(httpContext);
 
       // Fetch existing cards for the current user
       ExistingCards = await DbContext.UserCards

@@ -1,0 +1,195 @@
+@page "/itembrowse"
+@using Microsoft.EntityFrameworkCore
+@using WebProject.Data
+@inject ApplicationDbContext DbContext
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+@inject NavigationManager NavigationManager
+@using MudBlazor
+
+@rendermode InteractiveServer
+
+<PageTitle>Browse</PageTitle>
+
+<MudPaper Class="pa-4 mb-4">
+  <MudGrid>
+    <MudItem xs="12">
+      <MudTextField Variant="Variant.Outlined" @bind-Value="searchTerm" Label="Search Items" AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" Immediate="true" Clearable="true" OnClearButtonClick="ClearSearch" OnKeyUp="FilterItems" />
+    </MudItem>
+  </MudGrid>
+</MudPaper>
+
+@if (isLoading)
+{
+  <MudProgressLinear Indeterminate="true" Color="Color.Primary" Style="margin-bottom: 20px;" />
+}
+else
+{
+  <MudTable Items="@displayedItems" Hover="true" Striped="true">
+    <HeaderContent>
+      <MudTh>Image</MudTh>
+      <MudTh>Name</MudTh>
+      <MudTh>Price</MudTh>
+      <MudTh>Description</MudTh>
+    </HeaderContent>
+    <RowTemplate Context="item">
+      <MudTd>
+        <MudImage Src="@item.ThumbnailUrl" Alt="@item.Name" Style="width: 50px; height: 50px; cursor: pointer;" @onclick="@(() => NavigateToItemDetails(item.Id))" />
+      </MudTd>
+      <MudTd>
+        <MudLink Href="@($"/item-details/{item.Id}")">
+          @item.Name
+        </MudLink>
+      </MudTd>
+      <MudTd>@item.Price.ToString("C")</MudTd>
+      <MudTd>@item.Description</MudTd>
+
+    </RowTemplate>
+  </MudTable>
+}
+
+@code {
+  private List<Item> items = new();
+  private List<Item> displayedItems = new();
+  private List<Promote> activePromotes = new();
+  private bool isLoading = true;
+  private bool isPromotesLoading = true;
+  private string searchTerm = string.Empty;
+
+  protected override async Task OnAfterRenderAsync(bool firstRender)
+  {
+    if (firstRender)
+    {
+      await LoadItems();
+      await LoadActivePromotes();
+    }
+  }
+
+  private void NavigateToItemDetails(int itemId)
+  {
+    NavigationManager.NavigateTo($"/item-details/{itemId}");
+  }
+
+  private async Task LoadItems()
+  {
+    try
+    {
+      items = await DbContext.Items.ToListAsync();
+      displayedItems = items;
+    }
+    catch (Exception ex)
+    {
+      Snackbar.Add($"Error loading items: {ex.Message}", Severity.Error);
+    }
+    finally
+    {
+      isLoading = false;
+      StateHasChanged();
+    }
+  }
+
+  private async Task LoadActivePromotes()
+  {
+    try
+    {
+      var promotes = await DbContext.Promotes
+      .Where(p => p.IsActive)
+      .OrderByDescending(p => p.Id)
+      .Take(10)
+      .ToListAsync();
+      activePromotes = promotes;
+    }
+    catch (Exception ex)
+    {
+      Snackbar.Add($"Error loading promotes: {ex.Message}", Severity.Error);
+    }
+    finally
+    {
+      isPromotesLoading = false;
+      StateHasChanged();
+    }
+  }
+
+  private void FilterItems()
+  {
+    if (string.IsNullOrEmpty(searchTerm))
+    {
+      displayedItems = items;
+    }
+    else
+    {
+      displayedItems = items.Where(item =>
+      item.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+      ).ToList();
+    }
+  }
+
+  private void ClearSearch()
+  {
+    searchTerm = string.Empty;
+    displayedItems = items;
+    StateHasChanged();
+  }
+
+  private async Task OpenAddItemDialog()
+  {
+    var parameters = new DialogParameters();
+    var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+    var dialog = DialogService.Show<AddItemDialog>("Add Item", parameters, options);
+    var result = await dialog.Result;
+
+    if (result != null && !result.Canceled)
+    {
+      await LoadItems();
+    }
+  }
+
+  private async Task OpenDeleteConfirmationDialog(Item item)
+  {
+    var parameters = new DialogParameters
+      {
+        ["Message"] = $"Are you sure you want to delete the item '{item.Name}'?"
+      };
+    var options = new DialogOptions
+      {
+        CloseButton = true,
+        MaxWidth = MaxWidth.Small,
+        FullWidth = true
+      };
+    var dialog = DialogService.Show<ConfirmationDialog>("Delete Item", parameters, options);
+    var result = await dialog.Result;
+
+    if (result != null && result.Data is bool confirmed && confirmed)
+    {
+      await DeleteItem(item);
+    }
+  }
+
+  private async Task OpenEditItemDialog(Item item)
+  {
+    var parameters = new DialogParameters { ["Item"] = item };
+    var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+    var dialog = DialogService.Show<EditItemDialog>("Edit Item", parameters, options);
+    var result = await dialog.Result;
+
+    if (result != null && !result.Canceled)
+    {
+      await LoadItems();
+    }
+  }
+
+  private async Task DeleteItem(Item item)
+  {
+    try
+    {
+      DbContext.Items.Remove(item);
+      await DbContext.SaveChangesAsync();
+      Snackbar.Add("Item deleted successfully", Severity.Success);
+      await LoadItems();
+    }
+    catch (Exception ex)
+    {
+      Snackbar.Add($"Error deleting item: {ex.Message}", Severity.Error);
+    }
+  }
+}
