@@ -13,7 +13,15 @@
 <MudContainer MaxWidth="MaxWidth.ExtraLarge">
   <MudText Typo="Typo.h3" Class="mb-4">Your Cart</MudText>
 
-  @if (cartItems.Any())
+  @if (isLoading)
+  {
+    <MudGrid>
+      <MudItem xs="12" md="8">
+        <MudProgressLinear Indeterminate="true" Color="Color.Primary" Style="margin-bottom: 20px;" />
+      </MudItem>
+    </MudGrid>
+  }
+  else if (cartItems.Any())
   {
     <MudGrid>
       <MudItem xs="12" md="8">
@@ -104,6 +112,7 @@
   private List<CartItem> cartItems = new();
   private decimal totalPrice = 0;
   private bool isRendered = false;
+  private bool isLoading = true;
 
   protected override async Task OnInitializedAsync()
   {
@@ -123,8 +132,10 @@
   {
     if (isRendered)
     {
+      isLoading = true;
       cartItems = await CartService.GetCartItemsAsync();
       totalPrice = await CartService.GetTotalPriceAsync();
+      isLoading = false;
       StateHasChanged();
     }
   }
