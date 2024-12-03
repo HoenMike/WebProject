@@ -32,6 +32,7 @@ namespace WebProject.Controllers
         existingItem.Name = updatedItem.Name;
         existingItem.Price = updatedItem.Price;
         existingItem.Description = updatedItem.Description;
+        existingItem.ThumbnailUrl = updatedItem.ThumbnailUrl;
         existingItem.StockQuantity = updatedItem.StockQuantity;
 
         await _context.SaveChangesAsync();
