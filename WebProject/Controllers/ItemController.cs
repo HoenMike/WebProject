@@ -1,21 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using WebProject.Data;
 using WebProject.Models;
 
 namespace WebProject.Controllers
 {
-  public class ItemController
+  public class ItemController(ApplicationDbContext context)
   {
-    private readonly ApplicationDbContext _context;
-
-    public ItemController(ApplicationDbContext context)
-    {
-      _context = context;
-    }
+    private readonly ApplicationDbContext _context = context;
 
     public async Task<List<Item>> GetItemsAsync()
     {
@@ -33,10 +24,22 @@ namespace WebProject.Controllers
       await _context.SaveChangesAsync();
     }
 
-    public async Task UpdateItemAsync(Item item)
+    public async Task UpdateItemAsync(Item updatedItem)
     {
-      _context.Items.Update(item);
-      await _context.SaveChangesAsync();
+      var existingItem = await _context.Items.FindAsync(updatedItem.Id);
+      if (existingItem != null)
+      {
+        existingItem.Name = updatedItem.Name;
+        existingItem.Price = updatedItem.Price;
+        existingItem.Description = updatedItem.Description;
+        existingItem.StockQuantity = updatedItem.StockQuantity;
+
+        await _context.SaveChangesAsync();
+      }
+      else
+      {
+        throw new Exception("Item not found");
+      }
     }
 
     public async Task DeleteItemAsync(Item item)
