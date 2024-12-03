@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using MudBlazor;
 using MudBlazor.Services;
 using WebProject.Components;
 using WebProject.Components.Account;
@@ -48,6 +49,15 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Password.RequireUppercase = false;
     options.Password.RequireLowercase = false;
     options.Password.RequiredUniqueChars = 1;
+});
+
+// Configure Snackbar
+builder.Services.Configure<SnackbarConfiguration>(config =>
+{
+    config.PositionClass = Defaults.Classes.Position.BottomLeft;
+    config.PreventDuplicates = false;
+    config.NewestOnTop = false;
+    config.ShowCloseIcon = true;
 });
 
 var app = builder.Build();
