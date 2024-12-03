@@ -13,37 +13,38 @@
         <MudItem xs="12">
             @if (item != null)
             {
-                    <MudGrid>
-                        <MudItem xs="12" md="4">
-                            <MudCard>
-                                <MudCardMedia Image="@item.ThumbnailUrl" Alt="@item.Name" />
-                            </MudCard>
-                        </MudItem>
-                        <MudItem xs="12" md="8">
-                            <MudCard>
-                                <MudCardContent>
-                                    <MudText Typo="Typo.h4">@item.Name</MudText>
-                                    <MudText Typo="Typo.subtitle1" Color="Color.Secondary">@item.Price.ToString("C")</MudText>
-                                    <MudText Typo="Typo.body1">@item.Description</MudText>
-                                    <MudGrid>
-                                        <MudItem xs="12" md="6">
-                                            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="DecreaseQuantity">-</MudButton>
-                                            <MudTextField @bind-Value="buyQuantity" Type="number" Min="1" />
-                                            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="IncreaseQuantity">+</MudButton>
-                                        </MudItem>
-                                        <MudItem xs="12" md="6">
-                                            <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="AddToCart">Add to cart</MudButton>
-                                            <MudButton Variant="Variant.Filled" Color="Color.Tertiary">Buy Now</MudButton>
-                                        </MudItem>
-                                    </MudGrid>
-                                </MudCardContent>
-                            </MudCard>
-                        </MudItem>
-                    </MudGrid>
+                <MudGrid>
+                    <MudItem xs="12" md="4">
+                        <MudCard>
+                            <MudCardMedia Image="@item.ThumbnailUrl" Alt="@item.Name" />
+                        </MudCard>
+                    </MudItem>
+                    <MudItem xs="12" md="8">
+                        <MudCard>
+                            <MudCardContent>
+                                <MudText Typo="Typo.h4">@item.Name</MudText>
+                                <MudText Typo="Typo.subtitle1" Color="Color.Secondary">@item.Price.ToString("C")</MudText>
+                                <MudText Typo="Typo.body1">@item.Description</MudText>
+                                <MudText Typo="Typo.body2">Stock: @item.StockQuantity</MudText>
+                                <MudGrid>
+                                    <MudItem xs="12" md="6">
+                                        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="DecreaseQuantity">-</MudButton>
+                                        <MudNumericField @bind-Value="buyQuantity" Min="1" Max="@item.StockQuantity" />
+                                        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="IncreaseQuantity">+</MudButton>
+                                    </MudItem>
+                                    <MudItem xs="12" md="6">
+                                        <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="AddToCart">Add to cart</MudButton>
+                                        <MudButton Variant="Variant.Filled" Color="Color.Tertiary" OnClick="BuyNow">Buy Now</MudButton>
+                                    </MudItem>
+                                </MudGrid>
+                            </MudCardContent>
+                        </MudCard>
+                    </MudItem>
+                </MudGrid>
             }
             else
             {
-                    <MudText Typo="Typo.body1">Item not found</MudText>
+                <MudText Typo="Typo.body1">Item not found</MudText>
             }
         </MudItem>
     </MudGrid>
@@ -63,7 +64,10 @@
 
     private void IncreaseQuantity()
     {
-        buyQuantity++;
+        if (buyQuantity < item?.StockQuantity)
+        {
+            buyQuantity++;
+        }
     }
 
     private void DecreaseQuantity()
@@ -78,8 +82,20 @@
     {
         if (item != null)
         {
-            await CartService.AddToCartAsync(item, buyQuantity);
-            Snackbar.Add($"Added {buyQuantity} {item.Name} to cart", Severity.Success);
+            try
+            {
+                await CartService.AddToCartAsync(item, buyQuantity);
+                Snackbar.Add($"Added {buyQuantity} {item.Name} to cart", Severity.Success);
+            }
+            catch (InvalidOperationException ex)
+            {
+                Snackbar.Add(ex.Message, Severity.Error);
+            }
         }
+    }
+
+    private async Task BuyNow()
+    {
+        // Implement buy now functionality
     }
 }

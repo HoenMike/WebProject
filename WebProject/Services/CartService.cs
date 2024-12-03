@@ -45,11 +45,20 @@ namespace WebProject.Services
       try
       {
         var userId = GetUserId();
+        if (item.StockQuantity < quantity)
+        {
+          throw new InvalidOperationException("Not enough stock available.");
+        }
+
         var existingCartItem = await _dbContext.CartItems.FirstOrDefaultAsync(ci => ci.ItemId == item.Id && ci.UserId == userId);
 
         if (existingCartItem != null)
         {
           existingCartItem.Quantity += quantity;
+          if (existingCartItem.Quantity > item.StockQuantity)
+          {
+            throw new InvalidOperationException("Not enough stock available.");
+          }
         }
         else
         {
@@ -65,6 +74,7 @@ namespace WebProject.Services
           _dbContext.CartItems.Add(newCartItem);
         }
 
+        item.StockQuantity -= quantity;
         await _dbContext.SaveChangesAsync();
       }
       catch (Exception ex)

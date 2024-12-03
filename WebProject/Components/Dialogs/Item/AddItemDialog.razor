@@ -14,6 +14,9 @@
       <MudItem xs="12">
         <MudTextField @bind-Value="newItem.ThumbnailUrl" Label="Image URL" Required="true" />
       </MudItem>
+      <MudItem xs="12">
+        <MudTextField @bind-Value="newItem.StockQuantity" Label="Stock Quantity" Required="true" InputType="InputType.Number" />
+      </MudItem>
     </MudGrid>
   </DialogContent>
   <DialogActions>

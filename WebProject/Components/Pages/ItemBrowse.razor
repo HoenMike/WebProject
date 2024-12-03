@@ -31,6 +31,7 @@ else
       <MudTh>Name</MudTh>
       <MudTh>Price</MudTh>
       <MudTh>Description</MudTh>
+      <MudTh>Stock Quantity</MudTh>
     </HeaderContent>
     <RowTemplate Context="item">
       <MudTd>
@@ -41,8 +42,9 @@ else
           @item?.Name
         </MudLink>
       </MudTd>
-      <MudTd>@item?.Price.ToString("C")</MudTd>
-      <MudTd>@item?.Description</MudTd>
+      <MudTd>@item.Price.ToString("C")</MudTd>
+      <MudTd>@item.Description</MudTd>
+      <MudTd>@item.StockQuantity</MudTd>
     </RowTemplate>
   </MudTable>
 }
