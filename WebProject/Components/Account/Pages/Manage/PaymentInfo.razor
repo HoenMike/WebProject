@@ -1,0 +1,232 @@
+@page "/Account/Manage/PaymentInfo"
+
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Identity
+@using WebProject.Data
+@using WebProject.Models
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Http
+
+@inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
+@inject IdentityUserAccessor UserAccessor
+@inject ILogger<UserCard> Logger
+@inject ApplicationDbContext DbContext
+@inject NavigationManager NavigationManager
+@inject IHttpContextAccessor HttpContextAccessor
+
+<PageTitle>Payment Information</PageTitle>
+
+<div class="container">
+  <h3>Payment Information</h3>
+
+  @if (!string.IsNullOrEmpty(StatusMessage))
+  {
+    <div class="alert @(StatusMessageType)" role="alert">
+      @StatusMessage
+    </div>
+  }
+
+  <div class="alert alert-warning" role="alert">
+    <strong>Demo Version Warning:</strong> This is a demonstration version. Card details are stored in plain text
+    and are not validated or encrypted. <strong>DO NOT</strong> use real credit card information.
+  </div>
+
+  <div class="row">
+    <div class="col-md-6">
+      <EditForm Model="Input" FormName="payment-info" OnValidSubmit="OnValidSubmitAsync" method="post">
+        <DataAnnotationsValidator />
+        <ValidationSummary class="text-danger" role="alert" />
+
+        <div class="form-floating mb-3">
+          <InputText @bind-Value="Input.CardHolderName" class="form-control" placeholder="Card Holder Name" />
+          <label for="card-holder-name" class="form-label">Card Holder Name</label>
+          <ValidationMessage For="() => Input.CardHolderName" class="text-danger" />
+        </div>
+
+        <div class="form-floating mb-3">
+          <InputText @bind-Value="Input.CardNumber" class="form-control" placeholder="Card Number" />
+          <label for="card-number" class="form-label">Card Number</label>
+          <ValidationMessage For="() => Input.CardNumber" class="text-danger" />
+        </div>
+
+        <div class="row">
+          <div class="col-md-6 form-floating mb-3">
+            <InputDate @bind-Value="Input.ExpiryDate" class="form-control" placeholder="Expiry Date" />
+            <label for="expiry-date" class="form-label">Expiry Date</label>
+            <ValidationMessage For="() => Input.ExpiryDate" class="text-danger" />
+          </div>
+
+          <div class="col-md-6 form-floating mb-3">
+            <InputText @bind-Value="Input.Cvv" class="form-control" placeholder="CVV" />
+            <label for="cvv" class="form-label">CVV</label>
+            <ValidationMessage For="() => Input.Cvv" class="text-danger" />
+          </div>
+        </div>
+
+        <div class="form-check mb-3">
+          <InputCheckbox @bind-Value="Input.IsPrimary" class="form-check-input" id="is-primary" />
+          <label class="form-check-label" for="is-primary">Set as Primary Card</label>
+        </div>
+
+        <button type="submit" class="w-100 btn btn-lg btn-primary">Save Payment Information</button>
+      </EditForm>
+    </div>
+
+    @if (ExistingCards.Any())
+    {
+      <div class="col-md-6">
+        <h4>Existing Cards</h4>
+        <div class="list-group">
+          @foreach (var card in ExistingCards)
+          {
+            <div class="list-group-item list-group-item-action">
+              <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">@card.CardHolderName</h5>
+                @if (card.IsPrimary)
+                {
+                  <small class="text-success">Primary Card</small>
+                }
+              </div>
+              <p class="mb-1">
+                **** **** **** @card.CardNumber.Substring(Math.Max(0, card.CardNumber.Length - 4))
+                <br />
+                Expires: @card.ExpiryDate.ToString("MM/yyyy")
+              </p>
+              <div class="mt-2">
+                <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteCardAsync(card.Id)">Remove</button>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+</div>
+
+@code {
+  private ApplicationUser user = default!;
+  private List<UserCard> ExistingCards = new();
+  private string StatusMessage = string.Empty;
+  private string StatusMessageType = "alert-success";
+
+  [SupplyParameterFromForm]
+  private InputModel Input { get; set; } = new();
+
+  protected override async Task OnInitializedAsync()
+  {
+    try
+    {
+      user = await UserAccessor.GetRequiredUserAsync(HttpContextAccessor.HttpContext);
+
+      // Fetch existing cards for the current user
+      ExistingCards = await DbContext.UserCards
+      .Where(c => c.UserId == user.Id)
+      .ToListAsync();
+    }
+    catch (Exception ex)
+    {
+      Logger.LogError(ex, "Error initializing payment info page");
+      StatusMessage = $"An error occurred: {ex.Message}";
+      StatusMessageType = "alert-danger";
+    }
+  }
+
+  private async Task OnValidSubmitAsync()
+  {
+    try
+    {
+      // If setting this card as primary, update existing primary cards
+      if (Input.IsPrimary)
+      {
+        var existingPrimaryCards = await DbContext.UserCards
+        .Where(c => c.UserId == user.Id && c.IsPrimary)
+        .ToListAsync();
+
+        foreach (var primaryCard in existingPrimaryCards)
+        {
+          primaryCard.IsPrimary = false;
+        }
+      }
+
+      // Create new UserCard
+      var newCard = new UserCard
+        {
+          UserId = user.Id,
+          CardHolderName = Input.CardHolderName ?? string.Empty,
+          CardNumber = Input.CardNumber ?? string.Empty,
+          ExpiryDate = Input.ExpiryDate,
+          Cvv = Input.Cvv ?? string.Empty,
+          IsPrimary = Input.IsPrimary
+        };
+
+      DbContext.UserCards.Add(newCard);
+      await DbContext.SaveChangesAsync();
+
+      // Refresh the list of cards
+      ExistingCards = await DbContext.UserCards
+      .Where(c => c.UserId == user.Id)
+      .ToListAsync();
+
+      // Reset input form
+      Input = new InputModel();
+
+      StatusMessage = "Payment information added successfully.";
+      StatusMessageType = "alert-success";
+    }
+    catch (Exception ex)
+    {
+      Logger.LogError(ex, "Error saving payment information");
+      StatusMessage = $"Error: {ex.Message}";
+      StatusMessageType = "alert-danger";
+    }
+  }
+
+  private async Task DeleteCardAsync(int cardId)
+  {
+    try
+    {
+      var cardToRemove = await DbContext.UserCards.FindAsync(cardId);
+      if (cardToRemove != null)
+      {
+        DbContext.UserCards.Remove(cardToRemove);
+        await DbContext.SaveChangesAsync();
+
+        // Refresh the list of cards
+        ExistingCards = await DbContext.UserCards
+        .Where(c => c.UserId == user.Id)
+        .ToListAsync();
+
+        StatusMessage = "Card removed successfully.";
+        StatusMessageType = "alert-success";
+      }
+    }
+    catch (Exception ex)
+    {
+      Logger.LogError(ex, "Error removing card");
+      StatusMessage = $"Error removing card: {ex.Message}";
+      StatusMessageType = "alert-danger";
+    }
+  }
+
+  private sealed class InputModel
+  {
+    [Required(ErrorMessage = "Card Holder Name is required")]
+    [StringLength(100, ErrorMessage = "Card Holder Name cannot be longer than 100 characters")]
+    public string? CardHolderName { get; set; }
+
+    [Required(ErrorMessage = "Card Number is required")]
+    [StringLength(255, ErrorMessage = "Card Number cannot be longer than 255 characters")]
+    public string? CardNumber { get; set; }
+
+    [Required(ErrorMessage = "Expiry Date is required")]
+    [DataType(DataType.Date)]
+    public DateTime ExpiryDate { get; set; } = DateTime.Now.AddYears(1);
+
+    [Required(ErrorMessage = "CVV is required")]
+    [StringLength(255, ErrorMessage = "CVV cannot be longer than 255 characters")]
+    public string? Cvv { get; set; }
+
+    public bool IsPrimary { get; set; }
+  }
+}

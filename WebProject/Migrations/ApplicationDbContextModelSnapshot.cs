@@ -451,8 +451,9 @@ namespace WebProject.Migrations
                     b.Property<bool>("IsPrimary")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.HasKey("Id");
 
