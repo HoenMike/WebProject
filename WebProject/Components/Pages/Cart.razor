@@ -1,13 +1,168 @@
 @page "/cart"
-
 @using WebProject.Models
+@using WebProject.Services
+@inject CartService CartService
 @inject ISnackbar Snackbar
 @inject IDialogService DialogService
-@inject ItemController ItemController
 @using MudBlazor
 
 @rendermode InteractiveServer
 
-<PageTitle>Cart</PageTitle>
+<PageTitle>Your Cart</PageTitle>
 
-<h3>Your Cart</h3>
+<MudContainer MaxWidth="MaxWidth.ExtraLarge">
+  <MudText Typo="Typo.h3" Class="mb-4">Your Cart</MudText>
+
+  @if (cartItems.Any())
+  {
+    <MudGrid>
+      <MudItem xs="12" md="8">
+        <MudCard>
+          <MudCardContent>
+            <MudTable Items="@cartItems" Hover="true" Elevation="0" Context="item">
+              <HeaderContent>
+                <MudTh>Product</MudTh>
+                <MudTh>Price</MudTh>
+                <MudTh>Quantity</MudTh>
+                <MudTh>Total</MudTh>
+                <MudTh>Actions</MudTh>
+              </HeaderContent>
+              <RowTemplate>
+                <MudTd DataLabel="Product">
+                  <div class="d-flex align-center">
+                    <MudAvatar Image="@item.ThumbnailUrl" Class="mr-3" />
+                    <MudText>@item.Name</MudText>
+                  </div>
+                </MudTd>
+                <MudTd DataLabel="Price">@item.Price.ToString("C")</MudTd>
+                <MudTd DataLabel="Quantity">
+                  <div class="d-flex align-center">
+                    <MudIconButton Icon="@Icons.Material.Filled.Remove" Color="Color.Default" Size="Size.Small" Disabled="@(item.Quantity <= 1)" OnClick="() => DecreaseQuantity(item)" />
+                    <MudText Class="mx-2">@item.Quantity</MudText>
+                    <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Default" Size="Size.Small" OnClick="() => IncreaseQuantity(item)" />
+                  </div>
+                </MudTd>
+                <MudTd DataLabel="Total">
+                  @{
+                    var totalPrice = item.Price * item.Quantity;
+                  }
+                  @totalPrice.ToString("C")
+                </MudTd>
+                <MudTd DataLabel="Actions">
+                  <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => RemoveFromCart(item.ItemId)" />
+                </MudTd>
+              </RowTemplate>
+            </MudTable>
+          </MudCardContent>
+        </MudCard>
+      </MudItem>
+
+      <MudItem xs="12" md="4">
+        <MudCard>
+          <MudCardHeader>
+            <MudText Typo="Typo.h6">Order Summary</MudText>
+          </MudCardHeader>
+          <MudCardContent>
+            <MudGrid>
+              <MudItem xs="6">
+                <MudText>Subtotal</MudText>
+              </MudItem>
+              <MudItem xs="6" Class="d-flex justify-end">
+                <MudText>@totalPrice.ToString("C")</MudText>
+              </MudItem>
+              <MudItem xs="12">
+                <MudDivider />
+              </MudItem>
+              <MudItem xs="6">
+                <MudText Typo="Typo.h6">Total</MudText>
+              </MudItem>
+              <MudItem xs="6" Class="d-flex justify-end">
+                <MudText Typo="Typo.h6">@totalPrice.ToString("C")</MudText>
+              </MudItem>
+            </MudGrid>
+          </MudCardContent>
+          <MudCardActions>
+            <MudButton Color="Color.Primary" Variant="Variant.Filled" FullWidth="true" OnClick="ProceedToCheckout">
+              Proceed to Checkout
+            </MudButton>
+          </MudCardActions>
+        </MudCard>
+      </MudItem>
+    </MudGrid>
+  }
+  else
+  {
+    <MudCard>
+      <MudCardContent>
+        <MudAlert Severity="Severity.Normal">Your cart is empty</MudAlert>
+      </MudCardContent>
+    </MudCard>
+  }
+</MudContainer>
+
+@code {
+  private List<CartItem> cartItems = new();
+  private decimal totalPrice = 0;
+  private bool isRendered = false;
+
+  protected override async Task OnInitializedAsync()
+  {
+    // Initialization logic if needed
+  }
+
+  protected override async Task OnAfterRenderAsync(bool firstRender)
+  {
+    if (firstRender)
+    {
+      isRendered = true;
+      await LoadCart();
+    }
+  }
+
+  private async Task LoadCart()
+  {
+    if (isRendered)
+    {
+      cartItems = await CartService.GetCartItemsAsync();
+      totalPrice = await CartService.GetTotalPriceAsync();
+      StateHasChanged();
+    }
+  }
+
+  private async Task DecreaseQuantity(CartItem item)
+  {
+    if (item.Quantity > 1)
+    {
+      item.Quantity--;
+      await CartService.UpdateQuantityAsync(item.ItemId, item.Quantity);
+      await LoadCart();
+    }
+  }
+
+  private async Task IncreaseQuantity(CartItem item)
+  {
+    item.Quantity++;
+    await CartService.UpdateQuantityAsync(item.ItemId, item.Quantity);
+    await LoadCart();
+  }
+
+  private async Task RemoveFromCart(int itemId)
+  {
+    await CartService.RemoveFromCartAsync(itemId);
+    await LoadCart();
+    Snackbar.Add("Item removed from cart", Severity.Info);
+  }
+
+  private async Task ProceedToCheckout()
+  {
+    if (!cartItems.Any())
+    {
+      Snackbar.Add("Your cart is empty", Severity.Warning);
+      return;
+    }
+
+    // TODO: Implement checkout logic
+    // This could open a dialog or navigate to a checkout page
+    Snackbar.Add("Proceeding to checkout", Severity.Success);
+  }
+}

@@ -7,6 +7,7 @@ using WebProject.Components;
 using WebProject.Components.Account;
 using WebProject.Controllers;
 using WebProject.Data;
+using WebProject.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +19,7 @@ builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<ItemController>();
+builder.Services.AddScoped<CartService>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
 
 builder.Services.AddMudServices();

@@ -12,6 +12,7 @@ namespace WebProject.Data
     }
 
     public DbSet<Item> Items { get; set; }
+    public DbSet<CartItem> CartItems { get; set; }
     public DbSet<News> News { get; set; }
     public DbSet<UserCard> UserCards { get; set; }
     public DbSet<Review> Reviews { get; set; }

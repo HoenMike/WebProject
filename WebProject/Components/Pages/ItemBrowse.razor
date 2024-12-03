@@ -34,16 +34,15 @@ else
     </HeaderContent>
     <RowTemplate Context="item">
       <MudTd>
-        <MudImage Src="@item.ThumbnailUrl" Alt="@item.Name" Style="width: 50px; height: 50px; cursor: pointer;" @onclick="@(() => NavigateToItemDetails(item.Id))" />
+        <MudImage Src="@item?.ThumbnailUrl" Alt="@item?.Name" Style="width: 50px; height: 50px; cursor: pointer;" @onclick="@(() => NavigateToItemDetails(item?.Id ?? 0))" />
       </MudTd>
       <MudTd>
-        <MudLink Href="@($"/item-details/{item.Id}")">
-          @item.Name
+        <MudLink Href="@($"/item-details/{item?.Id}")">
+          @item?.Name
         </MudLink>
       </MudTd>
-      <MudTd>@item.Price.ToString("C")</MudTd>
-      <MudTd>@item.Description</MudTd>
-
+      <MudTd>@item?.Price.ToString("C")</MudTd>
+      <MudTd>@item?.Description</MudTd>
     </RowTemplate>
   </MudTable>
 }
@@ -67,14 +66,17 @@ else
 
   private void NavigateToItemDetails(int itemId)
   {
-    NavigationManager.NavigateTo($"/item-details/{itemId}");
+    if (itemId > 0)
+    {
+      NavigationManager.NavigateTo($"/item-details/{itemId}");
+    }
   }
 
   private async Task LoadItems()
   {
     try
     {
-      items = await DbContext.Items.ToListAsync();
+      items = await DbContext.Items.ToListAsync() ?? new List<Item>();
       displayedItems = items;
     }
     catch (Exception ex)
@@ -96,7 +98,7 @@ else
       .Where(p => p.IsActive)
       .OrderByDescending(p => p.Id)
       .Take(10)
-      .ToListAsync();
+      .ToListAsync() ?? new List<Promote>();
       activePromotes = promotes;
     }
     catch (Exception ex)
@@ -119,7 +121,7 @@ else
     else
     {
       displayedItems = items.Where(item =>
-      item.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+      item.Name?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) == true
       ).ToList();
     }
   }
@@ -146,6 +148,8 @@ else
 
   private async Task OpenDeleteConfirmationDialog(Item item)
   {
+    if (item == null) return;
+
     var parameters = new DialogParameters
       {
         ["Message"] = $"Are you sure you want to delete the item '{item.Name}'?"
@@ -167,6 +171,8 @@ else
 
   private async Task OpenEditItemDialog(Item item)
   {
+    if (item == null) return;
+
     var parameters = new DialogParameters { ["Item"] = item };
     var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
     var dialog = DialogService.Show<EditItemDialog>("Edit Item", parameters, options);
@@ -180,6 +186,8 @@ else
 
   private async Task DeleteItem(Item item)
   {
+    if (item == null) return;
+
     try
     {
       DbContext.Items.Remove(item);
