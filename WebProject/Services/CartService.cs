@@ -2,23 +2,22 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.JSInterop;
-using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
 using WebProject.Models;
 using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
+using WebProject.Data;
 
 namespace WebProject.Services
 {
   public class CartService
   {
-    private readonly IJSRuntime _jsRuntime;
+    private readonly ApplicationDbContext _dbContext;
     private readonly IHttpContextAccessor _httpContextAccessor;
-    private const string CartKey = "shopping-cart";
 
-    public CartService(IJSRuntime jsRuntime, IHttpContextAccessor httpContextAccessor)
+    public CartService(ApplicationDbContext dbContext, IHttpContextAccessor httpContextAccessor)
     {
-      _jsRuntime = jsRuntime;
+      _dbContext = dbContext;
       _httpContextAccessor = httpContextAccessor;
     }
 
@@ -31,10 +30,8 @@ namespace WebProject.Services
     {
       try
       {
-        var cartJson = await _jsRuntime.InvokeAsync<string>("localStorage.getItem", CartKey);
-        return string.IsNullOrEmpty(cartJson)
-            ? new List<CartItem>()
-            : JsonSerializer.Deserialize<List<CartItem>>(cartJson) ?? new List<CartItem>();
+        var userId = GetUserId();
+        return await _dbContext.CartItems.Where(ci => ci.UserId == userId).ToListAsync();
       }
       catch (Exception ex)
       {
@@ -47,17 +44,16 @@ namespace WebProject.Services
     {
       try
       {
-        var cartItems = await GetCartItemsAsync();
         var userId = GetUserId();
+        var existingCartItem = await _dbContext.CartItems.FirstOrDefaultAsync(ci => ci.ItemId == item.Id && ci.UserId == userId);
 
-        var existingCartItem = cartItems.FirstOrDefault(ci => ci.ItemId == item.Id && ci.UserId == userId);
         if (existingCartItem != null)
         {
           existingCartItem.Quantity += quantity;
         }
         else
         {
-          cartItems.Add(new CartItem
+          var newCartItem = new CartItem
           {
             UserId = userId,
             ItemId = item.Id,
@@ -65,10 +61,11 @@ namespace WebProject.Services
             Price = item.Price,
             Quantity = quantity,
             ThumbnailUrl = item.ThumbnailUrl
-          });
+          };
+          _dbContext.CartItems.Add(newCartItem);
         }
 
-        await SaveCartAsync(cartItems);
+        await _dbContext.SaveChangesAsync();
       }
       catch (Exception ex)
       {
@@ -80,10 +77,10 @@ namespace WebProject.Services
     {
       try
       {
-        var cartItems = await GetCartItemsAsync();
         var userId = GetUserId();
-        cartItems.RemoveAll(ci => ci.ItemId == itemId && ci.UserId == userId);
-        await SaveCartAsync(cartItems);
+        var cartItems = await _dbContext.CartItems.Where(ci => ci.ItemId == itemId && ci.UserId == userId).ToListAsync();
+        _dbContext.CartItems.RemoveRange(cartItems);
+        await _dbContext.SaveChangesAsync();
       }
       catch (Exception ex)
       {
@@ -95,22 +92,21 @@ namespace WebProject.Services
     {
       try
       {
-        var cartItems = await GetCartItemsAsync();
         var userId = GetUserId();
-        var cartItem = cartItems.FirstOrDefault(ci => ci.ItemId == itemId && ci.UserId == userId);
+        var cartItem = await _dbContext.CartItems.FirstOrDefaultAsync(ci => ci.ItemId == itemId && ci.UserId == userId);
 
         if (cartItem != null)
         {
           if (quantity <= 0)
           {
-            cartItems.Remove(cartItem);
+            _dbContext.CartItems.Remove(cartItem);
           }
           else
           {
             cartItem.Quantity = quantity;
           }
 
-          await SaveCartAsync(cartItems);
+          await _dbContext.SaveChangesAsync();
         }
       }
       catch (Exception ex)
@@ -123,7 +119,10 @@ namespace WebProject.Services
     {
       try
       {
-        await _jsRuntime.InvokeAsync<object>("localStorage.removeItem", CartKey);
+        var userId = GetUserId();
+        var cartItems = await _dbContext.CartItems.Where(ci => ci.UserId == userId).ToListAsync();
+        _dbContext.CartItems.RemoveRange(cartItems);
+        await _dbContext.SaveChangesAsync();
       }
       catch (Exception ex)
       {
@@ -131,26 +130,12 @@ namespace WebProject.Services
       }
     }
 
-    private async Task SaveCartAsync(List<CartItem> cartItems)
-    {
-      try
-      {
-        var cartJson = JsonSerializer.Serialize(cartItems);
-        await _jsRuntime.InvokeAsync<object>("localStorage.setItem", CartKey, cartJson);
-      }
-      catch (Exception ex)
-      {
-        Console.Error.WriteLine($"Error in SaveCartAsync: {ex.Message}");
-      }
-    }
-
     public async Task<decimal> GetTotalPriceAsync()
     {
       try
       {
-        var cartItems = await GetCartItemsAsync();
         var userId = GetUserId();
-        return cartItems.Where(ci => ci.UserId == userId).Sum(ci => ci.Price * ci.Quantity);
+        return await _dbContext.CartItems.Where(ci => ci.UserId == userId).SumAsync(ci => ci.Price * ci.Quantity);
       }
       catch (Exception ex)
       {
