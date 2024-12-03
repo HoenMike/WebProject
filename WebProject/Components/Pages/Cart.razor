@@ -21,7 +21,7 @@
       </MudItem>
     </MudGrid>
   }
-  else if (cartItems.Any())
+  else if (cartItems.Count > 0)
   {
     <MudGrid>
       <MudItem xs="12" md="8">
@@ -38,7 +38,9 @@
               <RowTemplate>
                 <MudTd DataLabel="Product">
                   <div class="d-flex align-center">
-                    <MudAvatar Image="@item.ThumbnailUrl" Class="mr-3" />
+                    <MudAvatar Size="Size.Large" Class="mr-3">
+                      <MudImage Src="@item.ThumbnailUrl"></MudImage>
+                    </MudAvatar>
                     <MudText>@item.Name</MudText>
                   </div>
                 </MudTd>
@@ -133,14 +135,11 @@
 
   private async Task LoadCart()
   {
-    if (isRendered)
-    {
-      isLoading = true;
-      cartItems = await CartService.GetCartItemsAsync();
-      totalPrice = await CartService.GetTotalPriceAsync();
-      isLoading = false;
-      StateHasChanged();
-    }
+    isLoading = true;
+    cartItems = await CartService.GetCartItemsAsync();
+    totalPrice = cartItems.Sum(item => item.Price * item.Quantity);
+    isLoading = false;
+    StateHasChanged();
   }
 
   private async Task DecreaseQuantity(CartItem item)
@@ -185,7 +184,7 @@
 
   private async Task ProceedToCheckout()
   {
-    if (!cartItems.Any())
+    if (cartItems.Count == 0)
     {
       Snackbar.Add("Your cart is empty", Severity.Warning);
       return;

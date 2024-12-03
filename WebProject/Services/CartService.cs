@@ -43,6 +43,7 @@ namespace WebProject.Services
           if (product != null)
           {
             item.ThumbnailUrl = product.ThumbnailUrl;
+            item.Price = product.Price;
           }
         }
         return cartItems;
@@ -71,6 +72,7 @@ namespace WebProject.Services
           {
             UserId = userId,
             ItemId = item.Id,
+            Name = item.Name,
             Quantity = quantity,
             Price = item.Price,
             ThumbnailUrl = item.ThumbnailUrl
