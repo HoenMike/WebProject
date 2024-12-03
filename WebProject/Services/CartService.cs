@@ -179,6 +179,47 @@ namespace WebProject.Services
       }
     }
 
+    public async Task DemoCheckoutAsync(List<CartItem> selectedItems)
+    {
+      try
+      {
+        var userId = GetUserId();
+        var order = new Order
+        {
+          UserId = userId,
+          TotalPrice = selectedItems.Sum(item => item.Price * item.Quantity),
+          Status = "Completed",
+          CreatedAt = DateTime.UtcNow,
+          PaymentMethod = "Demo",
+          ShippingAddress = "Demo Address"
+        };
+
+        _dbContext.Orders.Add(order);
+        await _dbContext.SaveChangesAsync();
+
+        foreach (var cartItem in selectedItems)
+        {
+          var orderItem = new OrderItem
+          {
+            OrderId = order.Id,
+            ItemId = cartItem.ItemId,
+            Quantity = cartItem.Quantity,
+            PriceAtTimeOfOrder = cartItem.Price
+          };
+
+          _dbContext.OrderItems.Add(orderItem);
+          _dbContext.CartItems.Remove(cartItem);
+        }
+
+        await _dbContext.SaveChangesAsync();
+      }
+      catch (Exception ex)
+      {
+        Console.Error.WriteLine($"Error in DemoCheckoutAsync: {ex.Message}");
+        throw;
+      }
+    }
+
     public async Task<decimal> GetTotalPriceAsync()
     {
       try

@@ -10,26 +10,31 @@ namespace WebProject.Models
     [Key]
     public int Id { get; set; }
 
+    [Required]
     [ForeignKey("User")]
-    public int UserId { get; set; }
+    public string UserId { get; set; }
 
+    [Required]
     [Column(TypeName = "decimal(18,2)")]
     public decimal TotalPrice { get; set; }
 
     [Required]
     [StringLength(50)]
-    public required string Status { get; set; }
+    public string Status { get; set; }
 
+    [Required]
     public DateTime CreatedAt { get; set; }
 
     [Required]
     [StringLength(100)]
-    public required string PaymentMethod { get; set; }
+    public string PaymentMethod { get; set; }
 
     [Required]
-
     [StringLength(500)]
-    public required string ShippingAddress { get; set; }
+    public string ShippingAddress { get; set; }
 
+    // Navigation property for OrderItems
+    public virtual ICollection<OrderItem> OrderItems { get; set; }
   }
+
 }

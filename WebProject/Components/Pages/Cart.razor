@@ -29,6 +29,10 @@
           <MudCardContent>
             <MudTable Items="@cartItems" Hover="true" Elevation="0" Context="item">
               <HeaderContent>
+                <MudTh>
+                  <MudCheckBox T="bool" @bind-Value="selectAll" @bind-Value:after="() => SelectAllChanged(selectAll)"
+                    Color="Color.Primary" />
+                </MudTh>
                 <MudTh>Product</MudTh>
                 <MudTh>Price</MudTh>
                 <MudTh>Quantity</MudTh>
@@ -36,6 +40,9 @@
                 <MudTh>Actions</MudTh>
               </HeaderContent>
               <RowTemplate>
+                <MudTd>
+                  <MudCheckBox T="bool" @bind-Value="item.IsSelected" Color="Color.Primary" />
+                </MudTd>
                 <MudTd DataLabel="Product">
                   <div class="d-flex align-center">
                     <MudAvatar Size="Size.Large" Class="mr-3">
@@ -118,10 +125,11 @@
   private decimal totalPrice = 0;
   private bool isRendered = false;
   private bool isLoading = true;
+  private bool selectAll;
 
   protected override async Task OnInitializedAsync()
   {
-    // Initialization logic if needed
+    await LoadCart();
   }
 
   protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -190,8 +198,38 @@
       return;
     }
 
-    // TODO: Implement checkout logic
-    // This could open a dialog or navigate to a checkout page
-    Snackbar.Add("Proceeding to checkout", Severity.Success);
+    var selectedItems = cartItems.Where(item => item.IsSelected).ToList();
+    if (selectedItems.Count == 0)
+    {
+      Snackbar.Add("Please select items to checkout", Severity.Warning);
+      return;
+    }
+
+    try
+    {
+      await CartService.DemoCheckoutAsync(selectedItems);
+      Snackbar.Add("Checkout successful", Severity.Success);
+      await LoadCart();
+    }
+    catch (Exception ex)
+    {
+      Snackbar.Add($"Checkout failed: {ex.Message}", Severity.Error);
+    }
+  }
+
+  private void SelectAllChanged(bool value)
+  {
+    selectAll = value;
+    foreach (var item in cartItems)
+    {
+      item.IsSelected = value;
+    }
+    StateHasChanged();
+  }
+
+  private void OnItemSelectedChanged(CartItem item, bool value)
+  {
+    item.IsSelected = value;
+    selectAll = cartItems.All(x => x.IsSelected);
   }
 }
