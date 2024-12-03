@@ -1,9 +1,4 @@
-@inject ApplicationDbContext DbContext
-@inject ISnackbar Snackbar
-@using Microsoft.AspNetCore.Components.Forms
-@using Microsoft.EntityFrameworkCore
-@using MudBlazor
-
+@inject ItemController ItemController
 <MudDialog>
   <DialogContent>
     <MudGrid>
@@ -41,15 +36,13 @@
 
     try
     {
-      DbContext.Items.Add(newItem);
-      await DbContext.SaveChangesAsync();
+      await ItemController.AddItemAsync(newItem);
       Snackbar.Add("Item added successfully", Severity.Success);
       MudDialog.Close(DialogResult.Ok(newItem));
     }
     catch (Exception ex)
     {
-      var innerExceptionMessage = ex.InnerException?.Message ?? ex.Message;
-      Snackbar.Add($"Error adding item: {innerExceptionMessage}", Severity.Error);
+      Snackbar.Add($"Error adding item: {ex.Message}", Severity.Error);
     }
   }
 

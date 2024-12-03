@@ -1,9 +1,8 @@
 @page "/items"
-@using Microsoft.EntityFrameworkCore
-@using WebProject.Data
-@inject ApplicationDbContext DbContext
+@using WebProject.Models
 @inject ISnackbar Snackbar
 @inject IDialogService DialogService
+@inject ItemController ItemController
 @using MudBlazor
 
 @rendermode InteractiveServer
@@ -15,9 +14,7 @@
 <MudPaper Class="pa-4 mb-4" Style="border-radius: 0;">
     <MudGrid>
         <MudItem xs="12">
-            <MudTextField Variant="Variant.Outlined" @bind-Value="searchTerm" Label="Search Items"
-                AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" Immediate="true"
-                Clearable="true" OnClearButtonClick="ClearSearch" OnKeyUp="FilterItems" />
+            <MudTextField Variant="Variant.Outlined" @bind-Value="searchTerm" Label="Search Items" AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" Immediate="true" Clearable="true" OnClearButtonClick="ClearSearch" OnKeyUp="FilterItems" />
         </MudItem>
         <MudItem xs="2">
             <MudButton Variant="Variant.Filled" OnClick="OpenAddItemDialog" Color="Color.Secondary" Class="ml-2">Add
@@ -46,10 +43,8 @@ else
             <MudTd>@item.Price.ToString("C")</MudTd>
             <MudTd>@item.Description</MudTd>
             <MudTd>
-                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary"
-                    OnClick="() => OpenEditItemDialog(item)" />
-                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error"
-                    OnClick="() => OpenDeleteConfirmationDialog(item)" />
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="() => OpenEditItemDialog(item)" />
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => OpenDeleteConfirmationDialog(item)" />
             </MudTd>
         </RowTemplate>
     </MudTable>
@@ -73,7 +68,7 @@ else
     {
         try
         {
-            items = await DbContext.Items.ToListAsync();
+            items = await ItemController.GetItemsAsync();
             displayedItems = items;
         }
         catch (Exception ex)
@@ -159,8 +154,7 @@ else
     {
         try
         {
-            DbContext.Items.Remove(item);
-            await DbContext.SaveChangesAsync();
+            await ItemController.DeleteItemAsync(item);
             Snackbar.Add("Item deleted successfully", Severity.Success);
             await LoadItems();
         }
