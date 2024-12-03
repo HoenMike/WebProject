@@ -7,35 +7,25 @@ using WebProject.Models;
 using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
 using WebProject.Data;
+using Microsoft.AspNetCore.Components.Authorization;
 
 namespace WebProject.Services
 {
   public class CartService
   {
     private readonly ApplicationDbContext _dbContext;
-    private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly AuthenticationStateProvider _authStateProvider;
 
-    public CartService(ApplicationDbContext dbContext, IHttpContextAccessor httpContextAccessor)
+    public CartService(ApplicationDbContext dbContext, AuthenticationStateProvider authStateProvider)
     {
       _dbContext = dbContext;
-      _httpContextAccessor = httpContextAccessor;
+      _authStateProvider = authStateProvider;
     }
-
-    private string GetUserId()
-    {
-      return _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new InvalidOperationException("User is not authenticated");
-    }
-
-    public async Task<Item?> GetProductByIdAsync(int itemId)
-    {
-      return await _dbContext.Items.FindAsync(itemId);
-    }
-
     public async Task<List<CartItem>> GetCartItemsAsync()
     {
       try
       {
-        var userId = GetUserId();
+        var userId = await GetUserId();
         var cartItems = await _dbContext.CartItems.Where(ci => ci.UserId == userId).ToListAsync();
         foreach (var item in cartItems)
         {
@@ -54,11 +44,26 @@ namespace WebProject.Services
         return new List<CartItem>();
       }
     }
+
+    private async Task<string> GetUserId()
+    {
+      var authState = await _authStateProvider.GetAuthenticationStateAsync();
+      var user = authState.User;
+
+      if (user.Identity?.IsAuthenticated != true)
+      {
+        throw new InvalidOperationException("User is not authenticated");
+      }
+
+      return user.FindFirst(ClaimTypes.NameIdentifier)?.Value ??
+          throw new InvalidOperationException("Cannot find user identifier");
+    }
+
     public async Task AddToCartAsync(Item item, int quantity)
     {
       try
       {
-        var userId = GetUserId();
+        var userId = await GetUserId(); // Await the GetUserId method
         var cartItem = await _dbContext.CartItems.FirstOrDefaultAsync(ci => ci.UserId == userId && ci.ItemId == item.Id);
 
         if (item.StockQuantity < quantity)
@@ -103,7 +108,7 @@ namespace WebProject.Services
     {
       try
       {
-        var userId = GetUserId();
+        var userId = await GetUserId(); // Await the GetUserId method
         var cartItems = await _dbContext.CartItems.Where(ci => ci.ItemId == itemId && ci.UserId == userId).ToListAsync();
         foreach (var cartItem in cartItems)
         {
@@ -126,7 +131,7 @@ namespace WebProject.Services
     {
       try
       {
-        var userId = GetUserId();
+        var userId = await GetUserId(); // Await the GetUserId method
         var cartItem = await _dbContext.CartItems.FirstOrDefaultAsync(ci => ci.ItemId == itemId && ci.UserId == userId);
 
         if (cartItem != null)
@@ -168,7 +173,7 @@ namespace WebProject.Services
     {
       try
       {
-        var userId = GetUserId();
+        var userId = await GetUserId(); // Await the GetUserId method
         var cartItems = await _dbContext.CartItems.Where(ci => ci.UserId == userId).ToListAsync();
         _dbContext.CartItems.RemoveRange(cartItems);
         await _dbContext.SaveChangesAsync();
@@ -183,7 +188,7 @@ namespace WebProject.Services
     {
       try
       {
-        var userId = GetUserId();
+        var userId = await GetUserId(); // Await the GetUserId method
         var order = new Order
         {
           UserId = userId,
@@ -224,7 +229,7 @@ namespace WebProject.Services
     {
       try
       {
-        var userId = GetUserId();
+        var userId = await GetUserId(); // Await the GetUserId method
         var cartItems = await GetCartItemsAsync();
         return cartItems.Sum(item => item.Price * item.Quantity);
       }
@@ -233,6 +238,11 @@ namespace WebProject.Services
         Console.Error.WriteLine($"Error in GetTotalPriceAsync: {ex.Message}");
         return 0;
       }
+    }
+
+    public async Task<Item> GetProductByIdAsync(int itemId)
+    {
+      return await _dbContext.Items.FindAsync(itemId);
     }
   }
 }
