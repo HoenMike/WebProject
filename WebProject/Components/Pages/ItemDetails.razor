@@ -28,13 +28,17 @@
                                 <MudText Typo="Typo.body2">Stock: @item.StockQuantity</MudText>
                                 <MudGrid>
                                     <MudItem xs="12" md="6">
-                                        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="DecreaseQuantity">-</MudButton>
+                                        <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                                            OnClick="DecreaseQuantity">-</MudButton>
                                         <MudNumericField @bind-Value="buyQuantity" Min="1" Max="@item.StockQuantity" />
-                                        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="IncreaseQuantity">+</MudButton>
+                                        <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                                            OnClick="IncreaseQuantity">+</MudButton>
                                     </MudItem>
                                     <MudItem xs="12" md="6">
-                                        <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="AddToCart">Add to cart</MudButton>
-                                        <MudButton Variant="Variant.Filled" Color="Color.Tertiary" OnClick="BuyNow">Buy Now</MudButton>
+                                        <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="AddToCart">Add
+                                            to cart</MudButton>
+                                        <MudButton Variant="Variant.Filled" Color="Color.Tertiary" OnClick="BuyNow">Buy Now
+                                        </MudButton>
                                     </MudItem>
                                 </MudGrid>
                             </MudCardContent>

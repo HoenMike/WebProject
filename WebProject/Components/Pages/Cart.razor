@@ -45,9 +45,11 @@
                 <MudTd DataLabel="Price">@item.Price.ToString("C")</MudTd>
                 <MudTd DataLabel="Quantity">
                   <div class="d-flex align-center">
-                    <MudIconButton Icon="@Icons.Material.Filled.Remove" Color="Color.Default" Size="Size.Small" Disabled="@(item.Quantity <= 1)" OnClick="() => DecreaseQuantity(item)" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Remove" Color="Color.Default" Size="Size.Small"
+                      Disabled="@(item.Quantity <= 1)" OnClick="() => DecreaseQuantity(item)" />
                     <MudText Class="mx-2">@item.Quantity</MudText>
-                    <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Default" Size="Size.Small" OnClick="() => IncreaseQuantity(item)" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Default" Size="Size.Small"
+                      OnClick="() => IncreaseQuantity(item)" />
                   </div>
                 </MudTd>
                 <MudTd DataLabel="Total">
@@ -57,7 +59,8 @@
                   @totalPrice.ToString("C")
                 </MudTd>
                 <MudTd DataLabel="Actions">
-                  <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => RemoveFromCart(item.ItemId)" />
+                  <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error"
+                    OnClick="() => RemoveFromCart(item.ItemId)" />
                 </MudTd>
               </RowTemplate>
             </MudTable>
@@ -145,16 +148,32 @@
     if (item.Quantity > 1)
     {
       item.Quantity--;
-      await CartService.UpdateQuantityAsync(item.ItemId, item.Quantity);
-      await LoadCart();
+      var product = await CartService.GetProductByIdAsync(item.ItemId);
+      if (product != null)
+      {
+        product.StockQuantity++;
+        await CartService.UpdateQuantityAsync(item.ItemId, item.Quantity);
+        await CartService.UpdateProductStockAsync(product);
+        await LoadCart();
+      }
     }
   }
 
   private async Task IncreaseQuantity(CartItem item)
   {
-    item.Quantity++;
-    await CartService.UpdateQuantityAsync(item.ItemId, item.Quantity);
-    await LoadCart();
+    var product = await CartService.GetProductByIdAsync(item.ItemId);
+    if (product != null && item.Quantity < product.StockQuantity)
+    {
+      item.Quantity++;
+      product.StockQuantity--;
+      await CartService.UpdateQuantityAsync(item.ItemId, item.Quantity);
+      await CartService.UpdateProductStockAsync(product);
+      await LoadCart();
+    }
+    else
+    {
+      Snackbar.Add("Not enough stock available", Severity.Warning);
+    }
   }
 
   private async Task RemoveFromCart(int itemId)

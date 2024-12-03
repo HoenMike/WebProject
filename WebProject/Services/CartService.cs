@@ -26,12 +26,26 @@ namespace WebProject.Services
       return _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new InvalidOperationException("User is not authenticated");
     }
 
+    public async Task<Item?> GetProductByIdAsync(int itemId)
+    {
+      return await _dbContext.Items.FindAsync(itemId);
+    }
+
     public async Task<List<CartItem>> GetCartItemsAsync()
     {
       try
       {
         var userId = GetUserId();
-        return await _dbContext.CartItems.Where(ci => ci.UserId == userId).ToListAsync();
+        var cartItems = await _dbContext.CartItems.Where(ci => ci.UserId == userId).ToListAsync();
+        foreach (var item in cartItems)
+        {
+          var product = await _dbContext.Items.FindAsync(item.ItemId);
+          if (product != null)
+          {
+            item.ThumbnailUrl = product.ThumbnailUrl;
+          }
+        }
+        return cartItems;
       }
       catch (Exception ex)
       {
@@ -39,47 +53,47 @@ namespace WebProject.Services
         return new List<CartItem>();
       }
     }
-
     public async Task AddToCartAsync(Item item, int quantity)
     {
       try
       {
         var userId = GetUserId();
+        var cartItem = await _dbContext.CartItems.FirstOrDefaultAsync(ci => ci.UserId == userId && ci.ItemId == item.Id);
+
         if (item.StockQuantity < quantity)
         {
-          throw new InvalidOperationException("Not enough stock available.");
+          throw new InvalidOperationException("Not enough stock available");
         }
 
-        var existingCartItem = await _dbContext.CartItems.FirstOrDefaultAsync(ci => ci.ItemId == item.Id && ci.UserId == userId);
-
-        if (existingCartItem != null)
+        if (cartItem == null)
         {
-          existingCartItem.Quantity += quantity;
-          if (existingCartItem.Quantity > item.StockQuantity)
-          {
-            throw new InvalidOperationException("Not enough stock available.");
-          }
-        }
-        else
-        {
-          var newCartItem = new CartItem
+          cartItem = new CartItem
           {
             UserId = userId,
             ItemId = item.Id,
-            Name = item.Name,
-            Price = item.Price,
             Quantity = quantity,
+            Price = item.Price,
             ThumbnailUrl = item.ThumbnailUrl
           };
-          _dbContext.CartItems.Add(newCartItem);
+          _dbContext.CartItems.Add(cartItem);
+        }
+        else
+        {
+          if (cartItem.Quantity + quantity > item.StockQuantity)
+          {
+            throw new InvalidOperationException("Not enough stock available");
+          }
+          cartItem.Quantity += quantity;
         }
 
         item.StockQuantity -= quantity;
+        _dbContext.Items.Update(item);
         await _dbContext.SaveChangesAsync();
       }
       catch (Exception ex)
       {
         Console.Error.WriteLine($"Error in AddToCartAsync: {ex.Message}");
+        throw;
       }
     }
 
@@ -89,6 +103,14 @@ namespace WebProject.Services
       {
         var userId = GetUserId();
         var cartItems = await _dbContext.CartItems.Where(ci => ci.ItemId == itemId && ci.UserId == userId).ToListAsync();
+        foreach (var cartItem in cartItems)
+        {
+          var product = await _dbContext.Items.FindAsync(cartItem.ItemId);
+          if (product != null)
+          {
+            product.StockQuantity += cartItem.Quantity; // Increase stock quantity
+          }
+        }
         _dbContext.CartItems.RemoveRange(cartItems);
         await _dbContext.SaveChangesAsync();
       }
@@ -122,6 +144,21 @@ namespace WebProject.Services
       catch (Exception ex)
       {
         Console.Error.WriteLine($"Error in UpdateQuantityAsync: {ex.Message}");
+        throw;
+      }
+    }
+
+    public async Task UpdateProductStockAsync(Item product)
+    {
+      try
+      {
+        _dbContext.Items.Update(product);
+        await _dbContext.SaveChangesAsync();
+      }
+      catch (Exception ex)
+      {
+        Console.Error.WriteLine($"Error in UpdateProductStockAsync: {ex.Message}");
+        throw;
       }
     }
 
@@ -145,7 +182,8 @@ namespace WebProject.Services
       try
       {
         var userId = GetUserId();
-        return await _dbContext.CartItems.Where(ci => ci.UserId == userId).SumAsync(ci => ci.Price * ci.Quantity);
+        var cartItems = await GetCartItemsAsync();
+        return cartItems.Sum(item => item.Price * item.Quantity);
       }
       catch (Exception ex)
       {
