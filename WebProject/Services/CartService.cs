@@ -81,7 +81,7 @@ namespace WebProject.Services
         }
         else
         {
-          if (cartItem.Quantity + quantity > item.StockQuantity)
+          if (item.StockQuantity <= 0)
           {
             throw new InvalidOperationException("Not enough stock available");
           }
