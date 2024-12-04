@@ -11,6 +11,16 @@
 
 <PageTitle>Home</PageTitle>
 
+<MudPaper Class="pa-4 mb-4">
+    <MudGrid>
+        <MudItem xs="12">
+            <MudTextField Variant="Variant.Outlined" @bind-Value="searchTerm" Label="Search Items"
+                AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" Immediate="true"
+                Clearable="true" OnClearButtonClick="ClearSearch" OnKeyUp="FilterItems" />
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+
 <div style="height: 400px; display: flex; justify-content: center; align-items: center;">
     <MudPaper Class="pa-4 mb-4"
         Style="height: 100%; width: 600px;display: flex; justify-content: center; align-items: center; ">
@@ -37,16 +47,6 @@
         }
     </MudPaper>
 </div>
-
-<MudPaper Class="pa-4 mb-4">
-    <MudGrid>
-        <MudItem xs="12">
-            <MudTextField Variant="Variant.Outlined" @bind-Value="searchTerm" Label="Search Items"
-                AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" Immediate="true"
-                Clearable="true" OnClearButtonClick="ClearSearch" OnKeyUp="FilterItems" />
-        </MudItem>
-    </MudGrid>
-</MudPaper>
 
 @if (isLoading)
 {
