@@ -5,54 +5,191 @@
 @using Microsoft.EntityFrameworkCore
 @using MudBlazor
 
-<MudContainer MaxWidth="MaxWidth.Medium">
-    <MudGrid>
-        <MudItem xs="12">
-            <MudText Typo="Typo.h3">Item Detail</MudText>
-        </MudItem>
-        <MudItem xs="12">
-            @if (item != null)
-            {
+<style>
+    .item-details-container {
+        display: flex;
+        background-color: #ffffff;
+        border-radius: 10px;
+        padding: 30px;
+        margin-left: 24px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .item-price {
+        font-size: 26px;
+        font-weight: bold;
+        color: #eb3521;
+        margin-top: 12px;
+        margin-bottom: 12px;
+    }
+    .item-name {
+        font-size: 30px;
+        font-weight: bold;
+        margin-bottom: 12px;
+    }
+    .quantity-btn {
+        background-color: #e5e5e5;
+        border: none;
+        border-radius: 5px;
+        font-size: 20px;
+        height: 50px;
+    }
+    .quantity-btn:hover{
+        background-color: #aeaeae;
+    }
+    .add-to-cart-btn {
+        color: #ff66a1;
+        border: 2px solid #ff66a1;
+        font-size: 15px;
+        border-radius: 8px;
+        padding: 8px 16px;
+    }
+    .buy-now-btn {
+        background-color: #ff66a1;
+        color: white;
+        padding: 8px 20px;
+        border: none;
+        border-radius: 8px;
+        font-size: 15px;
+        cursor: pointer;
+    }
+    .add-to-cart-btn:hover{
+        background-color: #ff1871;
+        color:#ffffff
+    }
+    .buy-now-btn:hover {
+        background-color: #ff1871;
+    }
+    .rating-container {
+    border: 1px solid #FF66A1; 
+    border-radius: 8px;       
+    padding: 20px;            
+    background-color: #FFFBFE;
+    
+    }
+
+    .average-rating {
+        display: flex;
+        align-items: center;
+        gap: 8px; 
+    }
+
+    .rating-filters {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+
+</style>
+
+<MudText Typo="Typo.h4" Style="margin: 20px;" class="item-name">Item Detail</MudText>
+<div class="item-details-container">
+    @if (item != null){
+        <MudGrid>
+            <!-- 1 -->
+            <MudItem xs="12"> 
                 <MudGrid>
-                    <MudItem xs="12" md="4">
-                        <MudCard>
-                            <MudCardMedia Image="@item.ThumbnailUrl" Alt="@item.Name" />
-                        </MudCard>
+                    <MudItem xs="4">
+                        <MudImage Src="@item.ThumbnailUrl" Alt="@item.Name" Style="width: 100%; border-radius: 12px;" />
                     </MudItem>
-                    <MudItem xs="12" md="8">
-                        <MudCard>
-                            <MudCardContent>
-                                <MudText Typo="Typo.h4">@item.Name</MudText>
-                                <MudText Typo="Typo.subtitle1" Color="Color.Secondary">@item.Price.ToString("C")</MudText>
-                                <MudText Typo="Typo.body1">@item.Description</MudText>
-                                <MudText Typo="Typo.body2">Stock: @item.StockQuantity</MudText>
+                    <MudItem xs="8">
+                        <MudText Typo="Typo.h4" class="item-name">@item.Name</MudText>
+                        <MudGrid Class="d-flex align-item-center">
+                            <!-- Rating -->
+                            <MudItem xs="3">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <MudText Typo="Typo.body1">4.0</MudText>
+                                    <MudRating SelectedValue="4" ReadOnly="true" />
+                                </div>
+                            </MudItem>
+
+                            <!-- Evaluate -->
+                            <MudItem xs="2" class="item-container">
+                                <MudText Typo="Typo.body1" Class="d-flex align-center">
+                                    23 Evaluate
+                                </MudText>
+                            </MudItem>
+
+                            <!-- Sold -->
+                            <MudItem xs="2" class="item-container">
+                                <MudText Typo="Typo.body1" Class="d-flex align-center">
+                                    30 Sold
+                                </MudText>
+                            </MudItem>
+                        </MudGrid>
+            
+                        <MudText Typo="Typo.h3" class="item-price">@item.Price.ToString("C")</MudText>
+                        <MudText Typo="Typo.body1" Class="mb-4">@item.Description</MudText>
+                        <MudText Typo="Typo.body2" Class="mb-4">Stock: @item.StockQuantity</MudText>
+                        <MudGrid>
+                            <MudItem xs="5" Class="d-flex align-center">
                                 <MudGrid>
-                                    <MudItem xs="12" md="6">
-                                        <MudButton Variant="Variant.Filled" Color="Color.Primary"
-                                            OnClick="DecreaseQuantity">-</MudButton>
-                                        <MudNumericField @bind-Value="buyQuantity" Min="1" Max="@item.StockQuantity" />
-                                        <MudButton Variant="Variant.Filled" Color="Color.Primary"
-                                            OnClick="IncreaseQuantity">+</MudButton>
+                                    <MudItem  xs="3" >
+                                        <MudButton class="quantity-btn" OnClick="DecreaseQuantity">-</MudButton>
                                     </MudItem>
-                                    <MudItem xs="12" md="6">
-                                        <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="AddToCart">Add
-                                            to cart</MudButton>
-                                        <MudButton Variant="Variant.Filled" Color="Color.Tertiary" OnClick="BuyNow">Buy Now
-                                        </MudButton>
+                                    <MudItem xs="3">
+                                        <MudNumericField HideSpinButtons="true" @bind-Value="buyQuantity" Min="1" Max="@item.StockQuantity" Variant="Variant.Outlined"  Style="width: 64px; height: 50px;"/>
+                                    </MudItem>
+                                    <MudItem xs="3">
+                                        <MudButton  class="quantity-btn" OnClick="IncreaseQuantity" >+</MudButton>
                                     </MudItem>
                                 </MudGrid>
-                            </MudCardContent>
-                        </MudCard>
+                            </MudItem>
+                            <MudItem xs="7" Class="d-flex align-center ">
+                                <MudItem xs="6" Class="d-flex align-center ">
+                                    <MudButton class="add-to-cart-btn" StartIcon="@Icons.Material.Outlined.ShoppingCart" OnClick="AddToCart"> Add to cart</MudButton>
+                                </MudItem>
+
+                                <MudItem xs="6" Class="d-flex align-center ">
+                                    <MudButton class="buy-now-btn" OnClick="BuyNow">Buy Now</MudButton>
+                                </MudItem>
+                            </MudItem>
+                        </MudGrid>
                     </MudItem>
                 </MudGrid>
-            }
-            else
-            {
-                <MudText Typo="Typo.body1">Item not found</MudText>
-            }
-        </MudItem>
-    </MudGrid>
-</MudContainer>
+            </MudItem>
+
+            <!-- 2 -->
+            <MudItem xs="12" Outlined="true">  
+                <MudText Typo="Typo.h6" Class="rating-title">
+                    Đánh giá sản phẩm
+                </MudText>
+
+                <div Class="rating-container mt-4">
+                    <MudGrid >
+                        <MudItem xs="3" Class="average-rating">
+                            <MudText Typo="Typo.h4" Style="color: #FF66A1;font-weight: bold; ">4.0/5</MudText>
+                            <MudRating SelectedValue="4" MaxValue="5" ReadOnly="true" Size="Size.Medium" />
+                        </MudItem>
+
+                        <MudItem xs="8" Class="rating-filters">
+                            <MudChip T="string" Variant="Variant.Outlined" Color="Color.Primary">All</MudChip>
+                            <MudChip T="string" Variant="Variant.Outlined" Color="Color.Primary">
+                                5 <MudRating SelectedValue="1" ReadOnly="true" MaxValue="1" Size="Size.Small" />
+                            </MudChip>
+                            <MudChip T="string" Variant="Variant.Outlined" Color="Color.Primary">
+                                4 <MudRating SelectedValue="1" ReadOnly="true" MaxValue="1" Size="Size.Small" />
+                            </MudChip>
+                            <MudChip T="string" Variant="Variant.Outlined" Color="Color.Primary">
+                                3 <MudRating SelectedValue="1" ReadOnly="true" MaxValue="1" Size="Size.Small" />
+                            </MudChip>
+                            <MudChip T="string" Variant="Variant.Outlined" Color="Color.Primary">
+                                2 <MudRating SelectedValue="1" ReadOnly="true" MaxValue="1" Size="Size.Small" />
+                            </MudChip>
+                            <MudChip T="string" Variant="Variant.Outlined" Color="Color.Primary">
+                                1 <MudRating SelectedValue="1" ReadOnly="true" MaxValue="1" Size="Size.Small" />
+                            </MudChip>
+                        </MudItem>
+                    </MudGrid>
+                </div>
+            </MudItem>
+        </MudGrid>
+
+    }
+    else
+    {
+        <MudText Typo="Typo.body1" >Item not found</MudText>
+    }
+</div>
 
 @code {
     [Parameter]
