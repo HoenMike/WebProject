@@ -28,7 +28,7 @@
       and are not validated or encrypted. <strong>DO NOT</strong> use real credit card information.
     </MudAlert>
     <MudGrid>
-      <MudItem xs="12" md="6">
+      <MudItem xs="6">
         <MudCardContent>
           <MudText Typo="Typo.h4">Add New Card</MudText>
           @if (!string.IsNullOrEmpty(CardStatusMessage))
@@ -70,38 +70,9 @@
         </MudCardContent>
       </MudItem>
 
-      <MudItem xs="12" md="6">
-        <MudCardContent>
-          <MudText Typo="Typo.h4">Shipping Information</MudText>
-          @if (!string.IsNullOrEmpty(ShippingStatusMessage))
-          {
-            <MudAlert Severity="@(ShippingStatusMessageType == "alert-success" ? Severity.Success : Severity.Error)">
-              @ShippingStatusMessage
-            </MudAlert>
-          }
-          <EditForm Model="PaymentInput" OnValidSubmit="OnValidSubmitPaymentAsync">
-            <DataAnnotationsValidator />
-            <MudTextField @bind-Value="PaymentInput.ReceiverName" Label="Receiver Name" Required="true"
-              RequiredError="Receiver Name is required" />
-            <MudTextField @bind-Value="PaymentInput.Address" Label="Address" Required="true"
-              RequiredError="Address is required" />
-            <MudTextField @bind-Value="PaymentInput.PhoneNumber" Label="Phone Number" Required="true"
-              RequiredError="Phone Number is required" />
-            <MudSelect T="PaymentMethod" @bind-Value="PaymentInput.PaymentMethod" Label="Payment Method" Required="true"
-              RequiredError="Payment Method is required">
-              <MudSelectItem Value="PaymentMethod.Cash">Cash</MudSelectItem>
-              <MudSelectItem Value="PaymentMethod.CreditCard">Credit Card</MudSelectItem>
-            </MudSelect>
-            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">
-              Save Shipping Information
-            </MudButton>
-          </EditForm>
-        </MudCardContent>
-      </MudItem>
-
       @if (ExistingCards.Any())
       {
-        <MudItem xs="12">
+        <MudItem xs="6">
           <MudCard>
             <MudCardContent>
               <MudText Typo="Typo.h4">Existing Cards</MudText>
@@ -135,7 +106,6 @@
       }
     </MudGrid>
   </MudCard>
-
 </MudContainer>
 
 @code {
@@ -143,14 +113,9 @@
   private List<UserCard> ExistingCards = new();
   private string CardStatusMessage = string.Empty;
   private string CardStatusMessageType = "alert-success";
-  private string ShippingStatusMessage = string.Empty;
-  private string ShippingStatusMessageType = "alert-success";
 
   [SupplyParameterFromForm]
   private CardInputModel CardInput { get; set; } = new();
-
-  [SupplyParameterFromForm]
-  private PaymentInputModel PaymentInput { get; set; } = new();
 
   protected override async Task OnInitializedAsync()
   {
@@ -168,21 +133,6 @@
       ExistingCards = await DbContext.UserCards
       .Where(c => c.UserId == user.Id)
       .ToListAsync();
-
-      // Fetch existing payment information for the current user
-      var existingCheckoutInfo = await DbContext.UserShippingInfos
-      .FirstOrDefaultAsync(u => u.UserId == user.Id);
-
-      if (existingCheckoutInfo != null)
-      {
-        PaymentInput = new PaymentInputModel
-          {
-            ReceiverName = existingCheckoutInfo.ReceiverName,
-            Address = existingCheckoutInfo.Address,
-            PhoneNumber = existingCheckoutInfo.PhoneNumber,
-            PaymentMethod = existingCheckoutInfo.PaymentMethod
-          };
-      }
     }
     catch (Exception ex)
     {
@@ -266,50 +216,6 @@
     }
   }
 
-  private async Task OnValidSubmitPaymentAsync()
-  {
-    try
-    {
-      // Check if a checkout info already exists for this user
-      var existingCheckoutInfo = await DbContext.UserShippingInfos
-      .FirstOrDefaultAsync(u => u.UserId == user.Id);
-
-      if (existingCheckoutInfo != null)
-      {
-        // Update existing checkout info
-        existingCheckoutInfo.ReceiverName = PaymentInput.ReceiverName ?? string.Empty;
-        existingCheckoutInfo.Address = PaymentInput.Address ?? string.Empty;
-        existingCheckoutInfo.PhoneNumber = PaymentInput.PhoneNumber ?? string.Empty;
-        existingCheckoutInfo.PaymentMethod = PaymentInput.PaymentMethod;
-      }
-      else
-      {
-        // Create new UserCheckoutInfo
-        var newShippingInfo = new UserShippingInfo
-          {
-            UserId = user.Id,
-            ReceiverName = PaymentInput.ReceiverName ?? string.Empty,
-            Address = PaymentInput.Address ?? string.Empty,
-            PhoneNumber = PaymentInput.PhoneNumber ?? string.Empty,
-            PaymentMethod = PaymentInput.PaymentMethod
-          };
-
-        DbContext.UserShippingInfos.Add(newShippingInfo);
-      }
-
-      await DbContext.SaveChangesAsync();
-
-      ShippingStatusMessage = "Shipping information updated successfully.";
-      ShippingStatusMessageType = "alert-success";
-    }
-    catch (Exception ex)
-    {
-      Logger.LogError(ex, "Error saving payment information");
-      ShippingStatusMessage = $"Error: {ex.Message}";
-      ShippingStatusMessageType = "alert-danger";
-    }
-  }
-
   private async Task DeleteCardAsync(int cardId)
   {
     try
@@ -356,23 +262,5 @@
     public string? Cvv { get; set; }
 
     public bool IsPrimary { get; set; }
-  }
-
-  private sealed class PaymentInputModel
-  {
-    [Required(ErrorMessage = "Receiver Name is required")]
-    [StringLength(100, ErrorMessage = "Receiver Name cannot be longer than 100 characters")]
-    public string? ReceiverName { get; set; }
-
-    [Required(ErrorMessage = "Address is required")]
-    [StringLength(255, ErrorMessage = "Address cannot be longer than 255 characters")]
-    public string? Address { get; set; }
-
-    [Required(ErrorMessage = "Phone Number is required")]
-    [StringLength(20, ErrorMessage = "Phone Number cannot be longer than 20 characters")]
-    public string? PhoneNumber { get; set; }
-
-    [Required(ErrorMessage = "Payment Method is required")]
-    public PaymentMethod PaymentMethod { get; set; }
   }
 }
