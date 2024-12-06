@@ -37,47 +37,89 @@
 
   <MudGrid>
     <MudItem xs="12" md="6">
-      <MudForm Model="Input" @ref="form" OnValidSubmit="OnValidSubmitAsync">
-        <MudTextField @bind-Value="Input.CardHolderName" Label="Card Holder Name" Required="true" RequiredError="Card Holder Name is required" />
-        <MudTextField @bind-Value="Input.CardNumber" Label="Card Number" Required="true" RequiredError="Card Number is required" />
-        <MudGrid>
-          <MudItem xs="12" md="6">
-            <MudDatePicker @bind-Value="Input.ExpiryDate" Label="Expiry Date" Required="true" RequiredError="Expiry Date is required" />
-          </MudItem>
-          <MudItem xs="12" md="6">
-            <MudTextField @bind-Value="Input.Cvv" Label="CVV" Required="true" RequiredError="CVV is required" />
-          </MudItem>
-        </MudGrid>
-        <MudCheckBox T="bool" @bind-Checked="Input.IsPrimary" Label="Set as Primary Card" />
-        <MudButton Type="Submit" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">Save Payment Information</MudButton>
-      </MudForm>
+      <MudCard>
+        <MudCardContent>
+          <MudText Typo="Typo.h4">Add New Card</MudText>
+          <EditForm Model="CardInput" OnValidSubmit="OnValidSubmitCardAsync">
+            <DataAnnotationsValidator />
+            <MudTextField @bind-Value="CardInput.CardHolderName" Label="Card Holder Name" Required="true"
+              RequiredError="Card Holder Name is required" />
+            <MudTextField @bind-Value="CardInput.CardNumber" Label="Card Number" Required="true"
+              RequiredError="Card Number is required" />
+            <MudGrid>
+              <MudItem xs="12" md="6">
+                <MudDatePicker @bind-Value="CardInput.ExpiryDate" Label="Expiry Date" Required="true"
+                  RequiredError="Expiry Date is required" />
+              </MudItem>
+              <MudItem xs="12" md="6">
+                <MudTextField @bind-Value="CardInput.Cvv" Label="CVV" Required="true" RequiredError="CVV is required" />
+              </MudItem>
+            </MudGrid>
+            <MudCheckBox T="bool" @bind-Checked="CardInput.IsPrimary" Label="Set as Primary Card" />
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">
+              Save Card Information
+            </MudButton>
+          </EditForm>
+        </MudCardContent>
+      </MudCard>
+    </MudItem>
+
+    <MudItem xs="12" md="6">
+      <MudCard>
+        <MudCardContent>
+          <MudText Typo="Typo.h4">Payment Information</MudText>
+          <EditForm Model="PaymentInput" OnValidSubmit="OnValidSubmitPaymentAsync">
+            <DataAnnotationsValidator />
+            <MudTextField @bind-Value="PaymentInput.ReceiverName" Label="Receiver Name" Required="true"
+              RequiredError="Receiver Name is required" />
+            <MudTextField @bind-Value="PaymentInput.Address" Label="Address" Required="true"
+              RequiredError="Address is required" />
+            <MudTextField @bind-Value="PaymentInput.PhoneNumber" Label="Phone Number" Required="true"
+              RequiredError="Phone Number is required" />
+            <MudSelect T="PaymentMethod" @bind-Value="PaymentInput.PaymentMethod" Label="Payment Method" Required="true"
+              RequiredError="Payment Method is required">
+              <MudSelectItem Value="PaymentMethod.Cash">Cash</MudSelectItem>
+              <MudSelectItem Value="PaymentMethod.CreditCard">Credit Card</MudSelectItem>
+            </MudSelect>
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">
+              Save Payment Information
+            </MudButton>
+          </EditForm>
+        </MudCardContent>
+      </MudCard>
     </MudItem>
 
     @if (ExistingCards.Any())
     {
-      <MudItem xs="12" md="6">
-        <MudText Typo="Typo.h4">Existing Cards</MudText>
-        <MudList T="UserCard">
-          @foreach (var card in ExistingCards)
-          {
-            <MudListItem T="UserCard">
-              <MudGrid>
-                <MudItem xs="8">
-                  <MudText Typo="Typo.h6">@card.CardHolderName</MudText>
-                  <MudText>**** **** **** @card.CardNumber.Substring(Math.Max(0, card.CardNumber.Length - 4))</MudText>
-                  <MudText>Expires: @card.ExpiryDate.ToString("MM/yyyy")</MudText>
-                  @if (card.IsPrimary)
-                  {
-                    <MudText Color="Color.Success">Primary Card</MudText>
-                  }
-                </MudItem>
-                <MudItem xs="4" Align="Align.End">
-                  <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="() => DeleteCardAsync(card.Id)">Remove</MudButton>
-                </MudItem>
-              </MudGrid>
-            </MudListItem>
-          }
-        </MudList>
+      <MudItem xs="12">
+        <MudCard>
+          <MudCardContent>
+            <MudText Typo="Typo.h4">Existing Cards</MudText>
+            <MudList T="UserCard">
+              @foreach (var card in ExistingCards)
+              {
+                <MudListItem T="UserCard">
+                  <MudGrid>
+                    <MudItem xs="8">
+                      <MudText Typo="Typo.h6">@card.CardHolderName</MudText>
+                      <MudText>**** **** **** @card.CardNumber.Substring(Math.Max(0, card.CardNumber.Length - 4))</MudText>
+                      <MudText>Expires: @card.ExpiryDate.ToString("MM/yyyy")</MudText>
+                      @if (card.IsPrimary)
+                      {
+                        <MudText Color="Color.Success">Primary Card</MudText>
+                      }
+                    </MudItem>
+                    <MudItem xs="4" Align="Align.End">
+                      <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="() => DeleteCardAsync(card.Id)">
+                        Remove
+                      </MudButton>
+                    </MudItem>
+                  </MudGrid>
+                </MudListItem>
+              }
+            </MudList>
+          </MudCardContent>
+        </MudCard>
       </MudItem>
     }
   </MudGrid>
@@ -88,10 +130,12 @@
   private List<UserCard> ExistingCards = new();
   private string StatusMessage = string.Empty;
   private string StatusMessageType = "alert-success";
-  private MudForm? form;
 
   [SupplyParameterFromForm]
-  private InputModel Input { get; set; } = new();
+  private CardInputModel CardInput { get; set; } = new();
+
+  [SupplyParameterFromForm]
+  private PaymentInputModel PaymentInput { get; set; } = new();
 
   protected override async Task OnInitializedAsync()
   {
@@ -118,44 +162,104 @@
     }
   }
 
-  private async Task OnValidSubmitAsync()
+  private async Task OnValidSubmitCardAsync()
   {
     try
     {
-      // If setting this card as primary, update existing primary cards
-      if (Input.IsPrimary)
+      // Begin a database transaction to ensure consistency
+      await using var transaction = await DbContext.Database.BeginTransactionAsync();
+
+      try
       {
-        var existingPrimaryCards = await DbContext.UserCards
-        .Where(c => c.UserId == user.Id && c.IsPrimary)
+        // If setting this card as primary, update existing primary cards
+        if (CardInput.IsPrimary)
+        {
+          var existingPrimaryCards = await DbContext.UserCards
+          .Where(c => c.UserId == user.Id && c.IsPrimary)
+          .ToListAsync();
+
+          foreach (var primaryCard in existingPrimaryCards)
+          {
+            primaryCard.IsPrimary = false;
+          }
+          await DbContext.SaveChangesAsync();
+        }
+
+        // Create new UserCard with all properties
+        var newCard = new UserCard
+          {
+            UserId = user.Id,
+            CardHolderName = CardInput.CardHolderName ?? string.Empty,
+            CardNumber = CardInput.CardNumber ?? string.Empty,
+            ExpiryDate = CardInput.ExpiryDate,
+            Cvv = CardInput.Cvv ?? string.Empty,
+            IsPrimary = CardInput.IsPrimary
+          };
+
+        DbContext.UserCards.Add(newCard);
+        await DbContext.SaveChangesAsync();
+
+        // Commit the transaction
+        await transaction.CommitAsync();
+
+        // Refresh the list of cards
+        ExistingCards = await DbContext.UserCards
+        .Where(c => c.UserId == user.Id)
         .ToListAsync();
 
-        foreach (var primaryCard in existingPrimaryCards)
-        {
-          primaryCard.IsPrimary = false;
-        }
+        // Reset input form
+        CardInput = new CardInputModel();
+
+        StatusMessage = "Card information added successfully.";
+        StatusMessageType = "alert-success";
+      }
+      catch
+      {
+        // Rollback the transaction if any error occurs
+        await transaction.RollbackAsync();
+        throw;
+      }
+    }
+    catch (Exception ex)
+    {
+      Logger.LogError(ex, "Error saving card information");
+      StatusMessage = $"Error: {ex.Message}";
+      StatusMessageType = "alert-danger";
+    }
+  }
+
+  private async Task OnValidSubmitPaymentAsync()
+  {
+    try
+    {
+      // Check if a checkout info already exists for this user
+      var existingCheckoutInfo = await DbContext.UserCheckoutInfos
+      .FirstOrDefaultAsync(u => u.UserId == user.Id);
+
+      if (existingCheckoutInfo != null)
+      {
+        // Update existing checkout info
+        existingCheckoutInfo.ReceiverName = PaymentInput.ReceiverName ?? string.Empty;
+        existingCheckoutInfo.Address = PaymentInput.Address ?? string.Empty;
+        existingCheckoutInfo.PhoneNumber = PaymentInput.PhoneNumber ?? string.Empty;
+        existingCheckoutInfo.PaymentMethod = PaymentInput.PaymentMethod;
+      }
+      else
+      {
+        // Create new UserCheckoutInfo
+        var newCheckoutInfo = new UserCheckoutInfo
+          {
+            UserId = user.Id,
+            ReceiverName = PaymentInput.ReceiverName ?? string.Empty,
+            Address = PaymentInput.Address ?? string.Empty,
+            PhoneNumber = PaymentInput.PhoneNumber ?? string.Empty,
+            PaymentMethod = PaymentInput.PaymentMethod
+          };
+
+        DbContext.UserCheckoutInfos.Add(newCheckoutInfo);
       }
 
-      // Create new UserCard
-      var newCard = new UserCard
-        {
-          UserId = user.Id,
-          CardHolderName = Input.CardHolderName ?? string.Empty,
-          CardNumber = Input.CardNumber ?? string.Empty,
-          ExpiryDate = Input.ExpiryDate,
-          Cvv = Input.Cvv ?? string.Empty,
-          IsPrimary = Input.IsPrimary
-        };
-
-      DbContext.UserCards.Add(newCard);
       await DbContext.SaveChangesAsync();
-
-      // Refresh the list of cards
-      ExistingCards = await DbContext.UserCards
-      .Where(c => c.UserId == user.Id)
-      .ToListAsync();
-
-      // Reset input form
-      Input = new InputModel();
 
       StatusMessage = "Payment information added successfully.";
       StatusMessageType = "alert-success";
@@ -195,7 +299,7 @@
     }
   }
 
-  private sealed class InputModel
+  private sealed class CardInputModel
   {
     [Required(ErrorMessage = "Card Holder Name is required")]
     [StringLength(100, ErrorMessage = "Card Holder Name cannot be longer than 100 characters")]
@@ -214,5 +318,23 @@
     public string? Cvv { get; set; }
 
     public bool IsPrimary { get; set; }
+  }
+
+  private sealed class PaymentInputModel
+  {
+    [Required(ErrorMessage = "Receiver Name is required")]
+    [StringLength(100, ErrorMessage = "Receiver Name cannot be longer than 100 characters")]
+    public string? ReceiverName { get; set; }
+
+    [Required(ErrorMessage = "Address is required")]
+    [StringLength(255, ErrorMessage = "Address cannot be longer than 255 characters")]
+    public string? Address { get; set; }
+
+    [Required(ErrorMessage = "Phone Number is required")]
+    [StringLength(20, ErrorMessage = "Phone Number cannot be longer than 20 characters")]
+    public string? PhoneNumber { get; set; }
+
+    [Required(ErrorMessage = "Payment Method is required")]
+    public PaymentMethod PaymentMethod { get; set; }
   }
 }

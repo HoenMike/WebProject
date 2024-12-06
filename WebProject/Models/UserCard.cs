@@ -11,7 +11,7 @@ namespace WebProject.Models
 
     [Required]
     [ForeignKey("User")]
-    public string UserId { get; set; }
+    public required string UserId { get; set; }
 
     [Required]
     [StringLength(100)]
@@ -29,8 +29,6 @@ namespace WebProject.Models
     [StringLength(255)]
     public required string Cvv { get; set; }
 
-    [StringLength(50)]
-    public string? CardType { get; set; }
 
     public bool IsPrimary { get; set; }
 
