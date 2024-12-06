@@ -1,0 +1,39 @@
+@using Microsoft.AspNetCore.Identity
+@using MudBlazor
+
+<MudDialog>
+  <DialogContent>
+    <MudTextField @bind-Value="_newRoleName" Label="Role Name" Variant="Variant.Outlined" />
+  </DialogContent>
+  <DialogActions>
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Submit" StartIcon="@Icons.Material.Filled.Save">
+      Save
+    </MudButton>
+    <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="Cancel"
+      StartIcon="@Icons.Material.Filled.Cancel">
+      Cancel
+    </MudButton>
+  </DialogActions>
+</MudDialog>
+
+@code {
+  [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
+  [Parameter] public IdentityRole Role { get; set; } = null!;
+
+  private string _newRoleName = string.Empty;
+
+  protected override void OnInitialized()
+  {
+    _newRoleName = Role.Name!;
+  }
+
+  private void Submit()
+  {
+    MudDialog.Close(DialogResult.Ok(true));
+  }
+
+  private void Cancel()
+  {
+    MudDialog.Cancel();
+  }
+}

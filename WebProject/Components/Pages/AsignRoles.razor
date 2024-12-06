@@ -1,33 +1,120 @@
 @page "/assign-roles"
-@* @attribute [Authorize(Roles = "Admin")] *@
+@attribute [Authorize(Roles = "Admin")]
 
 @using Microsoft.AspNetCore.Identity
 @using System.ComponentModel.DataAnnotations
 @using WebProject.Data
+@using Microsoft.EntityFrameworkCore
+@using MudBlazor
 
 @inject UserManager<ApplicationUser> UserManager
 @inject RoleManager<IdentityRole> RoleManager
 @inject ISnackbar Snackbar
+@inject IDialogService DialogService
 
 <PageTitle>Assign Roles</PageTitle>
 
-<h3>Assign Roles</h3>
+<MudContainer>
+  <MudText Typo="Typo.h3" Class="mb-4">Assign Roles</MudText>
 
-<EditForm Model="Input" OnValidSubmit="OnValidSubmitAsync">
-  <DataAnnotationsValidator />
-  <ValidationSummary />
-  <div class="form-group">
-    <label for="username">Username</label>
-    <InputText id="username" @bind-Value="Input.Username" class="form-control" />
-  </div>
-  <div class="form-group">
-    <label for="role">Role</label>
-    <InputText id="role" @bind-Value="Input.Role" class="form-control" />
-  </div>
-  <button type="submit" class="btn btn-primary">Assign Role</button>
-</EditForm>
+  <MudGrid>
+    <MudItem xs="12" md="6">
+      <MudPaper Elevation="3" Class="pa-4">
+        <EditForm Model="Input" OnValidSubmit="OnValidSubmitAsync">
+          <DataAnnotationsValidator />
+          <MudGrid>
+            <MudItem xs="12">
+              <MudTextField @bind-Value="Input.Username" Label="Username" Variant="Variant.Outlined" Required="true"
+                RequiredError="Username is required!" />
+            </MudItem>
+            <MudItem xs="12">
+              <MudSelect @bind-Value="Input.Role" Label="Role" Variant="Variant.Outlined" Required="true"
+                RequiredError="Role is required!">
+                @foreach (var role in _availableRoles)
+                {
+                  <MudSelectItem Value="@role">@role</MudSelectItem>
+                }
+              </MudSelect>
+            </MudItem>
+            <MudItem xs="12">
+              <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">
+                Assign Role
+              </MudButton>
+            </MudItem>
+          </MudGrid>
+        </EditForm>
+      </MudPaper>
+    </MudItem>
+
+    <MudItem xs="12" md="6">
+      <MudPaper Elevation="3" Class="pa-4">
+        <MudText Typo="Typo.h6" Class="mb-4">Role Management</MudText>
+        <MudDataGrid Items="@_roles" Filterable="true" Sortable="true" EditMode="DataGridEditMode.Form">
+          <Columns>
+            <PropertyColumn Property="x => x.Name" Title="Role Name" />
+            <TemplateColumn Title="Actions">
+              <CellTemplate>
+                <MudStack Row="true">
+                  <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary"
+                    OnClick="() => EditRole(context.Item)" />
+                  <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error"
+                    OnClick="() => DeleteRole(context.Item)" />
+                </MudStack>
+              </CellTemplate>
+            </TemplateColumn>
+          </Columns>
+        </MudDataGrid>
+
+        <MudPaper Class="mt-4 pa-4">
+          <MudTextField @bind-Value="_newRoleName" Label="New Role Name" Variant="Variant.Outlined" />
+          <MudButton Color="Color.Success" Variant="Variant.Filled" Class="mt-2" OnClick="CreateRole">
+            Create Role
+          </MudButton>
+        </MudPaper>
+      </MudPaper>
+    </MudItem>
+
+    <MudItem xs="12">
+      <MudPaper Elevation="3" Class="pa-4">
+        <MudText Typo="Typo.h6" Class="mb-4">User Roles</MudText>
+        <MudTable Items="UserRoles" Hover="true">
+          <HeaderContent>
+            <MudTh>Username</MudTh>
+            <MudTh>Roles</MudTh>
+          </HeaderContent>
+          <RowTemplate>
+            <MudTd DataLabel="Username">@context.Username</MudTd>
+            <MudTd DataLabel="Roles">@string.Join(", ", context.Roles)</MudTd>
+          </RowTemplate>
+        </MudTable>
+      </MudPaper>
+    </MudItem>
+  </MudGrid>
+</MudContainer>
 
 @code {
+  private List<string> _availableRoles = new();
+  private List<IdentityRole> _roles = new();
+  private string _newRoleName = string.Empty;
+  private List<UserRoleModel> UserRoles { get; set; } = new();
+
+  protected override async Task OnInitializedAsync()
+  {
+    // Populate available roles
+    _roles = await RoleManager.Roles.ToListAsync();
+    _availableRoles = _roles.Select(r => r.Name!).ToList();
+    await LoadUserRolesAsync();
+  }
+
+  private class InputModel
+  {
+    [Required]
+    public string Username { get; set; } = "";
+
+    [Required]
+    public string Role { get; set; } = "";
+  }
+
   private InputModel Input { get; set; } = new();
 
   private async Task OnValidSubmitAsync()
@@ -35,6 +122,17 @@
     var user = await UserManager.FindByNameAsync(Input.Username);
     if (user != null)
     {
+      var roles = await UserManager.GetRolesAsync(user);
+      var removeResult = await UserManager.RemoveFromRolesAsync(user, roles);
+      if (!removeResult.Succeeded)
+      {
+        foreach (var error in removeResult.Errors)
+        {
+          Snackbar.Add(error.Description, Severity.Error);
+        }
+        return;
+      }
+
       var roleExists = await RoleManager.RoleExistsAsync(Input.Role);
       if (roleExists)
       {
@@ -42,6 +140,8 @@
         if (result.Succeeded)
         {
           Snackbar.Add("Role assigned successfully", Severity.Success);
+          Input = new InputModel(); // Reset form
+          await LoadUserRolesAsync(); // Refresh user roles
         }
         else
         {
@@ -53,21 +153,113 @@
       }
       else
       {
-        // Handle role not existing
+        Snackbar.Add("Role does not exist", Severity.Error);
       }
     }
     else
     {
-      // Handle user not found
+      Snackbar.Add("User not found", Severity.Error);
     }
   }
 
-  private class InputModel
+  private async Task CreateRole()
   {
-    [Required]
-    public string Username { get; set; } = "";
+    if (string.IsNullOrWhiteSpace(_newRoleName))
+    {
+      Snackbar.Add("Role name cannot be empty", Severity.Warning);
+      return;
+    }
 
-    [Required]
-    public string Role { get; set; } = "";
+    var roleExists = await RoleManager.RoleExistsAsync(_newRoleName);
+    if (roleExists)
+    {
+      Snackbar.Add("Role already exists", Severity.Warning);
+      return;
+    }
+
+    var result = await RoleManager.CreateAsync(new IdentityRole(_newRoleName));
+    if (result.Succeeded)
+    {
+      Snackbar.Add($"Role '{_newRoleName}' created successfully", Severity.Success);
+      _roles.Add(new IdentityRole(_newRoleName));
+      _availableRoles.Add(_newRoleName);
+      _newRoleName = string.Empty;
+    }
+    else
+    {
+      foreach (var error in result.Errors)
+      {
+        Snackbar.Add(error.Description, Severity.Error);
+      }
+    }
+  }
+
+  private async Task EditRole(IdentityRole role)
+  {
+    // Implement edit role logic
+    var dialog = DialogService.Show<EditRoleDialog>("Edit Role",
+    new DialogParameters { { "Role", role } });
+
+    var result = await dialog.Result;
+    if (!result.Canceled)
+    {
+      // Refresh roles list
+      _roles = await RoleManager.Roles.ToListAsync();
+      _availableRoles = _roles.Select(r => r.Name!).ToList();
+    }
+  }
+
+  private async Task DeleteRole(IdentityRole role)
+  {
+    var parameters = new DialogParameters();
+    parameters.Add("Message", $"Are you sure you want to delete the role '{role.Name}'?");
+
+    var dialog = DialogService.Show<ConfirmationDialog>("Confirm Delete", parameters);
+    var result = await dialog.Result;
+
+    if (!result.Canceled)
+    {
+      var deleteResult = await RoleManager.DeleteAsync(role);
+      if (deleteResult.Succeeded)
+      {
+        Snackbar.Add($"Role '{role.Name}' deleted successfully", Severity.Success);
+        _roles.Remove(role);
+        _availableRoles.Remove(role.Name!);
+      }
+      else
+      {
+        foreach (var error in deleteResult.Errors)
+        {
+          Snackbar.Add(error.Description, Severity.Error);
+        }
+      }
+    }
+  }
+
+  private async Task LoadUserRolesAsync()
+  {
+    var users = await UserManager.Users.ToListAsync();
+    var userRoles = new List<UserRoleModel>();
+
+    foreach (var user in users)
+    {
+      if (user != null)
+      {
+        var roles = await UserManager.GetRolesAsync(user);
+        userRoles.Add(new UserRoleModel
+          {
+            Username = user.UserName ?? "Unknown",
+            Roles = roles.ToList()
+          });
+      }
+    }
+
+    UserRoles = userRoles;
+  }
+
+  private class UserRoleModel
+  {
+    public string Username { get; set; } = "";
+    public List<string> Roles { get; set; } = new();
   }
 }
