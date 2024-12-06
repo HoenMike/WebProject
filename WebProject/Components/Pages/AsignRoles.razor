@@ -100,7 +100,7 @@
 
 @code {
   private MudDataGrid<IdentityRole> _rolesDataGrid;
-  private List<string> _availableRoles = new();
+private List<string> _availableRoles = new();
   private List<IdentityRole> _roles = new();
   private string _newRoleName = string.Empty;
   private List<UserRoleModel> UserRoles { get; set; } = new();
@@ -339,9 +339,10 @@
       {
         Snackbar.Add("The role was modified by another user. Please refresh and try again.", Severity.Warning);
       }
-      catch (DbUpdateException)
-      {
-        Snackbar.Add("An error occurred while deleting the role. It may be in use.", Severity.Error);
+         
+          catch (DbUpdateException)
+            {
+            Snackbar.Add("An error occurred while deleting the role. It may be in use.", Severity.Error);
       }
     }
   }

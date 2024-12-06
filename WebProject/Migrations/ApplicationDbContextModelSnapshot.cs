@@ -493,7 +493,7 @@ namespace WebProject.Migrations
                     b.ToTable("UserCards");
                 });
 
-            modelBuilder.Entity("WebProject.Models.UserCheckoutInfo", b =>
+            modelBuilder.Entity("WebProject.Models.UserShippingInfo", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -522,7 +522,7 @@ namespace WebProject.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("UserCheckoutInfos");
+                    b.ToTable("UserShippingInfos");
                 });
 
             modelBuilder.Entity("WebProject.Models.WishList", b =>

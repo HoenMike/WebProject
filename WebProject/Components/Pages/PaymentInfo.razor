@@ -73,10 +73,10 @@
       <MudItem xs="12" md="6">
         <MudCardContent>
           <MudText Typo="Typo.h4">Shipping Information</MudText>
-          @if (!string.IsNullOrEmpty(PaymentStatusMessage))
+          @if (!string.IsNullOrEmpty(ShippingStatusMessage))
           {
-            <MudAlert Severity="@(PaymentStatusMessageType == "alert-success" ? Severity.Success : Severity.Error)">
-              @PaymentStatusMessage
+            <MudAlert Severity="@(ShippingStatusMessageType == "alert-success" ? Severity.Success : Severity.Error)">
+              @ShippingStatusMessage
             </MudAlert>
           }
           <EditForm Model="PaymentInput" OnValidSubmit="OnValidSubmitPaymentAsync">
@@ -143,8 +143,8 @@
   private List<UserCard> ExistingCards = new();
   private string CardStatusMessage = string.Empty;
   private string CardStatusMessageType = "alert-success";
-  private string PaymentStatusMessage = string.Empty;
-  private string PaymentStatusMessageType = "alert-success";
+  private string ShippingStatusMessage = string.Empty;
+  private string ShippingStatusMessageType = "alert-success";
 
   [SupplyParameterFromForm]
   private CardInputModel CardInput { get; set; } = new();
@@ -170,7 +170,7 @@
       .ToListAsync();
 
       // Fetch existing payment information for the current user
-      var existingCheckoutInfo = await DbContext.UserCheckoutInfos
+      var existingCheckoutInfo = await DbContext.UserShippingInfos
       .FirstOrDefaultAsync(u => u.UserId == user.Id);
 
       if (existingCheckoutInfo != null)
@@ -271,7 +271,7 @@
     try
     {
       // Check if a checkout info already exists for this user
-      var existingCheckoutInfo = await DbContext.UserCheckoutInfos
+      var existingCheckoutInfo = await DbContext.UserShippingInfos
       .FirstOrDefaultAsync(u => u.UserId == user.Id);
 
       if (existingCheckoutInfo != null)
@@ -285,7 +285,7 @@
       else
       {
         // Create new UserCheckoutInfo
-        var newCheckoutInfo = new UserCheckoutInfo
+        var newShippingInfo = new UserShippingInfo
           {
             UserId = user.Id,
             ReceiverName = PaymentInput.ReceiverName ?? string.Empty,
@@ -294,19 +294,19 @@
             PaymentMethod = PaymentInput.PaymentMethod
           };
 
-        DbContext.UserCheckoutInfos.Add(newCheckoutInfo);
+        DbContext.UserShippingInfos.Add(newShippingInfo);
       }
 
       await DbContext.SaveChangesAsync();
 
-      PaymentStatusMessage = "Payment information updated successfully.";
-      PaymentStatusMessageType = "alert-success";
+      ShippingStatusMessage = "Shipping information updated successfully.";
+      ShippingStatusMessageType = "alert-success";
     }
     catch (Exception ex)
     {
       Logger.LogError(ex, "Error saving payment information");
-      PaymentStatusMessage = $"Error: {ex.Message}";
-      PaymentStatusMessageType = "alert-danger";
+      ShippingStatusMessage = $"Error: {ex.Message}";
+      ShippingStatusMessageType = "alert-danger";
     }
   }
 

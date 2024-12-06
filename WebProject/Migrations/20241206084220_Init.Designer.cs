@@ -12,7 +12,7 @@ using WebProject.Data;
 namespace WebProject.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241203071350_Init")]
+    [Migration("20241206084220_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -476,10 +476,6 @@ namespace WebProject.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)");
 
-                    b.Property<string>("CardType")
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
-
                     b.Property<string>("Cvv")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -498,6 +494,38 @@ namespace WebProject.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("UserCards");
+                });
+
+            modelBuilder.Entity("WebProject.Models.UserShippingInfo", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("PaymentMethod")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("ReceiverName")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UserShippingInfos");
                 });
 
             modelBuilder.Entity("WebProject.Models.WishList", b =>

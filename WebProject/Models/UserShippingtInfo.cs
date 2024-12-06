@@ -10,7 +10,7 @@ namespace WebProject.Models
     CreditCard
   }
 
-  public class UserCheckoutInfo
+  public class UserShippingInfo
   {
     [Key]
     public int Id { get; set; }
