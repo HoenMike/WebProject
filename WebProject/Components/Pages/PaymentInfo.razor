@@ -21,53 +21,64 @@
 <PageTitle>Payment Information</PageTitle>
 
 <MudContainer MaxWidth="MaxWidth.Medium">
-  <MudText Typo="Typo.h3">Payment Information</MudText>
-
-  @if (!string.IsNullOrEmpty(StatusMessage))
-  {
-    <MudAlert Severity="@(StatusMessageType == "alert-success" ? Severity.Success : Severity.Error)">
-      @StatusMessage
+  <MudCard Class="pa-4 mb-4 mt-4">
+    <MudText Typo="Typo.h3">Payment Information</MudText>
+    <MudAlert Severity="Severity.Warning">
+      <strong>Demo Version Warning:</strong> This is a demonstration version. Card details are stored in plain text
+      and are not validated or encrypted. <strong>DO NOT</strong> use real credit card information.
     </MudAlert>
-  }
-
-  <MudAlert Severity="Severity.Warning">
-    <strong>Demo Version Warning:</strong> This is a demonstration version. Card details are stored in plain text
-    and are not validated or encrypted. <strong>DO NOT</strong> use real credit card information.
-  </MudAlert>
-
-  <MudGrid>
-    <MudItem xs="12" md="6">
-      <MudCard>
+    <MudGrid>
+      <MudItem xs="12" md="6">
         <MudCardContent>
           <MudText Typo="Typo.h4">Add New Card</MudText>
-          <EditForm Model="CardInput" OnValidSubmit="OnValidSubmitCardAsync">
-            <DataAnnotationsValidator />
-            <MudTextField @bind-Value="CardInput.CardHolderName" Label="Card Holder Name" Required="true"
-              RequiredError="Card Holder Name is required" />
-            <MudTextField @bind-Value="CardInput.CardNumber" Label="Card Number" Required="true"
-              RequiredError="Card Number is required" />
-            <MudGrid>
-              <MudItem xs="12" md="6">
-                <MudDatePicker @bind-Value="CardInput.ExpiryDate" Label="Expiry Date" Required="true"
-                  RequiredError="Expiry Date is required" />
-              </MudItem>
-              <MudItem xs="12" md="6">
-                <MudTextField @bind-Value="CardInput.Cvv" Label="CVV" Required="true" RequiredError="CVV is required" />
-              </MudItem>
-            </MudGrid>
-            <MudCheckBox T="bool" @bind-Checked="CardInput.IsPrimary" Label="Set as Primary Card" />
-            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">
-              Save Card Information
-            </MudButton>
-          </EditForm>
+          @if (!string.IsNullOrEmpty(CardStatusMessage))
+          {
+            <MudAlert Severity="@(CardStatusMessageType == "alert-success" ? Severity.Success : Severity.Error)">
+              @CardStatusMessage
+            </MudAlert>
+          }
+          @if (ExistingCards.Count >= 3)
+          {
+            <MudAlert Severity="Severity.Error">
+              You can only add up to 3 cards.
+            </MudAlert>
+          }
+          else
+          {
+            <EditForm Model="CardInput" OnValidSubmit="OnValidSubmitCardAsync">
+              <DataAnnotationsValidator />
+              <MudTextField @bind-Value="CardInput.CardHolderName" Label="Card Holder Name" Required="true"
+                RequiredError="Card Holder Name is required" />
+              <MudTextField @bind-Value="CardInput.CardNumber" Label="Card Number" Required="true"
+                RequiredError="Card Number is required" />
+              <MudGrid>
+                <MudItem xs="12" md="6">
+                  <MudDatePicker @bind-Value="CardInput.ExpiryDate" Label="Expiry Date" Required="true"
+                    RequiredError="Expiry Date is required" DateFormat="MM/yyyy" MinDate="@DateTime.Now"
+                    OpenTo="OpenTo.Year" FixDay="1" Views="new[] { CalendarView.Year, CalendarView.Month }" />
+                </MudItem>
+                <MudItem xs="12" md="6">
+                  <MudTextField @bind-Value="CardInput.Cvv" Label="CVV" Required="true" RequiredError="CVV is required" />
+                </MudItem>
+              </MudGrid>
+              <MudCheckBox T="bool" @bind-Value="CardInput.IsPrimary" Label="Set as Primary Card" />
+              <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">
+                Save Card Information
+              </MudButton>
+            </EditForm>
+          }
         </MudCardContent>
-      </MudCard>
-    </MudItem>
+      </MudItem>
 
-    <MudItem xs="12" md="6">
-      <MudCard>
+      <MudItem xs="12" md="6">
         <MudCardContent>
-          <MudText Typo="Typo.h4">Payment Information</MudText>
+          <MudText Typo="Typo.h4">Shipping Information</MudText>
+          @if (!string.IsNullOrEmpty(PaymentStatusMessage))
+          {
+            <MudAlert Severity="@(PaymentStatusMessageType == "alert-success" ? Severity.Success : Severity.Error)">
+              @PaymentStatusMessage
+            </MudAlert>
+          }
           <EditForm Model="PaymentInput" OnValidSubmit="OnValidSubmitPaymentAsync">
             <DataAnnotationsValidator />
             <MudTextField @bind-Value="PaymentInput.ReceiverName" Label="Receiver Name" Required="true"
@@ -82,54 +93,58 @@
               <MudSelectItem Value="PaymentMethod.CreditCard">Credit Card</MudSelectItem>
             </MudSelect>
             <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">
-              Save Payment Information
+              Save Shipping Information
             </MudButton>
           </EditForm>
         </MudCardContent>
-      </MudCard>
-    </MudItem>
-
-    @if (ExistingCards.Any())
-    {
-      <MudItem xs="12">
-        <MudCard>
-          <MudCardContent>
-            <MudText Typo="Typo.h4">Existing Cards</MudText>
-            <MudList T="UserCard">
-              @foreach (var card in ExistingCards)
-              {
-                <MudListItem T="UserCard">
-                  <MudGrid>
-                    <MudItem xs="8">
-                      <MudText Typo="Typo.h6">@card.CardHolderName</MudText>
-                      <MudText>**** **** **** @card.CardNumber.Substring(Math.Max(0, card.CardNumber.Length - 4))</MudText>
-                      <MudText>Expires: @card.ExpiryDate.ToString("MM/yyyy")</MudText>
-                      @if (card.IsPrimary)
-                      {
-                        <MudText Color="Color.Success">Primary Card</MudText>
-                      }
-                    </MudItem>
-                    <MudItem xs="4" Align="Align.End">
-                      <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="() => DeleteCardAsync(card.Id)">
-                        Remove
-                      </MudButton>
-                    </MudItem>
-                  </MudGrid>
-                </MudListItem>
-              }
-            </MudList>
-          </MudCardContent>
-        </MudCard>
       </MudItem>
-    }
-  </MudGrid>
+
+      @if (ExistingCards.Any())
+      {
+        <MudItem xs="12">
+          <MudCard>
+            <MudCardContent>
+              <MudText Typo="Typo.h4">Existing Cards</MudText>
+              <MudList T="UserCard">
+                @foreach (var card in ExistingCards)
+                {
+                  <MudListItem T="UserCard">
+                    <MudGrid>
+                      <MudItem xs="8">
+                        <MudText Typo="Typo.h6">@card.CardHolderName</MudText>
+                        <MudText>**** **** **** @card.CardNumber.Substring(Math.Max(0, card.CardNumber.Length - 4))
+                        </MudText>
+                        <MudText>Expires: @card.ExpiryDate.ToString("MM/yyyy")</MudText>
+                        @if (card.IsPrimary)
+                        {
+                          <MudText Color="Color.Success">Primary Card</MudText>
+                        }
+                      </MudItem>
+                      <MudItem xs="4" Align="Align.End">
+                        <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="() => DeleteCardAsync(card.Id)">
+                          Remove
+                        </MudButton>
+                      </MudItem>
+                    </MudGrid>
+                  </MudListItem>
+                }
+              </MudList>
+            </MudCardContent>
+          </MudCard>
+        </MudItem>
+      }
+    </MudGrid>
+  </MudCard>
+
 </MudContainer>
 
 @code {
   private ApplicationUser user = default!;
   private List<UserCard> ExistingCards = new();
-  private string StatusMessage = string.Empty;
-  private string StatusMessageType = "alert-success";
+  private string CardStatusMessage = string.Empty;
+  private string CardStatusMessageType = "alert-success";
+  private string PaymentStatusMessage = string.Empty;
+  private string PaymentStatusMessageType = "alert-success";
 
   [SupplyParameterFromForm]
   private CardInputModel CardInput { get; set; } = new();
@@ -153,12 +168,27 @@
       ExistingCards = await DbContext.UserCards
       .Where(c => c.UserId == user.Id)
       .ToListAsync();
+
+      // Fetch existing payment information for the current user
+      var existingCheckoutInfo = await DbContext.UserCheckoutInfos
+      .FirstOrDefaultAsync(u => u.UserId == user.Id);
+
+      if (existingCheckoutInfo != null)
+      {
+        PaymentInput = new PaymentInputModel
+          {
+            ReceiverName = existingCheckoutInfo.ReceiverName,
+            Address = existingCheckoutInfo.Address,
+            PhoneNumber = existingCheckoutInfo.PhoneNumber,
+            PaymentMethod = existingCheckoutInfo.PaymentMethod
+          };
+      }
     }
     catch (Exception ex)
     {
       Logger.LogError(ex, "Error initializing payment info page");
-      StatusMessage = $"An error occurred: {ex.Message}";
-      StatusMessageType = "alert-danger";
+      CardStatusMessage = $"An error occurred: {ex.Message}";
+      CardStatusMessageType = "alert-danger";
     }
   }
 
@@ -166,6 +196,14 @@
   {
     try
     {
+      // Check if the user already has 3 cards
+      if (ExistingCards.Count >= 3)
+      {
+        CardStatusMessage = "You can only add up to 3 cards.";
+        CardStatusMessageType = "alert-danger";
+        return;
+      }
+
       // Begin a database transaction to ensure consistency
       await using var transaction = await DbContext.Database.BeginTransactionAsync();
 
@@ -210,8 +248,8 @@
         // Reset input form
         CardInput = new CardInputModel();
 
-        StatusMessage = "Card information added successfully.";
-        StatusMessageType = "alert-success";
+        CardStatusMessage = "Card information added successfully.";
+        CardStatusMessageType = "alert-success";
       }
       catch
       {
@@ -223,8 +261,8 @@
     catch (Exception ex)
     {
       Logger.LogError(ex, "Error saving card information");
-      StatusMessage = $"Error: {ex.Message}";
-      StatusMessageType = "alert-danger";
+      CardStatusMessage = $"Error: {ex.Message}";
+      CardStatusMessageType = "alert-danger";
     }
   }
 
@@ -261,14 +299,14 @@
 
       await DbContext.SaveChangesAsync();
 
-      StatusMessage = "Payment information added successfully.";
-      StatusMessageType = "alert-success";
+      PaymentStatusMessage = "Payment information updated successfully.";
+      PaymentStatusMessageType = "alert-success";
     }
     catch (Exception ex)
     {
       Logger.LogError(ex, "Error saving payment information");
-      StatusMessage = $"Error: {ex.Message}";
-      StatusMessageType = "alert-danger";
+      PaymentStatusMessage = $"Error: {ex.Message}";
+      PaymentStatusMessageType = "alert-danger";
     }
   }
 
@@ -287,15 +325,15 @@
         .Where(c => c.UserId == user.Id)
         .ToListAsync();
 
-        StatusMessage = "Card removed successfully.";
-        StatusMessageType = "alert-success";
+        CardStatusMessage = "Card removed successfully.";
+        CardStatusMessageType = "alert-success";
       }
     }
     catch (Exception ex)
     {
       Logger.LogError(ex, "Error removing card");
-      StatusMessage = $"Error removing card: {ex.Message}";
-      StatusMessageType = "alert-danger";
+      CardStatusMessage = $"Error removing card: {ex.Message}";
+      CardStatusMessageType = "alert-danger";
     }
   }
 

@@ -60,6 +60,10 @@ builder.Services.Configure<SnackbarConfiguration>(config =>
     config.PreventDuplicates = false;
     config.NewestOnTop = false;
     config.ShowCloseIcon = true;
+    config.VisibleStateDuration = 3000;
+    config.HideTransitionDuration = 500;
+    config.ShowTransitionDuration = 500;
+    config.ClearAfterNavigation = true;
 });
 
 var app = builder.Build();
