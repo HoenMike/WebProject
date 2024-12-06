@@ -1,0 +1,25 @@
+<MudDialog>
+  <DialogContent>
+    <MudText Typo="Typo.body1">@ContentText</MudText>
+  </DialogContent>
+  <DialogActions>
+    <MudButton OnClick="Cancel" Color="Color.Secondary">Cancel</MudButton>
+    <MudButton OnClick="Login" Color="Color.Primary">Login now</MudButton>
+  </DialogActions>
+</MudDialog>
+
+@code {
+  [CascadingParameter] MudDialogInstance MudDialog { get; set; } = default!;
+  [Parameter]
+  public string ContentText { get; set; }
+
+  private void Cancel()
+  {
+    MudDialog.Cancel();
+  }
+
+  private void Login()
+  {
+    MudDialog.Close(DialogResult.Ok(true));
+  }
+}

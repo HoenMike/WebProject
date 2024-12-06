@@ -36,29 +36,39 @@
                 <span class="bi bi-vector-pen" aria-hidden="true"></span> News
             </NavLink>
         </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="news_management">
-                <span class="bi bi-vector-pen" aria-hidden="true"></span> News Manage
-            </NavLink>
-        </div>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="items">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Item Manage
-            </NavLink>
-        </div>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="/promote_management">
-                <span class="bi bi-badge-ad" aria-hidden="true"></span> Promotes Manage
-            </NavLink>
-        </div>
+        <AuthorizeView>
+            <Authorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="cart">
+                        <span class="bi bi-cart4-nav-menu" aria-hidden="true"></span> Cart
+                    </NavLink>
+                </div>
+            </Authorized>
+        </AuthorizeView>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="cart">
-                <span class="bi bi-cart4-nav-menu" aria-hidden="true"></span> Cart
-            </NavLink>
-        </div>
+
+        <MudDivider />
+
+        <AuthorizeView Roles="Admin">
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="news_management">
+                    <span class="bi bi-vector-pen" aria-hidden="true"></span> News Manage
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="items">
+                    <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Item Manage
+                </NavLink>
+            </div>
+
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="/promote_management">
+                    <span class="bi bi-badge-ad" aria-hidden="true"></span> Promotes Manage
+                </NavLink>
+            </div>
+        </AuthorizeView>
 
 
 
@@ -70,6 +80,7 @@
             </div>
         </AuthorizeView>
 
+        <MudDivider />
 
         <AuthorizeView>
             <Authorized>
