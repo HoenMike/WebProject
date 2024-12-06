@@ -12,6 +12,8 @@
 @inject ISnackbar Snackbar
 @inject IDialogService DialogService
 
+@rendermode InteractiveServer
+
 <PageTitle>Assign Roles</PageTitle>
 
 <MudContainer>
@@ -49,7 +51,12 @@
     <MudItem xs="12" md="6">
       <MudPaper Elevation="3" Class="pa-4">
         <MudText Typo="Typo.h6" Class="mb-4">Role Management</MudText>
-        <MudDataGrid Items="@_roles" Filterable="true" Sortable="true" EditMode="DataGridEditMode.Form">
+        <MudTextField @bind-Value="_newRoleName" Label="New Role Name" Variant="Variant.Outlined" />
+        <MudButton Color="Color.Success" Variant="Variant.Filled" Class="mt-2" OnClick="CreateRole">
+          Create Role
+        </MudButton>
+        <MudDataGrid @ref="_rolesDataGrid" Items="@_roles" Filterable="true" Sortable="true"
+          EditMode="DataGridEditMode.Form" Class="mt-4">
           <Columns>
             <PropertyColumn Property="x => x.Name" Title="Role Name" />
             <TemplateColumn Title="Actions">
@@ -64,13 +71,6 @@
             </TemplateColumn>
           </Columns>
         </MudDataGrid>
-
-        <MudPaper Class="mt-4 pa-4">
-          <MudTextField @bind-Value="_newRoleName" Label="New Role Name" Variant="Variant.Outlined" />
-          <MudButton Color="Color.Success" Variant="Variant.Filled" Class="mt-2" OnClick="CreateRole">
-            Create Role
-          </MudButton>
-        </MudPaper>
       </MudPaper>
     </MudItem>
 
@@ -81,10 +81,16 @@
           <HeaderContent>
             <MudTh>Username</MudTh>
             <MudTh>Roles</MudTh>
+            <MudTh>Actions</MudTh>
           </HeaderContent>
           <RowTemplate>
             <MudTd DataLabel="Username">@context.Username</MudTd>
             <MudTd DataLabel="Roles">@string.Join(", ", context.Roles)</MudTd>
+            <MudTd DataLabel="Actions">
+              <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="@(() => ClearRoles(context.Username))">
+                Clear Roles
+              </MudButton>
+            </MudTd>
           </RowTemplate>
         </MudTable>
       </MudPaper>
@@ -93,6 +99,7 @@
 </MudContainer>
 
 @code {
+  private MudDataGrid<IdentityRole> _rolesDataGrid;
   private List<string> _availableRoles = new();
   private List<IdentityRole> _roles = new();
   private string _newRoleName = string.Empty;
@@ -100,10 +107,25 @@
 
   protected override async Task OnInitializedAsync()
   {
-    // Populate available roles
-    _roles = await RoleManager.Roles.ToListAsync();
-    _availableRoles = _roles.Select(r => r.Name!).ToList();
+    // Populate available roles, excluding Admin
+    await LoadRolesAsync();
     await LoadUserRolesAsync();
+  }
+
+  private async Task LoadRolesAsync()
+  {
+    // Load roles, excluding the Admin role
+    _roles = await RoleManager.Roles
+    .Where(r => r.Name != "Admin")
+    .ToListAsync();
+
+    _availableRoles = _roles.Select(r => r.Name!).ToList();
+
+    // Ensure Admin is not available for creation or modification
+    if (!_availableRoles.Contains("Admin"))
+    {
+      _availableRoles.Add("Admin");
+    }
   }
 
   private class InputModel
@@ -123,6 +145,12 @@
     if (user != null)
     {
       var roles = await UserManager.GetRolesAsync(user);
+      if (roles.Contains("Admin") && (await UserManager.GetUsersInRoleAsync("Admin")).Count == 1 && Input.Role != "Admin")
+      {
+        Snackbar.Add("Cannot change the role of the last Admin", Severity.Error);
+        return;
+      }
+
       var removeResult = await UserManager.RemoveFromRolesAsync(user, roles);
       if (!removeResult.Succeeded)
       {
@@ -170,6 +198,13 @@
       return;
     }
 
+    // Prevent creating roles with reserved names
+    if (_newRoleName.Equals("Admin", StringComparison.OrdinalIgnoreCase))
+    {
+      Snackbar.Add("Cannot create a role with the reserved name 'Admin'", Severity.Error);
+      return;
+    }
+
     var roleExists = await RoleManager.RoleExistsAsync(_newRoleName);
     if (roleExists)
     {
@@ -177,40 +212,101 @@
       return;
     }
 
-    var result = await RoleManager.CreateAsync(new IdentityRole(_newRoleName));
-    if (result.Succeeded)
+    try
     {
-      Snackbar.Add($"Role '{_newRoleName}' created successfully", Severity.Success);
-      _roles.Add(new IdentityRole(_newRoleName));
-      _availableRoles.Add(_newRoleName);
-      _newRoleName = string.Empty;
-    }
-    else
-    {
-      foreach (var error in result.Errors)
+      var result = await RoleManager.CreateAsync(new IdentityRole(_newRoleName));
+      if (result.Succeeded)
       {
-        Snackbar.Add(error.Description, Severity.Error);
+        Snackbar.Add($"Role '{_newRoleName}' created successfully", Severity.Success);
+
+        // Reload roles to ensure latest data
+        await LoadRolesAsync();
+
+        _newRoleName = string.Empty;
+        StateHasChanged();
+      }
+      else
+      {
+        foreach (var error in result.Errors)
+        {
+          Snackbar.Add(error.Description, Severity.Error);
+        }
       }
     }
+    catch (DbUpdateException ex)
+    {
+      Snackbar.Add("An error occurred while creating the role. Please try again.", Severity.Error);
+      // Log the exception if you have logging
+      // _logger.LogError(ex, "Error creating role");
+    }
   }
-
   private async Task EditRole(IdentityRole role)
   {
-    // Implement edit role logic
+    if (role.Name == "Admin")
+    {
+      Snackbar.Add("Cannot edit the Admin role", Severity.Error);
+      return;
+    }
+
     var dialog = DialogService.Show<EditRoleDialog>("Edit Role",
     new DialogParameters { { "Role", role } });
 
     var result = await dialog.Result;
     if (!result.Canceled)
     {
-      // Refresh roles list
-      _roles = await RoleManager.Roles.ToListAsync();
-      _availableRoles = _roles.Select(r => r.Name!).ToList();
+      var newRoleName = result.Data as string;
+      if (string.IsNullOrWhiteSpace(newRoleName))
+      {
+        Snackbar.Add("Role name cannot be empty", Severity.Error);
+        return;
+      }
+
+      try
+      {
+        var existingRole = await RoleManager.FindByIdAsync(role.Id);
+        if (existingRole != null)
+        {
+          existingRole.Name = newRoleName;
+          var updateResult = await RoleManager.UpdateAsync(existingRole);
+
+          if (updateResult.Succeeded)
+          {
+            Snackbar.Add("Role updated successfully", Severity.Success);
+            await LoadRolesAsync();
+            StateHasChanged();
+          }
+          else
+          {
+            foreach (var error in updateResult.Errors)
+            {
+              Snackbar.Add(error.Description, Severity.Error);
+            }
+          }
+        }
+        else
+        {
+          Snackbar.Add("Role not found", Severity.Error);
+        }
+      }
+      catch (DbUpdateConcurrencyException)
+      {
+        Snackbar.Add("The role was modified by another user. Please refresh and try again.", Severity.Warning);
+      }
+      catch (Exception ex)
+      {
+        Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
+      }
     }
   }
 
   private async Task DeleteRole(IdentityRole role)
   {
+    if (role.Name == "Admin")
+    {
+      Snackbar.Add("Cannot delete the Admin role", Severity.Error);
+      return;
+    }
+
     var parameters = new DialogParameters();
     parameters.Add("Message", $"Are you sure you want to delete the role '{role.Name}'?");
 
@@ -219,16 +315,58 @@
 
     if (!result.Canceled)
     {
-      var deleteResult = await RoleManager.DeleteAsync(role);
-      if (deleteResult.Succeeded)
+      try
       {
-        Snackbar.Add($"Role '{role.Name}' deleted successfully", Severity.Success);
-        _roles.Remove(role);
-        _availableRoles.Remove(role.Name!);
+        var deleteResult = await RoleManager.DeleteAsync(role);
+        if (deleteResult.Succeeded)
+        {
+          Snackbar.Add($"Role '{role.Name}' deleted successfully", Severity.Success);
+
+          // Reload roles to ensure latest data
+          await LoadRolesAsync();
+
+          StateHasChanged();
+        }
+        else
+        {
+          foreach (var error in deleteResult.Errors)
+          {
+            Snackbar.Add(error.Description, Severity.Error);
+          }
+        }
+      }
+      catch (DbUpdateConcurrencyException)
+      {
+        Snackbar.Add("The role was modified by another user. Please refresh and try again.", Severity.Warning);
+      }
+      catch (DbUpdateException)
+      {
+        Snackbar.Add("An error occurred while deleting the role. It may be in use.", Severity.Error);
+      }
+    }
+  }
+
+  private async Task ClearRoles(string username)
+  {
+    var user = await UserManager.FindByNameAsync(username);
+    if (user != null)
+    {
+      var roles = await UserManager.GetRolesAsync(user);
+      if (roles.Contains("Admin") && (await UserManager.GetUsersInRoleAsync("Admin")).Count == 1)
+      {
+        Snackbar.Add("Cannot remove the last Admin role", Severity.Error);
+        return;
+      }
+
+      var removeResult = await UserManager.RemoveFromRolesAsync(user, roles);
+      if (removeResult.Succeeded)
+      {
+        Snackbar.Add("Roles cleared successfully", Severity.Success);
+        await LoadUserRolesAsync(); // Refresh user roles
       }
       else
       {
-        foreach (var error in deleteResult.Errors)
+        foreach (var error in removeResult.Errors)
         {
           Snackbar.Add(error.Description, Severity.Error);
         }
@@ -246,11 +384,14 @@
       if (user != null)
       {
         var roles = await UserManager.GetRolesAsync(user);
-        userRoles.Add(new UserRoleModel
-          {
-            Username = user.UserName ?? "Unknown",
-            Roles = roles.ToList()
-          });
+        if (roles.Any())
+        {
+          userRoles.Add(new UserRoleModel
+            {
+              Username = user.UserName ?? "Unknown",
+              Roles = roles.ToList()
+            });
+        }
       }
     }
 
@@ -262,4 +403,4 @@
     public string Username { get; set; } = "";
     public List<string> Roles { get; set; } = new();
   }
-}
+}       
