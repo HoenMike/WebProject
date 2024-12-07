@@ -20,86 +20,93 @@
 
 <PageTitle>Payment Information</PageTitle>
 
-<MudContainer MaxWidth="MaxWidth.Small">
+<MudContainer MaxWidth="MaxWidth.Medium">
   <MudCard Class="pa-4 mb-4 mt-4">
     <MudText Typo="Typo.h3">Payment Information</MudText>
     <MudAlert Severity="Severity.Warning">
       <strong>Demo Version Warning:</strong> This is a demonstration version. Card details are stored in plain text
       and are not validated or encrypted. <strong>DO NOT</strong> use real credit card information.
     </MudAlert>
-    <MudGrid>
-      <MudItem xs="12">
-        <MudCardContent>
-          <MudText Typo="Typo.h4">Add New Card</MudText>
-          @if (!string.IsNullOrEmpty(CardStatusMessage))
-          {
-            <MudAlert Severity="@(CardStatusMessageType == "alert-success" ? Severity.Success : Severity.Error)">
-              @CardStatusMessage
-            </MudAlert>
-          }
-          @if (ExistingCards.Count >= 3)
-          {
-            <MudAlert Severity="Severity.Error">
-              You can only add up to 3 cards.
-            </MudAlert>
-          }
-          else
-          {
-            <EditForm Model="CardInput" OnValidSubmit="OnValidSubmitCardAsync">
-              <DataAnnotationsValidator />
-              <MudTextField @bind-Value="CardInput.CardHolderName" Label="Card Holder Name" Required="true" RequiredError="Card Holder Name is required" />
+    @if (isLoading)
+    {
+      <MudProgressLinear Indeterminate="true" Color="Color.Primary" Style="margin-bottom: 20px;" />
+    }
+    else
+    {
+      <MudGrid>
+        <MudItem xs="12" md="6">
+          <MudCardContent>
+            <MudText Typo="Typo.h4">Add New Card</MudText>
+            @if (!string.IsNullOrEmpty(CardStatusMessage))
+            {
+              <MudAlert Severity="@(CardStatusMessageType == "alert-success" ? Severity.Success : Severity.Error)">
+                @CardStatusMessage
+              </MudAlert>
+            }
+            @if (ExistingCards.Count >= 3)
+            {
+              <MudAlert Severity="Severity.Error">
+                You can only add up to 3 cards.
+              </MudAlert>
+            }
+            else
+            {
+              <EditForm Model="CardInput" OnValidSubmit="OnValidSubmitCardAsync">
+                <DataAnnotationsValidator />
+                <MudTextField @bind-Value="CardInput.CardHolderName" Label="Card Holder Name" Required="true" RequiredError="Card Holder Name is required" />
 
-              <MudTextField @bind-Value="CardInput.CardNumber" Label="Card Number" Required="true" RequiredError="Card Number is required" />
+                <MudTextField @bind-Value="CardInput.CardNumber" Label="Card Number" Required="true" RequiredError="Card Number is required" />
 
-              <MudDatePicker @bind-Value="CardInput.ExpiryDate" Label="Expiry Date" Required="true" RequiredError="Expiry Date is required" DateFormat="MM/yyyy" MinDate="@DateTime.Now" OpenTo="OpenTo.Year" FixDay="1" Views="new[] { CalendarView.Year, CalendarView.Month }" />
+                <MudDatePicker @bind-Value="CardInput.ExpiryDate" Label="Expiry Date" Required="true" RequiredError="Expiry Date is required" DateFormat="MM/yyyy" MinDate="@DateTime.Now" OpenTo="OpenTo.Year" FixDay="1" Views="new[] { CalendarView.Year, CalendarView.Month }" />
 
-              <MudTextField @bind-Value="CardInput.Cvv" Label="CVV" Required="true" RequiredError="CVV is required" />
+                <MudTextField @bind-Value="CardInput.Cvv" Label="CVV" Required="true" RequiredError="CVV is required" />
 
-              <MudCheckBox T="bool" @bind-Value="CardInput.IsPrimary" Label="Set as Primary Card" />
+                <MudCheckBox T="bool" @bind-Value="CardInput.IsPrimary" Label="Set as Primary Card" />
 
-              <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">
-                Save Card Information
-              </MudButton>
-            </EditForm>
-          }
-        </MudCardContent>
-      </MudItem>
-
-      @if (ExistingCards.Any())
-      {
-        <MudItem xs="6">
-          <MudCard>
-            <MudCardContent>
-              <MudText Typo="Typo.h4">Existing Cards</MudText>
-              <MudList T="UserCard">
-                @foreach (var card in ExistingCards)
-                {
-                  <MudListItem T="UserCard">
-                    <MudGrid>
-                      <MudItem xs="8">
-                        <MudText Typo="Typo.h6">@card.CardHolderName</MudText>
-                        <MudText>**** **** **** @card.CardNumber.Substring(Math.Max(0, card.CardNumber.Length - 4))
-                        </MudText>
-                        <MudText>Expires: @card.ExpiryDate.ToString("MM/yyyy")</MudText>
-                        @if (card.IsPrimary)
-                        {
-                          <MudText Color="Color.Success">Primary Card</MudText>
-                        }
-                      </MudItem>
-                      <MudItem xs="4" Align="Align.End">
-                        <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="() => DeleteCardAsync(card.Id)">
-                          Remove
-                        </MudButton>
-                      </MudItem>
-                    </MudGrid>
-                  </MudListItem>
-                }
-              </MudList>
-            </MudCardContent>
-          </MudCard>
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">
+                  Save Card Information
+                </MudButton>
+              </EditForm>
+            }
+          </MudCardContent>
         </MudItem>
-      }
-    </MudGrid>
+
+        @if (ExistingCards.Any())
+        {
+          <MudItem xs="12" md="6">
+            <MudCard>
+              <MudCardContent>
+                <MudText Typo="Typo.h4">Existing Cards</MudText>
+                <MudList T="UserCard">
+                  @foreach (var card in ExistingCards)
+                  {
+                    <MudListItem T="UserCard">
+                      <MudGrid>
+                        <MudItem xs="12" md="7">
+                          <MudText Typo="Typo.h6">@card.CardHolderName</MudText>
+                          <MudText>**** **** **** @card.CardNumber.Substring(Math.Max(0, card.CardNumber.Length - 4))
+                          </MudText>
+                          <MudText>Expires: @card.ExpiryDate.ToString("MM/yyyy")</MudText>
+                          @if (card.IsPrimary)
+                          {
+                            <MudText Color="Color.Success">Primary Card</MudText>
+                          }
+                        </MudItem>
+                        <MudItem xs="12" md="5" Align="Align.End">
+                          <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="() => DeleteCardAsync(card.Id)">
+                            Remove
+                          </MudButton>
+                        </MudItem>
+                      </MudGrid>
+                    </MudListItem>
+                  }
+                </MudList>
+              </MudCardContent>
+            </MudCard>
+          </MudItem>
+        }
+      </MudGrid>
+    }
   </MudCard>
 </MudContainer>
 
@@ -108,6 +115,7 @@
   private List<UserCard> ExistingCards = new();
   private string CardStatusMessage = string.Empty;
   private string CardStatusMessageType = "alert-success";
+  private bool isLoading = true;
 
   [SupplyParameterFromForm]
   private CardInputModel CardInput { get; set; } = new();
@@ -134,6 +142,19 @@
       Logger.LogError(ex, "Error initializing payment info page");
       CardStatusMessage = $"An error occurred: {ex.Message}";
       CardStatusMessageType = "alert-danger";
+    }
+    finally
+    {
+      isLoading = false;
+    }
+  }
+
+  protected override async Task OnAfterRenderAsync(bool firstRender)
+  {
+    if (firstRender)
+    {
+      isLoading = false;
+      StateHasChanged();
     }
   }
 

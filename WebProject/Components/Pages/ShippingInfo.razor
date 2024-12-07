@@ -23,29 +23,36 @@
 <MudContainer MaxWidth="MaxWidth.Small">
   <MudCard Class="pa-4 mb-4 mt-4">
     <MudText Typo="Typo.h3">Shipping Information</MudText>
-    @if (!string.IsNullOrEmpty(ShippingStatusMessage))
+    @if (isLoading)
     {
-      <MudAlert Severity="@(ShippingStatusMessageType == "alert-success" ? Severity.Success : Severity.Error)">
-        @ShippingStatusMessage
-      </MudAlert>
+      <MudProgressLinear Indeterminate="true" Color="Color.Primary" Style="margin-bottom: 20px;" />
     }
-    <MudGrid>
-      <MudItem xs="12">
-        <EditForm Model="PaymentInput" OnValidSubmit="OnValidSubmitPaymentAsync">
-          <DataAnnotationsValidator />
-          <MudTextField @bind-Value="PaymentInput.ReceiverName" Label="Receiver Name" Required="true" RequiredError="Receiver Name is required" />
-          <MudTextField @bind-Value="PaymentInput.Address" Label="Address" Required="true" RequiredError="Address is required" />
-          <MudTextField @bind-Value="PaymentInput.PhoneNumber" Label="Phone Number" Required="true" RequiredError="Phone Number is required" />
-          <MudSelect T="PaymentMethod" @bind-Value="PaymentInput.PaymentMethod" Label="Payment Method" Required="true" RequiredError="Payment Method is required">
-            <MudSelectItem Value="PaymentMethod.Cash">Cash</MudSelectItem>
-            <MudSelectItem Value="PaymentMethod.CreditCard">Credit Card</MudSelectItem>
-          </MudSelect>
-          <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">
-            Save Shipping Information
-          </MudButton>
-        </EditForm>
-      </MudItem>
-    </MudGrid>
+    else
+    {
+      @if (!string.IsNullOrEmpty(ShippingStatusMessage))
+      {
+        <MudAlert Severity="@(ShippingStatusMessageType == "alert-success" ? Severity.Success : Severity.Error)">
+          @ShippingStatusMessage
+        </MudAlert>
+      }
+      <MudGrid>
+        <MudItem xs="12">
+          <EditForm Model="PaymentInput" OnValidSubmit="OnValidSubmitPaymentAsync">
+            <DataAnnotationsValidator />
+            <MudTextField @bind-Value="PaymentInput.ReceiverName" Label="Receiver Name" Required="true" RequiredError="Receiver Name is required" />
+            <MudTextField @bind-Value="PaymentInput.Address" Label="Address" Required="true" RequiredError="Address is required" />
+            <MudTextField @bind-Value="PaymentInput.PhoneNumber" Label="Phone Number" Required="true" RequiredError="Phone Number is required" />
+            <MudSelect T="PaymentMethod" @bind-Value="PaymentInput.PaymentMethod" Label="Payment Method" Required="true" RequiredError="Payment Method is required">
+              <MudSelectItem Value="PaymentMethod.Cash">Cash</MudSelectItem>
+              <MudSelectItem Value="PaymentMethod.CreditCard">Credit Card</MudSelectItem>
+            </MudSelect>
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">
+              Save Shipping Information
+            </MudButton>
+          </EditForm>
+        </MudItem>
+      </MudGrid>
+    }
   </MudCard>
 </MudContainer>
 
@@ -53,6 +60,7 @@
   private ApplicationUser user = default!;
   private string ShippingStatusMessage = string.Empty;
   private string ShippingStatusMessageType = "alert-success";
+  private bool isLoading = true;
 
   [SupplyParameterFromForm]
   private PaymentInputModel PaymentInput { get; set; } = new();
@@ -89,6 +97,19 @@
       Logger.LogError(ex, "Error initializing shipping info page");
       ShippingStatusMessage = $"An error occurred: {ex.Message}";
       ShippingStatusMessageType = "alert-danger";
+    }
+    finally
+    {
+      isLoading = false;
+    }
+  }
+
+  protected override async Task OnAfterRenderAsync(bool firstRender)
+  {
+    if (firstRender)
+    {
+      isLoading = false;
+      StateHasChanged();
     }
   }
 
