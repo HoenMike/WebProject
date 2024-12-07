@@ -1,0 +1,102 @@
+@page "/checkoutdialog"
+
+@using System.ComponentModel.DataAnnotations
+@using WebProject.Models
+@using Microsoft.EntityFrameworkCore
+@using MudBlazor
+@inject ApplicationDbContext DbContext
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+
+@rendermode InteractiveServer
+
+<DialogContent>
+  <MudText Typo="Typo.h4">Checkout</MudText>
+  <EditForm Model="CheckoutInput" OnValidSubmit="OnValidSubmitAsync">
+    <DataAnnotationsValidator />
+    <MudTextField @bind-Value="CheckoutInput.ReceiverName" Label="Receiver Name" Required="true" RequiredError="Receiver Name is required" />
+    <MudTextField @bind-Value="CheckoutInput.Address" Label="Address" Required="true" RequiredError="Address is required" />
+    <MudTextField @bind-Value="CheckoutInput.PhoneNumber" Label="Phone Number" Required="true" RequiredError="Phone Number is required" />
+    <MudSelect T="PaymentMethod" @bind-Value="CheckoutInput.PaymentMethod" Label="Payment Method" Required="true" RequiredError="Payment Method is required">
+      <MudSelectItem Value="PaymentMethod.Cash">Cash</MudSelectItem>
+      <MudSelectItem Value="PaymentMethod.CreditCard">Credit Card</MudSelectItem>
+    </MudSelect>
+    <MudTextField @bind-Value="CheckoutInput.CardHolderName" Label="Card Holder Name" Required="true" RequiredError="Card Holder Name is required" />
+    <MudTextField @bind-Value="CheckoutInput.CardNumber" Label="Card Number" Required="true" RequiredError="Card Number is required" />
+    <MudDatePicker @bind-Value="CheckoutInput.ExpiryDate" Label="Expiry Date" Required="true" RequiredError="Expiry Date is required" DateFormat="MM/yyyy" MinDate="@DateTime.Now" OpenTo="OpenTo.Year" FixDay="1" Views="new[] { CalendarView.Year, CalendarView.Month }" />
+    <MudTextField @bind-Value="CheckoutInput.Cvv" Label="CVV" Required="true" RequiredError="CVV is required" />
+    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">Submit</MudButton>
+  </EditForm>
+</DialogContent>
+
+@code {
+  [CascadingParameter] MudDialogInstance MudDialog { get; set; } = default!;
+  private CheckoutInputModel CheckoutInput { get; set; } = new();
+
+  private async Task OnValidSubmitAsync()
+  {
+    // Save the card and shipping information
+    var newShippingInfo = new UserShippingInfo
+      {
+        UserId = "user-id", // Replace with actual user ID
+        ReceiverName = CheckoutInput.ReceiverName ?? string.Empty,
+        Address = CheckoutInput.Address ?? string.Empty,
+        PhoneNumber = CheckoutInput.PhoneNumber ?? string.Empty,
+        PaymentMethod = CheckoutInput.PaymentMethod
+      };
+
+    DbContext.UserShippingInfos.Add(newShippingInfo);
+
+    var newCard = new UserCard
+      {
+        UserId = "user-id", // Replace with actual user ID
+        CardHolderName = CheckoutInput.CardHolderName ?? string.Empty,
+        CardNumber = CheckoutInput.CardNumber ?? string.Empty,
+        ExpiryDate = CheckoutInput.ExpiryDate,
+        Cvv = CheckoutInput.Cvv ?? string.Empty,
+        IsPrimary = true
+      };
+
+    DbContext.UserCards.Add(newCard);
+
+    await DbContext.SaveChangesAsync();
+
+    Snackbar.Add("Checkout information saved successfully.", Severity.Success);
+
+    MudDialog.Close(DialogResult.Ok(true));
+  }
+
+  private sealed class CheckoutInputModel
+  {
+    [Required(ErrorMessage = "Receiver Name is required")]
+    [StringLength(100, ErrorMessage = "Receiver Name cannot be longer than 100 characters")]
+    public string? ReceiverName { get; set; }
+
+    [Required(ErrorMessage = "Address is required")]
+    [StringLength(255, ErrorMessage = "Address cannot be longer than 255 characters")]
+    public string? Address { get; set; }
+
+    [Required(ErrorMessage = "Phone Number is required")]
+    [StringLength(20, ErrorMessage = "Phone Number cannot be longer than 20 characters")]
+    public string? PhoneNumber { get; set; }
+
+    [Required(ErrorMessage = "Payment Method is required")]
+    public PaymentMethod PaymentMethod { get; set; }
+
+    [Required(ErrorMessage = "Card Holder Name is required")]
+    [StringLength(100, ErrorMessage = "Card Holder Name cannot be longer than 100 characters")]
+    public string? CardHolderName { get; set; }
+
+    [Required(ErrorMessage = "Card Number is required")]
+    [StringLength(255, ErrorMessage = "Card Number cannot be longer than 255 characters")]
+    public string? CardNumber { get; set; }
+
+    [Required(ErrorMessage = "Expiry Date is required")]
+    [DataType(DataType.Date)]
+    public DateTime ExpiryDate { get; set; } = DateTime.Now.AddYears(1);
+
+    [Required(ErrorMessage = "CVV is required")]
+    [StringLength(255, ErrorMessage = "CVV cannot be longer than 255 characters")]
+    public string? Cvv { get; set; }
+  }
+}

@@ -195,34 +195,41 @@
     await LoadCart();
     Snackbar.Add("Item removed from cart", Severity.Info);
   }
-
-  private async Task ProceedToCheckout()
-  {
+private async Task ProceedToCheckout()
+{
     if (cartItems.Count == 0)
     {
-      Snackbar.Add("Your cart is empty", Severity.Warning);
-      return;
+        Snackbar.Add("Your cart is empty", Severity.Warning);
+        return;
     }
 
     var selectedItems = cartItems.Where(item => item.IsSelected).ToList();
     if (selectedItems.Count == 0)
     {
-      Snackbar.Add("Please select items to checkout", Severity.Warning);
-      return;
+        Snackbar.Add("Please select items to checkout", Severity.Warning);
+        return;
     }
 
-    try
-    {
-      await CartService.DemoCheckoutAsync(selectedItems);
-      Snackbar.Add("Checkout successful", Severity.Success);
-      await LoadCart();
-    }
-    catch (Exception ex)
-    {
-      Snackbar.Add($"Checkout failed: {ex.Message}", Severity.Error);
-    }
-  }
+    var parameters = new DialogParameters();
+    var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
 
+    var dialog = DialogService.Show<CheckoutDialog>("Checkout", parameters, options);
+    var result = await dialog.Result;
+
+    if (!result.Canceled)
+    {
+        try
+        {
+            await CartService.DemoCheckoutAsync(selectedItems);
+            Snackbar.Add("Checkout successful", Severity.Success);
+            await LoadCart();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Checkout failed: {ex.Message}", Severity.Error);
+        }
+    }
+}
   private void SelectAllChanged(bool value)
   {
     selectAll = value;
