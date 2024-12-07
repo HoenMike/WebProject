@@ -505,13 +505,6 @@ namespace WebProject.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("AddressName")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<bool>("IsPrimary")
-                        .HasColumnType("tinyint(1)");
-
                     b.Property<int>("PaymentMethod")
                         .HasColumnType("int");
 

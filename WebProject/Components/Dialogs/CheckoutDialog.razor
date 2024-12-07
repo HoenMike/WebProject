@@ -9,34 +9,34 @@
 @inject IDialogService DialogService
 
 @rendermode InteractiveServer
-<div Class="pa-4 mb-4">
-  <DialogContent>
-    <EditForm Model="CheckoutInput" OnValidSubmit="OnValidSubmitAsync">
-      <DataAnnotationsValidator />
-      <MudTextField @bind-Value="CheckoutInput.ReceiverName" Label="Receiver Name" Required="true"
-        RequiredError="Receiver Name is required" />
-      <MudTextField @bind-Value="CheckoutInput.Address" Label="Address" Required="true"
-        RequiredError="Address is required" />
-      <MudTextField @bind-Value="CheckoutInput.PhoneNumber" Label="Phone Number" Required="true"
-        RequiredError="Phone Number is required" />
-      <MudSelect T="PaymentMethod" @bind-Value="CheckoutInput.PaymentMethod" Label="Payment Method" Required="true"
-        RequiredError="Payment Method is required">
-        <MudSelectItem Value="PaymentMethod.Cash">Cash</MudSelectItem>
-        <MudSelectItem Value="PaymentMethod.CreditCard">Credit Card</MudSelectItem>
-      </MudSelect>
-      <MudTextField @bind-Value="CheckoutInput.CardHolderName" Label="Card Holder Name" Required="true"
-        RequiredError="Card Holder Name is required" />
-      <MudTextField @bind-Value="CheckoutInput.CardNumber" Label="Card Number" Required="true"
-        RequiredError="Card Number is required" />
-      <MudDatePicker @bind-Value="CheckoutInput.ExpiryDate" Label="Expiry Date" Required="true"
-        RequiredError="Expiry Date is required" DateFormat="MM/yyyy" MinDate="@DateTime.Now" OpenTo="OpenTo.Year"
-        FixDay="1" Views="new[] { CalendarView.Year, CalendarView.Month }" />
-      <MudTextField @bind-Value="CheckoutInput.Cvv" Label="CVV" Required="true" RequiredError="CVV is required" />
-      <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">Submit
-      </MudButton>
-    </EditForm>
-  </DialogContent>
-</div>
+
+<DialogContent>
+  <MudText Typo="Typo.h4">Checkout</MudText>
+  <EditForm Model="CheckoutInput" OnValidSubmit="OnValidSubmitAsync">
+    <DataAnnotationsValidator />
+    <MudTextField @bind-Value="CheckoutInput.ReceiverName" Label="Receiver Name" Required="true"
+      RequiredError="Receiver Name is required" />
+    <MudTextField @bind-Value="CheckoutInput.Address" Label="Address" Required="true"
+      RequiredError="Address is required" />
+    <MudTextField @bind-Value="CheckoutInput.PhoneNumber" Label="Phone Number" Required="true"
+      RequiredError="Phone Number is required" />
+    <MudSelect T="PaymentMethod" @bind-Value="CheckoutInput.PaymentMethod" Label="Payment Method" Required="true"
+      RequiredError="Payment Method is required">
+      <MudSelectItem Value="PaymentMethod.Cash">Cash</MudSelectItem>
+      <MudSelectItem Value="PaymentMethod.CreditCard">Credit Card</MudSelectItem>
+    </MudSelect>
+    <MudTextField @bind-Value="CheckoutInput.CardHolderName" Label="Card Holder Name" Required="true"
+      RequiredError="Card Holder Name is required" />
+    <MudTextField @bind-Value="CheckoutInput.CardNumber" Label="Card Number" Required="true"
+      RequiredError="Card Number is required" />
+    <MudDatePicker @bind-Value="CheckoutInput.ExpiryDate" Label="Expiry Date" Required="true"
+      RequiredError="Expiry Date is required" DateFormat="MM/yyyy" MinDate="@DateTime.Now" OpenTo="OpenTo.Year"
+      FixDay="1" Views="new[] { CalendarView.Year, CalendarView.Month }" />
+    <MudTextField @bind-Value="CheckoutInput.Cvv" Label="CVV" Required="true" RequiredError="CVV is required" />
+    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">Submit
+    </MudButton>
+  </EditForm>
+</DialogContent>
 
 @code {
   [CascadingParameter] MudDialogInstance MudDialog { get; set; } = default!;

@@ -20,9 +20,6 @@ namespace WebProject.Models
     public required string UserId { get; set; }
 
     [Required]
-    public required string AddressName { get; set; }
-
-    [Required]
     public required string ReceiverName { get; set; }
 
     [Required]
@@ -35,6 +32,5 @@ namespace WebProject.Models
     [EnumDataType(typeof(PaymentMethod))]
     public PaymentMethod PaymentMethod { get; set; }
 
-    public bool IsPrimary { get; set; }
   }
 }
