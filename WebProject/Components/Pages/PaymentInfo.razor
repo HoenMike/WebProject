@@ -20,7 +20,7 @@
 
 <PageTitle>Payment Information</PageTitle>
 
-<MudContainer MaxWidth="MaxWidth.Medium">
+<MudContainer MaxWidth="MaxWidth.Small">
   <MudCard Class="pa-4 mb-4 mt-4">
     <MudText Typo="Typo.h3">Payment Information</MudText>
     <MudAlert Severity="Severity.Warning">
@@ -28,7 +28,7 @@
       and are not validated or encrypted. <strong>DO NOT</strong> use real credit card information.
     </MudAlert>
     <MudGrid>
-      <MudItem xs="6">
+      <MudItem xs="12">
         <MudCardContent>
           <MudText Typo="Typo.h4">Add New Card</MudText>
           @if (!string.IsNullOrEmpty(CardStatusMessage))
@@ -47,21 +47,16 @@
           {
             <EditForm Model="CardInput" OnValidSubmit="OnValidSubmitCardAsync">
               <DataAnnotationsValidator />
-              <MudTextField @bind-Value="CardInput.CardHolderName" Label="Card Holder Name" Required="true"
-                RequiredError="Card Holder Name is required" />
-              <MudTextField @bind-Value="CardInput.CardNumber" Label="Card Number" Required="true"
-                RequiredError="Card Number is required" />
-              <MudGrid>
-                <MudItem xs="12" md="6">
-                  <MudDatePicker @bind-Value="CardInput.ExpiryDate" Label="Expiry Date" Required="true"
-                    RequiredError="Expiry Date is required" DateFormat="MM/yyyy" MinDate="@DateTime.Now"
-                    OpenTo="OpenTo.Year" FixDay="1" Views="new[] { CalendarView.Year, CalendarView.Month }" />
-                </MudItem>
-                <MudItem xs="12" md="6">
-                  <MudTextField @bind-Value="CardInput.Cvv" Label="CVV" Required="true" RequiredError="CVV is required" />
-                </MudItem>
-              </MudGrid>
+              <MudTextField @bind-Value="CardInput.CardHolderName" Label="Card Holder Name" Required="true" RequiredError="Card Holder Name is required" />
+
+              <MudTextField @bind-Value="CardInput.CardNumber" Label="Card Number" Required="true" RequiredError="Card Number is required" />
+
+              <MudDatePicker @bind-Value="CardInput.ExpiryDate" Label="Expiry Date" Required="true" RequiredError="Expiry Date is required" DateFormat="MM/yyyy" MinDate="@DateTime.Now" OpenTo="OpenTo.Year" FixDay="1" Views="new[] { CalendarView.Year, CalendarView.Month }" />
+
+              <MudTextField @bind-Value="CardInput.Cvv" Label="CVV" Required="true" RequiredError="CVV is required" />
+
               <MudCheckBox T="bool" @bind-Value="CardInput.IsPrimary" Label="Set as Primary Card" />
+
               <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">
                 Save Card Information
               </MudButton>

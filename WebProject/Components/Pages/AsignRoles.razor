@@ -1,5 +1,5 @@
 @page "/assign-roles"
-@attribute [Authorize(Roles = "Admin")]
+@* @attribute [Authorize(Roles = "Admin")] *@
 
 @using Microsoft.AspNetCore.Identity
 @using System.ComponentModel.DataAnnotations
@@ -26,12 +26,10 @@
           <DataAnnotationsValidator />
           <MudGrid>
             <MudItem xs="12">
-              <MudTextField @bind-Value="Input.Username" Label="Username" Variant="Variant.Outlined" Required="true"
-                RequiredError="Username is required!" />
+              <MudTextField @bind-Value="Input.Username" Label="Username" Variant="Variant.Outlined" Required="true" RequiredError="Username is required!" />
             </MudItem>
             <MudItem xs="12">
-              <MudSelect @bind-Value="Input.Role" Label="Role" Variant="Variant.Outlined" Required="true"
-                RequiredError="Role is required!">
+              <MudSelect @bind-Value="Input.Role" Label="Role" Variant="Variant.Outlined" Required="true" RequiredError="Role is required!">
                 @foreach (var role in _availableRoles)
                 {
                   <MudSelectItem Value="@role">@role</MudSelectItem>
@@ -55,17 +53,14 @@
         <MudButton Color="Color.Success" Variant="Variant.Filled" Class="mt-2" OnClick="CreateRole">
           Create Role
         </MudButton>
-        <MudDataGrid @ref="_rolesDataGrid" Items="@_roles" Filterable="true" Sortable="true"
-          EditMode="DataGridEditMode.Form" Class="mt-4">
+        <MudDataGrid @ref="_rolesDataGrid" Items="@_roles" Filterable="true" Sortable="true" EditMode="DataGridEditMode.Form" Class="mt-4">
           <Columns>
             <PropertyColumn Property="x => x.Name" Title="Role Name" />
             <TemplateColumn Title="Actions">
               <CellTemplate>
                 <MudStack Row="true">
-                  <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary"
-                    OnClick="() => EditRole(context.Item)" />
-                  <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error"
-                    OnClick="() => DeleteRole(context.Item)" />
+                  <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="() => EditRole(context.Item)" />
+                  <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => DeleteRole(context.Item)" />
                 </MudStack>
               </CellTemplate>
             </TemplateColumn>
@@ -100,7 +95,7 @@
 
 @code {
   private MudDataGrid<IdentityRole> _rolesDataGrid;
-private List<string> _availableRoles = new();
+  private List<string> _availableRoles = new();
   private List<IdentityRole> _roles = new();
   private string _newRoleName = string.Empty;
   private List<UserRoleModel> UserRoles { get; set; } = new();
@@ -339,10 +334,10 @@ private List<string> _availableRoles = new();
       {
         Snackbar.Add("The role was modified by another user. Please refresh and try again.", Severity.Warning);
       }
-         
-          catch (DbUpdateException)
-            {
-            Snackbar.Add("An error occurred while deleting the role. It may be in use.", Severity.Error);
+
+      catch (DbUpdateException)
+      {
+        Snackbar.Add("An error occurred while deleting the role. It may be in use.", Severity.Error);
       }
     }
   }
@@ -355,7 +350,7 @@ private List<string> _availableRoles = new();
       var roles = await UserManager.GetRolesAsync(user);
       if (roles.Contains("Admin") && (await UserManager.GetUsersInRoleAsync("Admin")).Count == 1)
       {
-        Snackbar.Add("Cannot remove the last Admin role", Severity.Error);
+        Snackbar.Add("Cannot remove the last Admin", Severity.Error);
         return;
       }
 
@@ -404,4 +399,4 @@ private List<string> _availableRoles = new();
     public string Username { get; set; } = "";
     public List<string> Roles { get; set; } = new();
   }
-}       
+}
