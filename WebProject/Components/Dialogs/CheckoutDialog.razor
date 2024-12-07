@@ -1,44 +1,172 @@
 @page "/checkoutdialog"
 
 @using System.ComponentModel.DataAnnotations
+@using System.Security.Claims
 @using WebProject.Models
 @using Microsoft.EntityFrameworkCore
 @using MudBlazor
 @inject ApplicationDbContext DbContext
 @inject ISnackbar Snackbar
 @inject IDialogService DialogService
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider _authStateProvider
 
 @rendermode InteractiveServer
-
 <DialogContent>
-  <MudText Typo="Typo.h4">Checkout</MudText>
-  <EditForm Model="CheckoutInput" OnValidSubmit="OnValidSubmitAsync">
-    <DataAnnotationsValidator />
-    <MudTextField @bind-Value="CheckoutInput.ReceiverName" Label="Receiver Name" Required="true" RequiredError="Receiver Name is required" />
-    <MudTextField @bind-Value="CheckoutInput.Address" Label="Address" Required="true" RequiredError="Address is required" />
-    <MudTextField @bind-Value="CheckoutInput.PhoneNumber" Label="Phone Number" Required="true" RequiredError="Phone Number is required" />
-    <MudSelect T="PaymentMethod" @bind-Value="CheckoutInput.PaymentMethod" Label="Payment Method" Required="true" RequiredError="Payment Method is required">
-      <MudSelectItem Value="PaymentMethod.Cash">Cash</MudSelectItem>
-      <MudSelectItem Value="PaymentMethod.CreditCard">Credit Card</MudSelectItem>
-    </MudSelect>
-    <MudTextField @bind-Value="CheckoutInput.CardHolderName" Label="Card Holder Name" Required="true" RequiredError="Card Holder Name is required" />
-    <MudTextField @bind-Value="CheckoutInput.CardNumber" Label="Card Number" Required="true" RequiredError="Card Number is required" />
-    <MudDatePicker @bind-Value="CheckoutInput.ExpiryDate" Label="Expiry Date" Required="true" RequiredError="Expiry Date is required" DateFormat="MM/yyyy" MinDate="@DateTime.Now" OpenTo="OpenTo.Year" FixDay="1" Views="new[] { CalendarView.Year, CalendarView.Month }" />
-    <MudTextField @bind-Value="CheckoutInput.Cvv" Label="CVV" Required="true" RequiredError="CVV is required" />
-    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">Submit</MudButton>
-  </EditForm>
+  @if (isLoading)
+  {
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" Style="margin-bottom: 20px;" />
+  }
+  else
+  {
+    @if (!hasCard || !hasShippingInfo)
+    {
+      <MudText Typo="Typo.h6">
+        Please complete your
+        @if (!hasCard && !hasShippingInfo)
+        {
+          <text>payment and shipping information.</text>
+        }
+        else if (!hasCard)
+        {
+          <text>payment information.</text>
+        }
+        else if (!hasShippingInfo)
+        {
+          <text>shipping information.</text>
+        }
+      </MudText>
+
+      <MudStack Spacing="3">
+        @if (!hasCard)
+        {
+          <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" OnClick="NavigateToPaymentInfo">
+            Go to Payment Info
+          </MudButton>
+        }
+        @if (!hasShippingInfo)
+        {
+          <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" OnClick="NavigateToShippingInfo">
+            Go to Shipping Info
+          </MudButton>
+        }
+      </MudStack>
+    }
+    else
+    {
+      <EditForm Model="CheckoutInput" OnValidSubmit="OnValidSubmitAsync">
+        <DataAnnotationsValidator />
+        <MudGrid>
+          <MudItem xs="12" md="6">
+            <MudCard>
+              <MudCardContent>
+                <MudText Typo="Typo.h6">Shipping Information</MudText>
+                <MudTextField @bind-Value="CheckoutInput.ReceiverName" Label="Receiver Name" Required="true"
+                  RequiredError="Receiver Name is required" />
+                <MudTextField @bind-Value="CheckoutInput.Address" Label="Address" Required="true"
+                  RequiredError="Address is required" />
+                <MudTextField @bind-Value="CheckoutInput.PhoneNumber" Label="Phone Number" Required="true"
+                  RequiredError="Phone Number is required" />
+              </MudCardContent>
+            </MudCard>
+          </MudItem>
+          <MudItem xs="12" md="6">
+            <MudCard>
+              <MudCardContent>
+                <MudText Typo="Typo.h6">Payment Information</MudText>
+                <MudSelect T="PaymentMethod" @bind-Value="CheckoutInput.PaymentMethod" Label="Payment Method"
+                  Required="true" RequiredError="Payment Method is required">
+                  <MudSelectItem Value="PaymentMethod.Cash">Cash</MudSelectItem>
+                  <MudSelectItem Value="PaymentMethod.CreditCard">Credit Card</MudSelectItem>
+                </MudSelect>
+                <MudTextField @bind-Value="CheckoutInput.CardHolderName" Label="Card Holder Name" Required="true"
+                  RequiredError="Card Holder Name is required" />
+                <MudTextField @bind-Value="CheckoutInput.CardNumber" Label="Card Number" Required="true"
+                  RequiredError="Card Number is required" />
+                <MudDatePicker @bind-Value="CheckoutInput.ExpiryDate" Label="Expiry Date" Required="true"
+                  RequiredError="Expiry Date is required" DateFormat="MM/yyyy" MinDate="@DateTime.Now" OpenTo="OpenTo.Year"
+                  FixDay="1" Views="new[] { CalendarView.Year, CalendarView.Month }" />
+                <MudTextField @bind-Value="CheckoutInput.Cvv" Label="CVV" Required="true" RequiredError="CVV is required" />
+              </MudCardContent>
+            </MudCard>
+          </MudItem>
+        </MudGrid>
+        <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">Submit
+        </MudButton>
+      </EditForm>
+    }
+  }
 </DialogContent>
+
 
 @code {
   [CascadingParameter] MudDialogInstance MudDialog { get; set; } = default!;
   private CheckoutInputModel CheckoutInput { get; set; } = new();
+  private bool isLoading = true;
+  private bool hasCard = false;
+  private bool hasShippingInfo = false;
+
+  protected override async Task OnInitializedAsync()
+  {
+    var userId = await GetUserId();
+
+    var existingCard = await DbContext.UserCards.FirstOrDefaultAsync(c => c.UserId == userId);
+    var existingShippingInfo = await DbContext.UserShippingInfos.FirstOrDefaultAsync(s => s.UserId == userId);
+
+    if (existingCard != null)
+    {
+      hasCard = true;
+      CheckoutInput.CardHolderName = existingCard.CardHolderName;
+      CheckoutInput.CardNumber = existingCard.CardNumber;
+      CheckoutInput.ExpiryDate = existingCard.ExpiryDate;
+      CheckoutInput.Cvv = existingCard.Cvv;
+      CheckoutInput.PaymentMethod = PaymentMethod.CreditCard;
+    }
+
+    if (existingShippingInfo != null)
+    {
+      hasShippingInfo = true;
+      CheckoutInput.ReceiverName = existingShippingInfo.ReceiverName;
+      CheckoutInput.Address = existingShippingInfo.Address;
+      CheckoutInput.PhoneNumber = existingShippingInfo.PhoneNumber;
+      CheckoutInput.PaymentMethod = existingShippingInfo.PaymentMethod;
+    }
+
+    isLoading = false;
+  }
+
+  private async Task<string> GetUserId()
+  {
+    var authState = await _authStateProvider.GetAuthenticationStateAsync();
+    var user = authState.User;
+
+    if (user.Identity?.IsAuthenticated != true)
+    {
+      throw new InvalidOperationException("User is not authenticated");
+    }
+
+    return user.FindFirst(ClaimTypes.NameIdentifier)?.Value ??
+    throw new InvalidOperationException("Cannot find user identifier");
+  }
+
+  private void NavigateToPaymentInfo()
+  {
+    NavigationManager.NavigateTo("/paymentinfo");
+  }
+
+  private void NavigateToShippingInfo()
+  {
+    NavigationManager.NavigateTo("/shippinginfo");
+  }
 
   private async Task OnValidSubmitAsync()
   {
-    // Save the card and shipping information
+    var userId = await GetUserId();
+
     var newShippingInfo = new UserShippingInfo
       {
-        UserId = "user-id", // Replace with actual user ID
+        UserId = userId,
+        AddressName = CheckoutInput.AddressName ?? string.Empty,
         ReceiverName = CheckoutInput.ReceiverName ?? string.Empty,
         Address = CheckoutInput.Address ?? string.Empty,
         PhoneNumber = CheckoutInput.PhoneNumber ?? string.Empty,
@@ -49,7 +177,7 @@
 
     var newCard = new UserCard
       {
-        UserId = "user-id", // Replace with actual user ID
+        UserId = userId,
         CardHolderName = CheckoutInput.CardHolderName ?? string.Empty,
         CardNumber = CheckoutInput.CardNumber ?? string.Empty,
         ExpiryDate = CheckoutInput.ExpiryDate,
@@ -63,40 +191,6 @@
 
     Snackbar.Add("Checkout information saved successfully.", Severity.Success);
 
-    MudDialog.Close(DialogResult.Ok(true));
-  }
-
-  private sealed class CheckoutInputModel
-  {
-    [Required(ErrorMessage = "Receiver Name is required")]
-    [StringLength(100, ErrorMessage = "Receiver Name cannot be longer than 100 characters")]
-    public string? ReceiverName { get; set; }
-
-    [Required(ErrorMessage = "Address is required")]
-    [StringLength(255, ErrorMessage = "Address cannot be longer than 255 characters")]
-    public string? Address { get; set; }
-
-    [Required(ErrorMessage = "Phone Number is required")]
-    [StringLength(20, ErrorMessage = "Phone Number cannot be longer than 20 characters")]
-    public string? PhoneNumber { get; set; }
-
-    [Required(ErrorMessage = "Payment Method is required")]
-    public PaymentMethod PaymentMethod { get; set; }
-
-    [Required(ErrorMessage = "Card Holder Name is required")]
-    [StringLength(100, ErrorMessage = "Card Holder Name cannot be longer than 100 characters")]
-    public string? CardHolderName { get; set; }
-
-    [Required(ErrorMessage = "Card Number is required")]
-    [StringLength(255, ErrorMessage = "Card Number cannot be longer than 255 characters")]
-    public string? CardNumber { get; set; }
-
-    [Required(ErrorMessage = "Expiry Date is required")]
-    [DataType(DataType.Date)]
-    public DateTime ExpiryDate { get; set; } = DateTime.Now.AddYears(1);
-
-    [Required(ErrorMessage = "CVV is required")]
-    [StringLength(255, ErrorMessage = "CVV cannot be longer than 255 characters")]
-    public string? Cvv { get; set; }
+    MudDialog.Close(DialogResult.Ok(CheckoutInput));
   }
 }

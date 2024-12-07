@@ -1,6 +1,4 @@
 @page "/cart"
-@using WebProject.Models
-@using WebProject.Services
 @inject CartService CartService
 @inject ISnackbar Snackbar
 @inject IDialogService DialogService
@@ -30,7 +28,8 @@
             <MudTable Items="@cartItems" Hover="true" Elevation="0" Context="item">
               <HeaderContent>
                 <MudTh>
-                  <MudCheckBox T="bool" @bind-Value="selectAll" @bind-Value:after="() => SelectAllChanged(selectAll)" Color="Color.Primary" />
+                  <MudCheckBox T="bool" @bind-Value="selectAll" @bind-Value:after="() => SelectAllChanged(selectAll)"
+                    Color="Color.Primary" />
                 </MudTh>
                 <MudTh>Product</MudTh>
                 <MudTh>Unit Price</MudTh>
@@ -40,7 +39,8 @@
               </HeaderContent>
               <RowTemplate>
                 <MudTd>
-                  <MudCheckBox T="bool" @bind-Value="item.IsSelected" @bind-Value:after="() => OnItemSelectedChanged(item, item.IsSelected)" Color="Color.Primary" />
+                  <MudCheckBox T="bool" @bind-Value="item.IsSelected"
+                    @bind-Value:after="() => OnItemSelectedChanged(item, item.IsSelected)" Color="Color.Primary" />
                 </MudTd>
                 <MudTd DataLabel="Product">
                   <div class="d-flex align-center">
@@ -53,9 +53,11 @@
                 <MudTd DataLabel="Unit Price">@item.Price.ToString("C")</MudTd>
                 <MudTd DataLabel="Quantity">
                   <div class="d-flex align-center">
-                    <MudIconButton Icon="@Icons.Material.Filled.Remove" Color="Color.Default" Size="Size.Small" Disabled="@(item.Quantity <= 1)" OnClick="() => DecreaseQuantity(item)" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Remove" Color="Color.Default" Size="Size.Small"
+                      Disabled="@(item.Quantity <= 1)" OnClick="() => DecreaseQuantity(item)" />
                     <MudText Class="mx-2">@item.Quantity</MudText>
-                    <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Default" Size="Size.Small" OnClick="() => IncreaseQuantity(item)" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Default" Size="Size.Small"
+                      OnClick="() => IncreaseQuantity(item)" />
                   </div>
                 </MudTd>
                 <MudTd DataLabel="Item Total">
@@ -65,7 +67,8 @@
                   @itemTotal.ToString("C")
                 </MudTd>
                 <MudTd DataLabel="Actions">
-                  <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => RemoveFromCart(item.ItemId)" />
+                  <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error"
+                    OnClick="() => RemoveFromCart(item.ItemId)" />
                 </MudTd>
               </RowTemplate>
             </MudTable>
@@ -80,8 +83,6 @@
           </MudCardHeader>
           <MudCardContent>
             <MudGrid>
-              
-              
               <MudItem xs="6">
                 <MudText Typo="Typo.h6">Selected Items</MudText>
               </MudItem>
@@ -143,14 +144,14 @@
     isLoading = true;
     cartItems = await CartService.GetCartItemsAsync();
     totalPrice = cartItems.Sum(item => item.Price * item.Quantity);
-    
+
     // Reset selected items state
     selectAll = false;
     foreach (var item in cartItems)
     {
       item.IsSelected = false;
     }
-    
+
     UpdateSelectedTotalPrice();
     isLoading = false;
     StateHasChanged();
@@ -195,19 +196,20 @@
     await LoadCart();
     Snackbar.Add("Item removed from cart", Severity.Info);
   }
-private async Task ProceedToCheckout()
-{
+
+  private async Task ProceedToCheckout()
+  {
     if (cartItems.Count == 0)
     {
-        Snackbar.Add("Your cart is empty", Severity.Warning);
-        return;
+      Snackbar.Add("Your cart is empty", Severity.Warning);
+      return;
     }
 
     var selectedItems = cartItems.Where(item => item.IsSelected).ToList();
     if (selectedItems.Count == 0)
     {
-        Snackbar.Add("Please select items to checkout", Severity.Warning);
-        return;
+      Snackbar.Add("Please select items to checkout", Severity.Warning);
+      return;
     }
 
     var parameters = new DialogParameters();
@@ -218,18 +220,20 @@ private async Task ProceedToCheckout()
 
     if (!result.Canceled)
     {
-        try
-        {
-            await CartService.DemoCheckoutAsync(selectedItems);
-            Snackbar.Add("Checkout successful", Severity.Success);
-            await LoadCart();
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add($"Checkout failed: {ex.Message}", Severity.Error);
-        }
+      try
+      {
+        var checkoutInput = (CheckoutInputModel)result.Data;
+        await CartService.CheckoutAsync(selectedItems, checkoutInput.PaymentMethod.ToString(), checkoutInput.Address);
+        Snackbar.Add("Checkout successful", Severity.Success);
+        await LoadCart();
+      }
+      catch (Exception ex)
+      {
+        Snackbar.Add($"Checkout failed: {ex.Message}", Severity.Error);
+      }
     }
-}
+  }
+
   private void SelectAllChanged(bool value)
   {
     selectAll = value;

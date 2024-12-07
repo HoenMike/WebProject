@@ -184,19 +184,19 @@ namespace WebProject.Services
       }
     }
 
-    public async Task DemoCheckoutAsync(List<CartItem> selectedItems)
+    public async Task CheckoutAsync(List<CartItem> selectedItems, string paymentMethod, string shippingAddress)
     {
       try
       {
-        var userId = await GetUserId(); // Await the GetUserId method
+        var userId = await GetUserId();
         var order = new Order
         {
           UserId = userId,
           TotalPrice = selectedItems.Sum(item => item.Price * item.Quantity),
-          Status = "Completed",
+          Status = "Confirmed",
           CreatedAt = DateTime.UtcNow,
-          PaymentMethod = "Demo",
-          ShippingAddress = "Demo Address"
+          PaymentMethod = paymentMethod,
+          ShippingAddress = shippingAddress
         };
 
         _dbContext.Orders.Add(order);
@@ -220,7 +220,7 @@ namespace WebProject.Services
       }
       catch (Exception ex)
       {
-        Console.Error.WriteLine($"Error in DemoCheckoutAsync: {ex.Message}");
+        Console.Error.WriteLine($"Error in CheckoutAsync: {ex.Message}");
         throw;
       }
     }

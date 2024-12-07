@@ -20,7 +20,7 @@
 
 <PageTitle>Shipping Information</PageTitle>
 
-<MudContainer MaxWidth="MaxWidth.Small">
+<MudContainer MaxWidth="MaxWidth.Medium">
   <MudCard Class="pa-4 mb-4 mt-4">
     <MudText Typo="Typo.h3">Shipping Information</MudText>
     @if (isLoading)
@@ -29,28 +29,80 @@
     }
     else
     {
-      @if (!string.IsNullOrEmpty(ShippingStatusMessage))
-      {
-        <MudAlert Severity="@(ShippingStatusMessageType == "alert-success" ? Severity.Success : Severity.Error)">
-          @ShippingStatusMessage
-        </MudAlert>
-      }
       <MudGrid>
-        <MudItem xs="12">
-          <EditForm Model="PaymentInput" OnValidSubmit="OnValidSubmitPaymentAsync">
-            <DataAnnotationsValidator />
-            <MudTextField @bind-Value="PaymentInput.ReceiverName" Label="Receiver Name" Required="true" RequiredError="Receiver Name is required" />
-            <MudTextField @bind-Value="PaymentInput.Address" Label="Address" Required="true" RequiredError="Address is required" />
-            <MudTextField @bind-Value="PaymentInput.PhoneNumber" Label="Phone Number" Required="true" RequiredError="Phone Number is required" />
-            <MudSelect T="PaymentMethod" @bind-Value="PaymentInput.PaymentMethod" Label="Payment Method" Required="true" RequiredError="Payment Method is required">
-              <MudSelectItem Value="PaymentMethod.Cash">Cash</MudSelectItem>
-              <MudSelectItem Value="PaymentMethod.CreditCard">Credit Card</MudSelectItem>
-            </MudSelect>
-            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">
-              Save Shipping Information
-            </MudButton>
-          </EditForm>
+        <MudItem xs="12" md="6">
+          <MudCardContent>
+            <MudText Typo="Typo.h4">Add New Shipping Address</MudText>
+            @if (!string.IsNullOrEmpty(ShippingStatusMessage))
+            {
+              <MudAlert Severity="@(ShippingStatusMessageType == "alert-success" ? Severity.Success : Severity.Error)">
+                @ShippingStatusMessage
+              </MudAlert>
+            }
+            @if (ExistingShippingAddresses.Count >= 3)
+            {
+              <MudAlert Severity="Severity.Error">
+                You can only add up to 3 shipping addresses.
+              </MudAlert>
+            }
+            else
+            {
+              <EditForm Model="PaymentInput" OnValidSubmit="OnValidSubmitPaymentAsync">
+                <DataAnnotationsValidator />
+                <MudTextField @bind-Value="PaymentInput.ReceiverName" Label="Receiver Name" Required="true"
+                  RequiredError="Receiver Name is required" />
+                <MudTextField @bind-Value="PaymentInput.Address" Label="Address" Required="true"
+                  RequiredError="Address is required" />
+                <MudTextField @bind-Value="PaymentInput.PhoneNumber" Label="Phone Number" Required="true"
+                  RequiredError="Phone Number is required" />
+                <MudSelect T="PaymentMethod" @bind-Value="PaymentInput.PaymentMethod" Label="Payment Method" Required="true"
+                  RequiredError="Payment Method is required">
+                  <MudSelectItem Value="PaymentMethod.Cash">Cash</MudSelectItem>
+                  <MudSelectItem Value="PaymentMethod.CreditCard">Credit Card</MudSelectItem>
+                </MudSelect>
+                <MudCheckBox T="bool" @bind-Value="PaymentInput.IsPrimary" Label="Set as Primary Address" />
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">
+                  Save Shipping Information
+                </MudButton>
+              </EditForm>
+            }
+          </MudCardContent>
         </MudItem>
+
+        @if (ExistingShippingAddresses.Any())
+        {
+          <MudItem xs="12" md="6">
+            <MudCard>
+              <MudCardContent>
+                <MudText Typo="Typo.h4">Existing Shipping Addresses</MudText>
+                <MudList T="UserShippingInfo">
+                  @foreach (var shippingInfo in ExistingShippingAddresses)
+                  {
+                    <MudListItem T="UserShippingInfo">
+                      <MudGrid>
+                        <MudItem xs="12" md="7">
+                          <MudText Typo="Typo.h6">@shippingInfo.ReceiverName</MudText>
+                          <MudText>@shippingInfo.Address</MudText>
+                          <MudText>@shippingInfo.PhoneNumber</MudText>
+                          @if (shippingInfo.IsPrimary)
+                          {
+                            <MudText Color="Color.Success">Primary Address</MudText>
+                          }
+                        </MudItem>
+                        <MudItem xs="12" md="5" Align="Align.End">
+                          <MudButton Variant="Variant.Outlined" Color="Color.Error"
+                            OnClick="() => DeleteShippingInfoAsync(shippingInfo.Id)">
+                            Remove
+                          </MudButton>
+                        </MudItem>
+                      </MudGrid>
+                    </MudListItem>
+                  }
+                </MudList>
+              </MudCardContent>
+            </MudCard>
+          </MudItem>
+        }
       </MudGrid>
     }
   </MudCard>
@@ -58,6 +110,7 @@
 
 @code {
   private ApplicationUser user = default!;
+  private List<UserShippingInfo> ExistingShippingAddresses = new();
   private string ShippingStatusMessage = string.Empty;
   private string ShippingStatusMessageType = "alert-success";
   private bool isLoading = true;
@@ -77,20 +130,10 @@
 
       user = await UserAccessor.GetRequiredUserAsync(httpContext);
 
-      // Fetch existing payment information for the current user
-      var existingCheckoutInfo = await DbContext.UserShippingInfos
-      .FirstOrDefaultAsync(u => u.UserId == user.Id);
-
-      if (existingCheckoutInfo != null)
-      {
-        PaymentInput = new PaymentInputModel
-          {
-            ReceiverName = existingCheckoutInfo.ReceiverName,
-            Address = existingCheckoutInfo.Address,
-            PhoneNumber = existingCheckoutInfo.PhoneNumber,
-            PaymentMethod = existingCheckoutInfo.PaymentMethod
-          };
-      }
+      // Fetch existing shipping addresses for the current user
+      ExistingShippingAddresses = await DbContext.UserShippingInfos
+      .Where(c => c.UserId == user.Id)
+      .ToListAsync();
     }
     catch (Exception ex)
     {
@@ -117,37 +160,68 @@
   {
     try
     {
-      // Check if a checkout info already exists for this user
-      var existingCheckoutInfo = await DbContext.UserShippingInfos
-      .FirstOrDefaultAsync(u => u.UserId == user.Id);
-
-      if (existingCheckoutInfo != null)
+      // Check if the user already has 3 shipping addresses
+      if (ExistingShippingAddresses.Count >= 3)
       {
-        // Update existing checkout info
-        existingCheckoutInfo.ReceiverName = PaymentInput.ReceiverName ?? string.Empty;
-        existingCheckoutInfo.Address = PaymentInput.Address ?? string.Empty;
-        existingCheckoutInfo.PhoneNumber = PaymentInput.PhoneNumber ?? string.Empty;
-        existingCheckoutInfo.PaymentMethod = PaymentInput.PaymentMethod;
+        ShippingStatusMessage = "You can only add up to 3 shipping addresses.";
+        ShippingStatusMessageType = "alert-danger";
+        return;
       }
-      else
+
+      // Begin a database transaction to ensure consistency
+      await using var transaction = await DbContext.Database.BeginTransactionAsync();
+
+      try
       {
-        // Create new UserCheckoutInfo
+        // If setting this address as primary, update existing primary addresses
+        if (PaymentInput.IsPrimary)
+        {
+          var existingPrimaryAddresses = await DbContext.UserShippingInfos
+          .Where(c => c.UserId == user.Id && c.IsPrimary)
+          .ToListAsync();
+
+          foreach (var primaryAddress in existingPrimaryAddresses)
+          {
+            primaryAddress.IsPrimary = false;
+          }
+          await DbContext.SaveChangesAsync();
+        }
+
+        // Create new UserShippingInfo
         var newShippingInfo = new UserShippingInfo
           {
             UserId = user.Id,
+            AddressName = PaymentInput.AddressName ?? string.Empty,
             ReceiverName = PaymentInput.ReceiverName ?? string.Empty,
             Address = PaymentInput.Address ?? string.Empty,
             PhoneNumber = PaymentInput.PhoneNumber ?? string.Empty,
-            PaymentMethod = PaymentInput.PaymentMethod
+            PaymentMethod = PaymentInput.PaymentMethod,
+            IsPrimary = PaymentInput.IsPrimary
           };
 
         DbContext.UserShippingInfos.Add(newShippingInfo);
+        await DbContext.SaveChangesAsync();
+
+        // Commit the transaction
+        await transaction.CommitAsync();
+
+        // Refresh the list of shipping addresses
+        ExistingShippingAddresses = await DbContext.UserShippingInfos
+        .Where(c => c.UserId == user.Id)
+        .ToListAsync();
+
+        // Reset input form
+        PaymentInput = new PaymentInputModel();
+
+        ShippingStatusMessage = "Shipping information added successfully.";
+        ShippingStatusMessageType = "alert-success";
       }
-
-      await DbContext.SaveChangesAsync();
-
-      ShippingStatusMessage = "Shipping information updated successfully.";
-      ShippingStatusMessageType = "alert-success";
+      catch
+      {
+        // Rollback the transaction if any error occurs
+        await transaction.RollbackAsync();
+        throw;
+      }
     }
     catch (Exception ex)
     {
@@ -157,8 +231,41 @@
     }
   }
 
+  private async Task DeleteShippingInfoAsync(int shippingInfoId)
+  {
+    try
+    {
+      var shippingInfoToRemove = await DbContext.UserShippingInfos.FindAsync(shippingInfoId);
+      if (shippingInfoToRemove != null)
+      {
+        DbContext.UserShippingInfos.Remove(shippingInfoToRemove);
+        await DbContext.SaveChangesAsync();
+
+        // Refresh the list of shipping addresses
+        ExistingShippingAddresses = await DbContext.UserShippingInfos
+        .Where(c => c.UserId == user.Id)
+        .ToListAsync();
+
+        ShippingStatusMessage = "Shipping address removed successfully.";
+        ShippingStatusMessageType = "alert-success";
+      }
+    }
+    catch (Exception ex)
+    {
+      Logger.LogError(ex, "Error removing shipping address");
+      ShippingStatusMessage = $"Error removing shipping address: {ex.Message}";
+      ShippingStatusMessageType = "alert-danger";
+    }
+  }
+
   private sealed class PaymentInputModel
   {
+
+
+    [Required(ErrorMessage = "Address Name is required")]
+    [StringLength(100, ErrorMessage = "Address Name cannot be longer than 100 characters")]
+    public string? AddressName { get; set; }
+
     [Required(ErrorMessage = "Receiver Name is required")]
     [StringLength(100, ErrorMessage = "Receiver Name cannot be longer than 100 characters")]
     public string? ReceiverName { get; set; }
@@ -173,5 +280,7 @@
 
     [Required(ErrorMessage = "Payment Method is required")]
     public PaymentMethod PaymentMethod { get; set; }
+
+    public bool IsPrimary { get; set; }
   }
 }
