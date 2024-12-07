@@ -24,24 +24,23 @@
   else if (cartItems.Count > 0)
   {
     <MudGrid>
-      <MudItem xs="12" md="8">
+      <MudItem xs="12" md="7">
         <MudCard>
           <MudCardContent>
             <MudTable Items="@cartItems" Hover="true" Elevation="0" Context="item">
               <HeaderContent>
                 <MudTh>
-                  <MudCheckBox T="bool" @bind-Value="selectAll" @bind-Value:after="() => SelectAllChanged(selectAll)"
-                    Color="Color.Primary" />
+                  <MudCheckBox T="bool" @bind-Value="selectAll" @bind-Value:after="() => SelectAllChanged(selectAll)" Color="Color.Primary" />
                 </MudTh>
                 <MudTh>Product</MudTh>
-                <MudTh>Price</MudTh>
+                <MudTh>Unit Price</MudTh>
                 <MudTh>Quantity</MudTh>
-                <MudTh>Total</MudTh>
+                <MudTh>Item Total</MudTh>
                 <MudTh>Actions</MudTh>
               </HeaderContent>
               <RowTemplate>
                 <MudTd>
-                  <MudCheckBox T="bool" @bind-Value="item.IsSelected" Color="Color.Primary" />
+                  <MudCheckBox T="bool" @bind-Value="item.IsSelected" @bind-Value:after="() => OnItemSelectedChanged(item, item.IsSelected)" Color="Color.Primary" />
                 </MudTd>
                 <MudTd DataLabel="Product">
                   <div class="d-flex align-center">
@@ -51,25 +50,22 @@
                     <MudText>@item.Name</MudText>
                   </div>
                 </MudTd>
-                <MudTd DataLabel="Price">@item.Price.ToString("C")</MudTd>
+                <MudTd DataLabel="Unit Price">@item.Price.ToString("C")</MudTd>
                 <MudTd DataLabel="Quantity">
                   <div class="d-flex align-center">
-                    <MudIconButton Icon="@Icons.Material.Filled.Remove" Color="Color.Default" Size="Size.Small"
-                      Disabled="@(item.Quantity <= 1)" OnClick="() => DecreaseQuantity(item)" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Remove" Color="Color.Default" Size="Size.Small" Disabled="@(item.Quantity <= 1)" OnClick="() => DecreaseQuantity(item)" />
                     <MudText Class="mx-2">@item.Quantity</MudText>
-                    <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Default" Size="Size.Small"
-                      OnClick="() => IncreaseQuantity(item)" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Default" Size="Size.Small" OnClick="() => IncreaseQuantity(item)" />
                   </div>
                 </MudTd>
-                <MudTd DataLabel="Total">
+                <MudTd DataLabel="Item Total">
                   @{
-                    var totalPrice = item.Price * item.Quantity;
+                    var itemTotal = item.Price * item.Quantity;
                   }
-                  @totalPrice.ToString("C")
+                  @itemTotal.ToString("C")
                 </MudTd>
                 <MudTd DataLabel="Actions">
-                  <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error"
-                    OnClick="() => RemoveFromCart(item.ItemId)" />
+                  <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => RemoveFromCart(item.ItemId)" />
                 </MudTd>
               </RowTemplate>
             </MudTable>
@@ -77,27 +73,26 @@
         </MudCard>
       </MudItem>
 
-      <MudItem xs="12" md="4">
+      <MudItem xs="12" md="5">
         <MudCard>
           <MudCardHeader>
             <MudText Typo="Typo.h6">Order Summary</MudText>
           </MudCardHeader>
           <MudCardContent>
             <MudGrid>
+              
+              
               <MudItem xs="6">
-                <MudText>Subtotal</MudText>
+                <MudText Typo="Typo.h6">Selected Items</MudText>
               </MudItem>
               <MudItem xs="6" Class="d-flex justify-end">
-                <MudText>@totalPrice.ToString("C")</MudText>
-              </MudItem>
-              <MudItem xs="12">
-                <MudDivider />
+                <MudText>@selectedItemsCount</MudText>
               </MudItem>
               <MudItem xs="6">
-                <MudText Typo="Typo.h6">Total</MudText>
+                <MudText Typo="Typo.h6">Selected Total</MudText>
               </MudItem>
               <MudItem xs="6" Class="d-flex justify-end">
-                <MudText Typo="Typo.h6">@totalPrice.ToString("C")</MudText>
+                <MudText Typo="Typo.h6">@selectedTotalPrice.ToString("C")</MudText>
               </MudItem>
             </MudGrid>
           </MudCardContent>
@@ -123,6 +118,8 @@
 @code {
   private List<CartItem> cartItems = new();
   private decimal totalPrice = 0;
+  private decimal selectedTotalPrice = 0;
+  private int selectedItemsCount = 0;
   private bool isRendered = false;
   private bool isLoading = true;
   private bool selectAll;
@@ -146,6 +143,15 @@
     isLoading = true;
     cartItems = await CartService.GetCartItemsAsync();
     totalPrice = cartItems.Sum(item => item.Price * item.Quantity);
+    
+    // Reset selected items state
+    selectAll = false;
+    foreach (var item in cartItems)
+    {
+      item.IsSelected = false;
+    }
+    
+    UpdateSelectedTotalPrice();
     isLoading = false;
     StateHasChanged();
   }
@@ -224,6 +230,7 @@
     {
       item.IsSelected = value;
     }
+    UpdateSelectedTotalPrice();
     StateHasChanged();
   }
 
@@ -231,5 +238,13 @@
   {
     item.IsSelected = value;
     selectAll = cartItems.All(x => x.IsSelected);
+    UpdateSelectedTotalPrice();
+  }
+
+  private void UpdateSelectedTotalPrice()
+  {
+    var selectedItems = cartItems.Where(item => item.IsSelected).ToList();
+    selectedTotalPrice = selectedItems.Sum(item => item.Price * item.Quantity);
+    selectedItemsCount = selectedItems.Count;
   }
 }
