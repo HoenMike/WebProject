@@ -1,114 +1,91 @@
 ﻿@using WebProject.Components.Account.Pages
 @implements IDisposable
-
 @inject NavigationManager NavigationManager
 
-<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">
+@rendermode InteractiveServer
+
+<div class="navigation-container @(isMenuOpen ? "menu-open" : "")">
+    <div class="nav-header">
+        <MudLink Href="/" Underline="Underline.None" Typo="Typo.h5" Class="nav-title">
             <span class="text-pink">Daily</span><span class="text-black">Store</span>
-        </a>
+        </MudLink>
+        <div class="mobile-toggle" @onclick="ToggleMenu">
+            <MudIcon Icon="@Icons.Material.Filled.Menu" />
+        </div>
     </div>
-</div>
 
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+    <div class="mud-navmenu-container py-3" Width="250px" Square="true">
+        <MudNavMenu Color="Color.Primary" Bordered="false">
+            <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">
+                Home
+            </MudNavLink>
 
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
+            <MudNavLink Href="itembrowse" Icon="@Icons.Material.Filled.Search">
+                Item Browse
+            </MudNavLink>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="itembrowse">
-                <span class="bi bi-search-nav-menu" aria-hidden="true"></span> Item Browse
-            </NavLink>
-        </div>
+            <MudNavLink Href="news" Icon="@Icons.Material.Filled.Edit">
+                News
+            </MudNavLink>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="news">
-                <span class="bi bi-vector-pen" aria-hidden="true"></span> News
-            </NavLink>
-        </div>
+            <MudDivider Class="my-2" />
 
-        <MudDivider />
+            <AuthorizeView Roles="Admin">
+                <MudNavLink Href="news_management" Icon="@Icons.Material.Filled.EditNote">
+                    News Manage
+                </MudNavLink>
+                <MudNavLink Href="items" Icon="@Icons.Material.Filled.List">
+                    Item Manage
+                </MudNavLink>
+                <MudNavLink Href="/promote_management" Icon="@Icons.Material.Filled.Campaign">
+                    Promotes Manage
+                </MudNavLink>
+            </AuthorizeView>
 
-        <AuthorizeView Roles="Admin">
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="news_management">
-                    <span class="bi bi-vector-pen" aria-hidden="true"></span> News Manage
-                </NavLink>
-            </div>
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="items">
-                    <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Item Manage
-                </NavLink>
-            </div>
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="/promote_management">
-                    <span class="bi bi-badge-ad" aria-hidden="true"></span> Promotes Manage
-                </NavLink>
-            </div>
-        </AuthorizeView>
+            <AuthorizeView>
+                <MudNavLink Href="assign-roles" Icon="@Icons.Material.Filled.Lock">
+                    Role Assign
+                </MudNavLink>
+            </AuthorizeView>
 
-        <AuthorizeView>
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="assign-roles">
-                    <span class="bi bi-lock-nav-menu" aria-hidden="true"></span> Role Assign
-                </NavLink>
-            </div>
-        </AuthorizeView>
+            <MudDivider Class="my-2" />
 
-        <MudDivider />
+            <AuthorizeView>
+                <Authorized>
+                    <MudNavLink Href="cart" Icon="@Icons.Material.Filled.ShoppingCart">
+                        Cart
+                    </MudNavLink>
+                    <MudNavLink Href="paymentinfo" Icon="@Icons.Material.Filled.CreditCard">
+                        Payment Info
+                    </MudNavLink>
+                    <MudNavLink Href="shippinginfo" Icon="@Icons.Material.Filled.LocalShipping">
+                        Shipping Info
+                    </MudNavLink>
+                </Authorized>
+            </AuthorizeView>
 
-        <AuthorizeView>
-            <Authorized>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="cart">
-                        <span class="bi bi-cart4-nav-menu" aria-hidden="true"></span> Cart
-                    </NavLink>
-                </div>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="paymentinfo">
-                        <span class="bi bi-credit-card" aria-hidden="true"></span> Payment Info
-                    </NavLink>
-                </div>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="shippinginfo">
-                        <span class="bi bi-truck-nav-menu" aria-hidden="true"></span> Shipping Info
-                    </NavLink>
-                </div>
-            </Authorized>
-        </AuthorizeView>
-
-        <AuthorizeView>
-            <Authorized>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="Account/Manage">
-                        <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> @context.User.Identity?.Name
-                    </NavLink>
-                </div>
-            </Authorized>
-            <NotAuthorized>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="Account/Register">
-                        <span class="bi bi-person-nav-menu" aria-hidden="true"></span> Register
-                    </NavLink>
-                </div>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="Account/Login">
-                        <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Login
-                    </NavLink>
-                </div>
-            </NotAuthorized>
-        </AuthorizeView>
-    </nav>
+            <AuthorizeView>
+                <Authorized>
+                    <MudNavLink Href="Account/Manage" Icon="@Icons.Material.Filled.Person">
+                        @context.User.Identity?.Name
+                    </MudNavLink>
+                </Authorized>
+                <NotAuthorized>
+                    <MudNavLink Href="Account/Register" Icon="@Icons.Material.Filled.PersonAdd">
+                        Register
+                    </MudNavLink>
+                    <MudNavLink Href="Account/Login" Icon="@Icons.Material.Filled.Login">
+                        Login
+                    </MudNavLink>
+                </NotAuthorized>
+            </AuthorizeView>
+        </MudNavMenu>
+    </div>
 </div>
 
 @code {
     private string? currentUrl;
+    private bool isMenuOpen = false;
 
     protected override void OnInitialized()
     {
@@ -116,9 +93,17 @@
         NavigationManager.LocationChanged += OnLocationChanged;
     }
 
+    private void ToggleMenu()
+    {
+        isMenuOpen = !isMenuOpen;
+        StateHasChanged();
+    }
+
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
     {
         currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
+        // Close menu when navigating on mobile
+        isMenuOpen = false;
         StateHasChanged();
     }
 
