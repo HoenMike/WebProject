@@ -53,11 +53,15 @@
             {
               <EditForm Model="CardInput" OnValidSubmit="OnValidSubmitCardAsync">
                 <DataAnnotationsValidator />
-                <MudTextField @bind-Value="CardInput.CardHolderName" Label="Card Holder Name" Required="true" RequiredError="Card Holder Name is required" />
+                <MudTextField @bind-Value="CardInput.CardHolderName" Label="Card Holder Name" Required="true"
+                  RequiredError="Card Holder Name is required" />
 
-                <MudTextField @bind-Value="CardInput.CardNumber" Label="Card Number" Required="true" RequiredError="Card Number is required" />
+                <MudTextField @bind-Value="CardInput.CardNumber" Label="Card Number" Required="true"
+                  RequiredError="Card Number is required" />
 
-                <MudDatePicker @bind-Value="CardInput.ExpiryDate" Label="Expiry Date" Required="true" RequiredError="Expiry Date is required" DateFormat="MM/yyyy" MinDate="@DateTime.Now" OpenTo="OpenTo.Year" FixDay="1" Views="new[] { CalendarView.Year, CalendarView.Month }" />
+                <MudDatePicker @bind-Value="CardInput.ExpiryDate" Label="Expiry Date" Required="true"
+                  RequiredError="Expiry Date is required" DateFormat="MM/yyyy" MinDate="@DateTime.Now" OpenTo="OpenTo.Year"
+                  FixDay="1" Views="new[] { CalendarView.Year, CalendarView.Month }" />
 
                 <MudTextField @bind-Value="CardInput.Cvv" Label="CVV" Required="true" RequiredError="CVV is required" />
 
@@ -80,7 +84,7 @@
                 <MudList T="UserCard">
                   @foreach (var card in ExistingCards)
                   {
-                    <MudListItem T="UserCard">
+                    <MudListItem T="UserCard" OnClick="() => SetPrimaryCardAsync(card.Id)">
                       <MudGrid>
                         <MudItem xs="12" md="7">
                           <MudText Typo="Typo.h6">@card.CardHolderName</MudText>
@@ -93,7 +97,8 @@
                           }
                         </MudItem>
                         <MudItem xs="12" md="5" Align="Align.End">
-                          <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="() => DeleteCardAsync(card.Id)">
+                          <MudButton Variant="Variant.Outlined" Color="Color.Error"
+                            OnClick="@(async (e) => { await DeleteCardAsync(card.Id); })">
                             Remove
                           </MudButton>
                         </MudItem>
@@ -154,6 +159,7 @@
     if (firstRender)
     {
       isLoading = false;
+      await Task.Yield(); // Ensure the method is awaited
       StateHasChanged();
     }
   }
@@ -239,6 +245,7 @@
       var cardToRemove = await DbContext.UserCards.FindAsync(cardId);
       if (cardToRemove != null)
       {
+        bool wasPrimary = cardToRemove.IsPrimary;
         DbContext.UserCards.Remove(cardToRemove);
         await DbContext.SaveChangesAsync();
 
@@ -246,6 +253,12 @@
         ExistingCards = await DbContext.UserCards
         .Where(c => c.UserId == user.Id)
         .ToListAsync();
+
+        if (wasPrimary && ExistingCards.Any())
+        {
+          var newestCard = ExistingCards.OrderByDescending(c => c.Id).First();
+          await SetPrimaryCardAsync(newestCard.Id);
+        }
 
         CardStatusMessage = "Card removed successfully.";
         CardStatusMessageType = "alert-success";
@@ -255,6 +268,42 @@
     {
       Logger.LogError(ex, "Error removing card");
       CardStatusMessage = $"Error removing card: {ex.Message}";
+      CardStatusMessageType = "alert-danger";
+    }
+  }
+
+  private async Task SetPrimaryCardAsync(int cardId)
+  {
+    try
+    {
+      var cardToSetPrimary = await DbContext.UserCards.FindAsync(cardId);
+      if (cardToSetPrimary != null)
+      {
+        var existingPrimaryCards = await DbContext.UserCards
+        .Where(c => c.UserId == user.Id && c.IsPrimary)
+        .ToListAsync();
+
+        foreach (var primaryCard in existingPrimaryCards)
+        {
+          primaryCard.IsPrimary = false;
+        }
+
+        cardToSetPrimary.IsPrimary = true;
+        await DbContext.SaveChangesAsync();
+
+        // Refresh the list of cards
+        ExistingCards = await DbContext.UserCards
+        .Where(c => c.UserId == user.Id)
+        .ToListAsync();
+
+        CardStatusMessage = "Primary card set successfully.";
+        CardStatusMessageType = "alert-success";
+      }
+    }
+    catch (Exception ex)
+    {
+      Logger.LogError(ex, "Error setting primary card");
+      CardStatusMessage = $"Error setting primary card: {ex.Message}";
       CardStatusMessageType = "alert-danger";
     }
   }
