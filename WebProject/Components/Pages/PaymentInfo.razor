@@ -182,6 +182,12 @@
 
       try
       {
+        // If this is the first card, set it as primary
+        if (ExistingCards.Count == 0)
+        {
+          CardInput.IsPrimary = true;
+        }
+
         // If setting this card as primary, update existing primary cards
         if (CardInput.IsPrimary)
         {
