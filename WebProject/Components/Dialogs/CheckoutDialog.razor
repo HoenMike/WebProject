@@ -219,8 +219,6 @@
 
       await DbContext.SaveChangesAsync();
 
-      Snackbar.Add("Checkout information saved successfully.", Severity.Success);
-
       MudDialog.Close(DialogResult.Ok(CheckoutInput.PaymentMethod));
     }
     catch (Exception ex)

@@ -265,6 +265,12 @@
         CardStatusMessageType = "alert-success";
       }
     }
+    catch (DbUpdateException dbEx)
+    {
+      Logger.LogError(dbEx, "Error removing card. Inner exception: {InnerException}", dbEx.InnerException?.Message);
+      CardStatusMessage = $"Error removing card: {dbEx.InnerException?.Message ?? dbEx.Message}";
+      CardStatusMessageType = "alert-danger";
+    }
     catch (Exception ex)
     {
       Logger.LogError(ex, "Error removing card");

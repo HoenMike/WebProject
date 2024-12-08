@@ -247,7 +247,7 @@ namespace WebProject.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("CartItems", (string)null);
+                    b.ToTable("CartItems");
                 });
 
             modelBuilder.Entity("WebProject.Models.Item", b =>
@@ -278,7 +278,7 @@ namespace WebProject.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Items", (string)null);
+                    b.ToTable("Items");
                 });
 
             modelBuilder.Entity("WebProject.Models.ItemPhoto", b =>
@@ -301,7 +301,7 @@ namespace WebProject.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ItemPhotos", (string)null);
+                    b.ToTable("ItemPhotos");
                 });
 
             modelBuilder.Entity("WebProject.Models.News", b =>
@@ -335,7 +335,7 @@ namespace WebProject.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("News", (string)null);
+                    b.ToTable("News");
                 });
 
             modelBuilder.Entity("WebProject.Models.Order", b =>
@@ -351,25 +351,21 @@ namespace WebProject.Migrations
 
                     b.Property<string>("PaymentMethod")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("ShippingAddress")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("varchar(500)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
+                        .HasColumnType("longtext");
 
                     b.Property<decimal>("TotalPrice")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("UserCardId")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                    b.Property<int?>("UserCardId")
+                        .HasColumnType("int");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -377,7 +373,9 @@ namespace WebProject.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Orders", (string)null);
+                    b.HasIndex("UserCardId");
+
+                    b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("WebProject.Models.OrderItem", b =>
@@ -406,7 +404,7 @@ namespace WebProject.Migrations
 
                     b.HasIndex("OrderId");
 
-                    b.ToTable("OrderItems", (string)null);
+                    b.ToTable("OrderItems");
                 });
 
             modelBuilder.Entity("WebProject.Models.Promote", b =>
@@ -426,7 +424,7 @@ namespace WebProject.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Promotes", (string)null);
+                    b.ToTable("Promotes");
                 });
 
             modelBuilder.Entity("WebProject.Models.Review", b =>
@@ -456,7 +454,7 @@ namespace WebProject.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Reviews", (string)null);
+                    b.ToTable("Reviews");
                 });
 
             modelBuilder.Entity("WebProject.Models.UserCard", b =>
@@ -494,7 +492,7 @@ namespace WebProject.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("UserCards", (string)null);
+                    b.ToTable("UserCards");
                 });
 
             modelBuilder.Entity("WebProject.Models.UserShippingInfo", b =>
@@ -526,7 +524,7 @@ namespace WebProject.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("UserShippingInfos", (string)null);
+                    b.ToTable("UserShippingInfos");
                 });
 
             modelBuilder.Entity("WebProject.Models.WishList", b =>
@@ -548,7 +546,7 @@ namespace WebProject.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("WishLists", (string)null);
+                    b.ToTable("WishLists");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -602,6 +600,15 @@ namespace WebProject.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("WebProject.Models.Order", b =>
+                {
+                    b.HasOne("WebProject.Models.UserCard", "UserCard")
+                        .WithMany()
+                        .HasForeignKey("UserCardId");
+
+                    b.Navigation("UserCard");
+                });
+
             modelBuilder.Entity("WebProject.Models.OrderItem", b =>
                 {
                     b.HasOne("WebProject.Models.Item", "Item")
@@ -611,7 +618,7 @@ namespace WebProject.Migrations
                         .IsRequired();
 
                     b.HasOne("WebProject.Models.Order", "Order")
-                        .WithMany("OrderItems")
+                        .WithMany()
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -619,11 +626,6 @@ namespace WebProject.Migrations
                     b.Navigation("Item");
 
                     b.Navigation("Order");
-                });
-
-            modelBuilder.Entity("WebProject.Models.Order", b =>
-                {
-                    b.Navigation("OrderItems");
                 });
 #pragma warning restore 612, 618
         }

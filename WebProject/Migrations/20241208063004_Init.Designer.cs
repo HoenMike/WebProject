@@ -12,7 +12,7 @@ using WebProject.Data;
 namespace WebProject.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241207140424_Init")]
+    [Migration("20241208063004_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -354,27 +354,29 @@ namespace WebProject.Migrations
 
                     b.Property<string>("PaymentMethod")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("ShippingAddress")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("varchar(500)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
+                        .HasColumnType("longtext");
 
                     b.Property<decimal>("TotalPrice")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<int?>("UserCardId")
+                        .HasColumnType("int");
 
                     b.Property<string>("UserId")
                         .IsRequired()
                         .HasColumnType("longtext");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("UserCardId");
 
                     b.ToTable("Orders");
                 });
@@ -601,6 +603,15 @@ namespace WebProject.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("WebProject.Models.Order", b =>
+                {
+                    b.HasOne("WebProject.Models.UserCard", "UserCard")
+                        .WithMany()
+                        .HasForeignKey("UserCardId");
+
+                    b.Navigation("UserCard");
+                });
+
             modelBuilder.Entity("WebProject.Models.OrderItem", b =>
                 {
                     b.HasOne("WebProject.Models.Item", "Item")
@@ -610,7 +621,7 @@ namespace WebProject.Migrations
                         .IsRequired();
 
                     b.HasOne("WebProject.Models.Order", "Order")
-                        .WithMany("OrderItems")
+                        .WithMany()
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -618,11 +629,6 @@ namespace WebProject.Migrations
                     b.Navigation("Item");
 
                     b.Navigation("Order");
-                });
-
-            modelBuilder.Entity("WebProject.Models.Order", b =>
-                {
-                    b.Navigation("OrderItems");
                 });
 #pragma warning restore 612, 618
         }

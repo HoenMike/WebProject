@@ -14,6 +14,7 @@ namespace WebProject.Models
     public string UserId { get; set; }
 
     [Required]
+    [Column(TypeName = "decimal(18,2)")]
     public decimal TotalPrice { get; set; }
 
     [Required]
