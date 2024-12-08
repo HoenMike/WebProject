@@ -25,33 +25,33 @@
     <MudText Typo="Typo.h3">Shipping Information</MudText>
     @if (isLoading)
     {
-                  <MudProgressLinear Indeterminate="true" Color="Color.Primary" Style="margin-bottom: 20px;" />
+      <MudProgressLinear Indeterminate="true" Color="Color.Primary" Style="margin-bottom: 20px;" />
     }
     else
     {
       @if (!string.IsNullOrEmpty(ShippingStatusMessage))
       {
-                                <MudAlert Severity="@(ShippingStatusMessageType == "alert-success" ? Severity.Success : Severity.Error)">
+        <MudAlert Severity="@(ShippingStatusMessageType == "alert-success" ? Severity.Success : Severity.Error)">
           @ShippingStatusMessage
-                                </MudAlert>
+        </MudAlert>
       }
-                  <MudGrid>
-                    <MudItem xs="12">
-                      <EditForm Model="PaymentInput" OnValidSubmit="OnValidSubmitPaymentAsync">
-                        <DataAnnotationsValidator />
-                        <MudTextField @bind-Value="PaymentInput.ReceiverName" Label="Receiver Name" Required="true" RequiredError="Receiver Name is required" />
-                        <MudTextField @bind-Value="PaymentInput.Address" Label="Address" Required="true" RequiredError="Address is required" />
-                        <MudTextField @bind-Value="PaymentInput.PhoneNumber" Label="Phone Number" Required="true" RequiredError="Phone Number is required" />
-                        <MudSelect T="PaymentMethod" @bind-Value="PaymentInput.PaymentMethod" Label="Payment Method" Required="true" RequiredError="Payment Method is required">
-                          <MudSelectItem Value="PaymentMethod.Cash">Cash</MudSelectItem>
-                          <MudSelectItem Value="PaymentMethod.CreditCard">Credit Card</MudSelectItem>
-                        </MudSelect>
-                        <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">
-                          Save Shipping Information
-                        </MudButton>
-                      </EditForm>
-                    </MudItem>
-                  </MudGrid>
+      <MudGrid>
+        <MudItem xs="12">
+          <EditForm Model="PaymentInput" OnValidSubmit="OnValidSubmitPaymentAsync">
+            <DataAnnotationsValidator />
+            <MudTextField @bind-Value="PaymentInput.ReceiverName" Label="Receiver Name" Required="true"
+              RequiredError="Receiver Name is required" />
+            <MudTextField @bind-Value="PaymentInput.Address" Label="Address" Required="true"
+              RequiredError="Address is required" />
+            <MudTextField @bind-Value="PaymentInput.PhoneNumber" Label="Phone Number" Required="true"
+              RequiredError="Phone Number is required" />
+
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">
+              Save Shipping Information
+            </MudButton>
+          </EditForm>
+        </MudItem>
+      </MudGrid>
     }
   </MudCard>
 </MudContainer>
@@ -118,8 +118,8 @@
     {
       // Check if a checkout info already exists for this user
       var existingCheckoutInfos = await DbContext.UserShippingInfos
-          .Where(u => u.UserId == user.Id)
-          .ToListAsync();
+      .Where(u => u.UserId == user.Id)
+      .ToListAsync();
 
       if (existingCheckoutInfos.Count > 1)
       {
@@ -133,7 +133,6 @@
         existingCheckoutInfo.ReceiverName = PaymentInput.ReceiverName ?? string.Empty;
         existingCheckoutInfo.Address = PaymentInput.Address ?? string.Empty;
         existingCheckoutInfo.PhoneNumber = PaymentInput.PhoneNumber ?? string.Empty;
-        existingCheckoutInfo.PaymentMethod = PaymentInput.PaymentMethod;
 
         DbContext.UserShippingInfos.Update(existingCheckoutInfo);
       }
@@ -146,7 +145,6 @@
             ReceiverName = PaymentInput.ReceiverName ?? string.Empty,
             Address = PaymentInput.Address ?? string.Empty,
             PhoneNumber = PaymentInput.PhoneNumber ?? string.Empty,
-            PaymentMethod = PaymentInput.PaymentMethod
           };
 
         DbContext.UserShippingInfos.Add(newShippingInfo);
@@ -180,6 +178,6 @@
     public string? PhoneNumber { get; set; }
 
     [Required(ErrorMessage = "Payment Method is required")]
-    public PaymentMethod PaymentMethod { get; set; }
+    public PaymentMethod PaymentMethod { get; set; } = PaymentMethod.Cash;
   }
 }
