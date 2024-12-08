@@ -197,6 +197,17 @@ namespace WebProject.Services
           throw new InvalidOperationException("Missing shipping information");
         }
 
+        int? userCardId = null;
+        if (paymentMethod == PaymentMethod.CreditCard)
+        {
+          var primaryCard = await _dbContext.UserCards.FirstOrDefaultAsync(u => u.UserId == userId && u.IsPrimary);
+          if (primaryCard == null)
+          {
+            throw new InvalidOperationException("No primary card found for the user");
+          }
+          userCardId = primaryCard.Id;
+        }
+
         var order = new Order
         {
           UserId = userId,
@@ -204,7 +215,8 @@ namespace WebProject.Services
           Status = "Pending",
           CreatedAt = DateTime.UtcNow,
           PaymentMethod = paymentMethod.ToString(),
-          ShippingAddress = $"{shippingInfo.ReceiverName}, {shippingInfo.Address}, {shippingInfo.PhoneNumber}"
+          ShippingAddress = $"{shippingInfo.ReceiverName}, {shippingInfo.Address}, {shippingInfo.PhoneNumber}",
+          UserCardId = userCardId
         };
 
         _dbContext.Orders.Add(order);

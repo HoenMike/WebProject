@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebProject.Data;
 
@@ -11,9 +12,11 @@ using WebProject.Data;
 namespace WebProject.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241208060230_AddUserCardId")]
+    partial class AddUserCardId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -247,7 +250,7 @@ namespace WebProject.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("CartItems", (string)null);
+                    b.ToTable("CartItems");
                 });
 
             modelBuilder.Entity("WebProject.Models.Item", b =>
@@ -278,7 +281,7 @@ namespace WebProject.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Items", (string)null);
+                    b.ToTable("Items");
                 });
 
             modelBuilder.Entity("WebProject.Models.ItemPhoto", b =>
@@ -301,7 +304,7 @@ namespace WebProject.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ItemPhotos", (string)null);
+                    b.ToTable("ItemPhotos");
                 });
 
             modelBuilder.Entity("WebProject.Models.News", b =>
@@ -335,7 +338,7 @@ namespace WebProject.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("News", (string)null);
+                    b.ToTable("News");
                 });
 
             modelBuilder.Entity("WebProject.Models.Order", b =>
@@ -377,7 +380,7 @@ namespace WebProject.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Orders", (string)null);
+                    b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("WebProject.Models.OrderItem", b =>
@@ -406,7 +409,7 @@ namespace WebProject.Migrations
 
                     b.HasIndex("OrderId");
 
-                    b.ToTable("OrderItems", (string)null);
+                    b.ToTable("OrderItems");
                 });
 
             modelBuilder.Entity("WebProject.Models.Promote", b =>
@@ -426,7 +429,7 @@ namespace WebProject.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Promotes", (string)null);
+                    b.ToTable("Promotes");
                 });
 
             modelBuilder.Entity("WebProject.Models.Review", b =>
@@ -456,7 +459,7 @@ namespace WebProject.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Reviews", (string)null);
+                    b.ToTable("Reviews");
                 });
 
             modelBuilder.Entity("WebProject.Models.UserCard", b =>
@@ -494,7 +497,7 @@ namespace WebProject.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("UserCards", (string)null);
+                    b.ToTable("UserCards");
                 });
 
             modelBuilder.Entity("WebProject.Models.UserShippingInfo", b =>
@@ -526,7 +529,7 @@ namespace WebProject.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("UserShippingInfos", (string)null);
+                    b.ToTable("UserShippingInfos");
                 });
 
             modelBuilder.Entity("WebProject.Models.WishList", b =>
@@ -548,7 +551,7 @@ namespace WebProject.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("WishLists", (string)null);
+                    b.ToTable("WishLists");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
