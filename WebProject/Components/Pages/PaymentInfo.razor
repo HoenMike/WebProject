@@ -56,14 +56,15 @@
                 <MudTextField @bind-Value="CardInput.CardHolderName" Label="Card Holder Name" Required="true"
                   RequiredError="Card Holder Name is required" />
 
-                <MudTextField @bind-Value="CardInput.CardNumber" Label="Card Number" Required="true"
-                  RequiredError="Card Number is required" />
+                <MudTextField Mask="@(new PatternMask("0000 0000 0000 0000"))" @bind-Value="CardInput.CardNumber"
+                  Label="Card Number" Required="true" RequiredError="Card Number is required" Variant="Variant.Text"
+                  Clearable />
 
-                <MudDatePicker @bind-Value="CardInput.ExpiryDate" Label="Expiry Date" Required="true"
-                  RequiredError="Expiry Date is required" DateFormat="MM/yyyy" MinDate="@DateTime.Now" OpenTo="OpenTo.Year"
-                  FixDay="1" Views="new[] { CalendarView.Year, CalendarView.Month }" />
+                <MudTextField Mask="@(new DateMask("MM/YY", 'Y', 'M'))" @bind-Value="CardInput.ExpiryDateString"
+                  Label="Expiry Date" Required="true" RequiredError="Expiry Date is required" Variant="Variant.Text" />
 
-                <MudTextField @bind-Value="CardInput.Cvv" Label="CVV" Required="true" RequiredError="CVV is required" />
+                <MudTextField Mask="@(new PatternMask("000"))" @bind-Value="CardInput.Cvv" Label="CVV" Required="true"
+                  RequiredError="CVV is required" Variant="Variant.Text" />
 
                 <MudCheckBox T="bool" @bind-Value="CardInput.IsPrimary" Label="Set as Primary Card" />
 
@@ -319,13 +320,25 @@
     public string? CardNumber { get; set; }
 
     [Required(ErrorMessage = "Expiry Date is required")]
-    [DataType(DataType.Date)]
-    public DateTime ExpiryDate { get; set; } = DateTime.Now.AddYears(1);
+    [StringLength(5, ErrorMessage = "Expiry Date must be in MM/YY format")]
+    public string? ExpiryDateString { get; set; }
 
     [Required(ErrorMessage = "CVV is required")]
     [StringLength(255, ErrorMessage = "CVV cannot be longer than 255 characters")]
     public string? Cvv { get; set; }
 
     public bool IsPrimary { get; set; }
+
+    public DateTime ExpiryDate
+    {
+      get
+      {
+        if (DateTime.TryParseExact(ExpiryDateString, "MM/yy", null, System.Globalization.DateTimeStyles.None, out var date))
+        {
+          return date;
+        }
+        return DateTime.MinValue;
+      }
+    }
   }
 }
