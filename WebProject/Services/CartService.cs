@@ -46,7 +46,7 @@ namespace WebProject.Services
       }
     }
 
-    private async Task<string> GetUserId()
+    public async Task<string> GetUserId()
     {
       var authState = await _authStateProvider.GetAuthenticationStateAsync();
       var user = authState.User;

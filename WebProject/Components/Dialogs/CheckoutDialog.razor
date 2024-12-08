@@ -10,6 +10,7 @@
 @inject IDialogService DialogService
 @inject IHttpContextAccessor HttpContextAccessor
 @inject NavigationManager NavigationManager
+@inject CartService CartService
 
 @rendermode InteractiveServer
 
@@ -137,17 +138,7 @@
   {
     try
     {
-      var httpContext = HttpContextAccessor.HttpContext;
-      if (httpContext == null)
-      {
-        throw new InvalidOperationException("HttpContext is null");
-      }
-
-      var userId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-      if (userId == null)
-      {
-        throw new InvalidOperationException("User is not authenticated");
-      }
+      var userId = await CartService.GetUserId();
 
       var shippingInfo = await DbContext.UserShippingInfos.FirstOrDefaultAsync(u => u.UserId == userId);
       var paymentInfo = await DbContext.UserCards.FirstOrDefaultAsync(u => u.UserId == userId && u.IsPrimary);
@@ -190,17 +181,7 @@
   {
     try
     {
-      var httpContext = HttpContextAccessor.HttpContext;
-      if (httpContext == null)
-      {
-        throw new InvalidOperationException("HttpContext is null");
-      }
-
-      var userId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-      if (userId == null)
-      {
-        throw new InvalidOperationException("User is not authenticated");
-      }
+      var userId = await CartService.GetUserId();
 
       // Validate both shipping and payment information
       if (missingShippingInfo)
@@ -215,30 +196,28 @@
         return;
       }
 
-      var newShippingInfo = new UserShippingInfo
-        {
-          UserId = userId,
-          ReceiverName = CheckoutInput.ReceiverName ?? string.Empty,
-          Address = CheckoutInput.Address ?? string.Empty,
-          PhoneNumber = CheckoutInput.PhoneNumber ?? string.Empty,
-          PaymentMethod = CheckoutInput.PaymentMethod
-        };
-
-      DbContext.UserShippingInfos.Update(newShippingInfo);
+      var existingShippingInfo = await DbContext.UserShippingInfos.FirstOrDefaultAsync(u => u.UserId == userId);
+      if (existingShippingInfo != null)
+      {
+        existingShippingInfo.ReceiverName = CheckoutInput.ReceiverName ?? string.Empty;
+        existingShippingInfo.Address = CheckoutInput.Address ?? string.Empty;
+        existingShippingInfo.PhoneNumber = CheckoutInput.PhoneNumber ?? string.Empty;
+        existingShippingInfo.PaymentMethod = CheckoutInput.PaymentMethod;
+        DbContext.UserShippingInfos.Update(existingShippingInfo);
+      }
 
       if (CheckoutInput.PaymentMethod == PaymentMethod.CreditCard)
       {
-        var newCard = new UserCard
-          {
-            UserId = userId,
-            CardHolderName = CheckoutInput.CardHolderName ?? string.Empty,
-            CardNumber = CheckoutInput.CardNumber ?? string.Empty,
-            ExpiryDate = CheckoutInput.ExpiryDate,
-            Cvv = CheckoutInput.Cvv ?? string.Empty,
-            IsPrimary = true
-          };
-
-        DbContext.UserCards.Update(newCard);
+        var existingCard = await DbContext.UserCards.FirstOrDefaultAsync(c => c.UserId == userId && c.CardNumber ==
+        CheckoutInput.CardNumber);
+        if (existingCard != null)
+        {
+          existingCard.CardHolderName = CheckoutInput.CardHolderName ?? string.Empty;
+          existingCard.ExpiryDate = CheckoutInput.ExpiryDate;
+          existingCard.Cvv = CheckoutInput.Cvv ?? string.Empty;
+          existingCard.IsPrimary = true;
+          DbContext.UserCards.Update(existingCard);
+        }
       }
 
       await DbContext.SaveChangesAsync();
