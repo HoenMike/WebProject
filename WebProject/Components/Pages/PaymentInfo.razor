@@ -15,6 +15,7 @@
 @inject ApplicationDbContext DbContext
 @inject NavigationManager NavigationManager
 @inject IHttpContextAccessor HttpContextAccessor
+@inject ISnackbar Snackbar
 
 @rendermode InteractiveServer
 
@@ -37,12 +38,6 @@
         <MudItem xs="12" md="6">
           <MudCardContent>
             <MudText Typo="Typo.h4">Add New Card</MudText>
-            @if (!string.IsNullOrEmpty(CardStatusMessage))
-            {
-              <MudAlert Severity="@(CardStatusMessageType == "alert-success" ? Severity.Success : Severity.Error)">
-                @CardStatusMessage
-              </MudAlert>
-            }
             @if (ExistingCards.Count >= 3)
             {
               <MudAlert Severity="Severity.Error">
@@ -119,8 +114,6 @@
 @code {
   private ApplicationUser user = default!;
   private List<UserCard> ExistingCards = new();
-  private string CardStatusMessage = string.Empty;
-  private string CardStatusMessageType = "alert-success";
   private bool isLoading = true;
 
   [SupplyParameterFromForm]
@@ -146,8 +139,7 @@
     catch (Exception ex)
     {
       Logger.LogError(ex, "Error initializing payment info page");
-      CardStatusMessage = $"An error occurred: {ex.Message}";
-      CardStatusMessageType = "alert-danger";
+      Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
     }
     finally
     {
@@ -172,8 +164,7 @@
       // Check if the user already has 3 cards
       if (ExistingCards.Count >= 3)
       {
-        CardStatusMessage = "You can only add up to 3 cards.";
-        CardStatusMessageType = "alert-danger";
+        Snackbar.Add("You can only add up to 3 cards.", Severity.Error);
         return;
       }
 
@@ -227,8 +218,7 @@
         // Reset input form
         CardInput = new CardInputModel();
 
-        CardStatusMessage = "Card information added successfully.";
-        CardStatusMessageType = "alert-success";
+        Snackbar.Add("Card information added successfully.", Severity.Success);
       }
       catch
       {
@@ -240,8 +230,7 @@
     catch (Exception ex)
     {
       Logger.LogError(ex, "Error saving card information");
-      CardStatusMessage = $"Error: {ex.Message}";
-      CardStatusMessageType = "alert-danger";
+      Snackbar.Add($"Error: {ex.Message}", Severity.Error);
     }
   }
 
@@ -267,21 +256,18 @@
           await SetPrimaryCardAsync(newestCard.Id);
         }
 
-        CardStatusMessage = "Card removed successfully.";
-        CardStatusMessageType = "alert-success";
+        Snackbar.Add("Card removed successfully.", Severity.Success);
       }
     }
     catch (DbUpdateException dbEx)
     {
       Logger.LogError(dbEx, "Error removing card. Inner exception: {InnerException}", dbEx.InnerException?.Message);
-      CardStatusMessage = $"Error removing card: {dbEx.InnerException?.Message ?? dbEx.Message}";
-      CardStatusMessageType = "alert-danger";
+      Snackbar.Add($"Error removing card: {dbEx.InnerException?.Message ?? dbEx.Message}", Severity.Error);
     }
     catch (Exception ex)
     {
       Logger.LogError(ex, "Error removing card");
-      CardStatusMessage = $"Error removing card: {ex.Message}";
-      CardStatusMessageType = "alert-danger";
+      Snackbar.Add($"Error removing card: {ex.Message}", Severity.Error);
     }
   }
 
@@ -309,15 +295,13 @@
         .Where(c => c.UserId == user.Id)
         .ToListAsync();
 
-        CardStatusMessage = "Primary card set successfully.";
-        CardStatusMessageType = "alert-success";
+        Snackbar.Add("Primary card set successfully.", Severity.Success);
       }
     }
     catch (Exception ex)
     {
       Logger.LogError(ex, "Error setting primary card");
-      CardStatusMessage = $"Error setting primary card: {ex.Message}";
-      CardStatusMessageType = "alert-danger";
+      Snackbar.Add($"Error setting primary card: {ex.Message}", Severity.Error);
     }
   }
 
