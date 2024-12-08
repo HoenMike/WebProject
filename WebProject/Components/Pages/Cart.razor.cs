@@ -114,7 +114,7 @@ namespace WebProject.Components.Pages
       {
         try
         {
-          await CartService.DemoCheckoutAsync(selectedItems);
+          await CartService.CheckoutAsync(selectedItems);
           Snackbar.Add("Checkout successful", Severity.Success);
           await LoadCart();
         }

@@ -21,6 +21,7 @@ namespace WebProject.Services
       _dbContext = dbContext;
       _authStateProvider = authStateProvider;
     }
+
     public async Task<List<CartItem>> GetCartItemsAsync()
     {
       try
@@ -63,7 +64,7 @@ namespace WebProject.Services
     {
       try
       {
-        var userId = await GetUserId(); // Await the GetUserId method
+        var userId = await GetUserId();
         var cartItem = await _dbContext.CartItems.FirstOrDefaultAsync(ci => ci.UserId == userId && ci.ItemId == item.Id);
 
         if (item.StockQuantity < quantity)
@@ -108,14 +109,14 @@ namespace WebProject.Services
     {
       try
       {
-        var userId = await GetUserId(); // Await the GetUserId method
+        var userId = await GetUserId();
         var cartItems = await _dbContext.CartItems.Where(ci => ci.ItemId == itemId && ci.UserId == userId).ToListAsync();
         foreach (var cartItem in cartItems)
         {
           var product = await _dbContext.Items.FindAsync(cartItem.ItemId);
           if (product != null)
           {
-            product.StockQuantity += cartItem.Quantity; // Increase stock quantity
+            product.StockQuantity += cartItem.Quantity;
           }
         }
         _dbContext.CartItems.RemoveRange(cartItems);
@@ -131,7 +132,7 @@ namespace WebProject.Services
     {
       try
       {
-        var userId = await GetUserId(); // Await the GetUserId method
+        var userId = await GetUserId();
         var cartItem = await _dbContext.CartItems.FirstOrDefaultAsync(ci => ci.ItemId == itemId && ci.UserId == userId);
 
         if (cartItem != null)
@@ -173,7 +174,7 @@ namespace WebProject.Services
     {
       try
       {
-        var userId = await GetUserId(); // Await the GetUserId method
+        var userId = await GetUserId();
         var cartItems = await _dbContext.CartItems.Where(ci => ci.UserId == userId).ToListAsync();
         _dbContext.CartItems.RemoveRange(cartItems);
         await _dbContext.SaveChangesAsync();
@@ -184,19 +185,27 @@ namespace WebProject.Services
       }
     }
 
-    public async Task DemoCheckoutAsync(List<CartItem> selectedItems)
+    public async Task CheckoutAsync(List<CartItem> selectedItems)
     {
       try
       {
-        var userId = await GetUserId(); // Await the GetUserId method
+        var userId = await GetUserId();
+        var shippingInfo = await _dbContext.UserShippingInfos.FirstOrDefaultAsync(u => u.UserId == userId);
+        var paymentInfo = await _dbContext.UserCards.FirstOrDefaultAsync(u => u.UserId == userId && u.IsPrimary);
+
+        if (shippingInfo == null || paymentInfo == null)
+        {
+          throw new InvalidOperationException("Missing shipping or payment information");
+        }
+
         var order = new Order
         {
           UserId = userId,
           TotalPrice = selectedItems.Sum(item => item.Price * item.Quantity),
-          Status = "Completed",
+          Status = "Pending",
           CreatedAt = DateTime.UtcNow,
-          PaymentMethod = "Demo",
-          ShippingAddress = "Demo Address"
+          PaymentMethod = shippingInfo.PaymentMethod.ToString(),
+          ShippingAddress = $"{shippingInfo.ReceiverName}, {shippingInfo.Address}, {shippingInfo.PhoneNumber}"
         };
 
         _dbContext.Orders.Add(order);
@@ -220,7 +229,7 @@ namespace WebProject.Services
       }
       catch (Exception ex)
       {
-        Console.Error.WriteLine($"Error in DemoCheckoutAsync: {ex.Message}");
+        Console.Error.WriteLine($"Error in CheckoutAsync: {ex.Message}");
         throw;
       }
     }
@@ -229,7 +238,7 @@ namespace WebProject.Services
     {
       try
       {
-        var userId = await GetUserId(); // Await the GetUserId method
+        var userId = await GetUserId();
         var cartItems = await GetCartItemsAsync();
         return cartItems.Sum(item => item.Price * item.Quantity);
       }
