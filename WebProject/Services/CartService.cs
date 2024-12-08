@@ -185,17 +185,16 @@ namespace WebProject.Services
       }
     }
 
-    public async Task CheckoutAsync(List<CartItem> selectedItems)
+    public async Task CheckoutAsync(List<CartItem> selectedItems, PaymentMethod paymentMethod)
     {
       try
       {
         var userId = await GetUserId();
         var shippingInfo = await _dbContext.UserShippingInfos.FirstOrDefaultAsync(u => u.UserId == userId);
-        var paymentInfo = await _dbContext.UserCards.FirstOrDefaultAsync(u => u.UserId == userId && u.IsPrimary);
 
-        if (shippingInfo == null || paymentInfo == null)
+        if (shippingInfo == null)
         {
-          throw new InvalidOperationException("Missing shipping or payment information");
+          throw new InvalidOperationException("Missing shipping information");
         }
 
         var order = new Order
@@ -204,7 +203,7 @@ namespace WebProject.Services
           TotalPrice = selectedItems.Sum(item => item.Price * item.Quantity),
           Status = "Pending",
           CreatedAt = DateTime.UtcNow,
-          PaymentMethod = shippingInfo.PaymentMethod.ToString(),
+          PaymentMethod = paymentMethod.ToString(),
           ShippingAddress = $"{shippingInfo.ReceiverName}, {shippingInfo.Address}, {shippingInfo.PhoneNumber}"
         };
 
@@ -218,7 +217,7 @@ namespace WebProject.Services
             OrderId = order.Id,
             ItemId = cartItem.ItemId,
             Quantity = cartItem.Quantity,
-            PriceAtTimeOfOrder = cartItem.Price
+            PriceAtTimeOfOrder = cartItem.Price,
           };
 
           _dbContext.OrderItems.Add(orderItem);

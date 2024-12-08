@@ -89,6 +89,7 @@ namespace WebProject.Components.Pages
       await LoadCart();
       Snackbar.Add("Item removed from cart", Severity.Info);
     }
+
     private async Task ProceedToCheckout()
     {
       if (cartItems.Count == 0)
@@ -114,7 +115,8 @@ namespace WebProject.Components.Pages
       {
         try
         {
-          await CartService.CheckoutAsync(selectedItems);
+          var paymentMethod = (PaymentMethod)result.Data;
+          await CartService.CheckoutAsync(selectedItems, paymentMethod);
           Snackbar.Add("Checkout successful", Severity.Success);
           await LoadCart();
         }
@@ -124,6 +126,7 @@ namespace WebProject.Components.Pages
         }
       }
     }
+
     private void SelectAllChanged(bool value)
     {
       selectAll = value;
