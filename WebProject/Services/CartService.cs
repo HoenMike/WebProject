@@ -46,7 +46,7 @@ namespace WebProject.Services
       }
     }
 
-    private async Task<string> GetUserId()
+    public async Task<string> GetUserId()
     {
       var authState = await _authStateProvider.GetAuthenticationStateAsync();
       var user = authState.User;
@@ -185,17 +185,27 @@ namespace WebProject.Services
       }
     }
 
-    public async Task CheckoutAsync(List<CartItem> selectedItems)
+    public async Task CheckoutAsync(List<CartItem> selectedItems, PaymentMethod paymentMethod)
     {
       try
       {
         var userId = await GetUserId();
         var shippingInfo = await _dbContext.UserShippingInfos.FirstOrDefaultAsync(u => u.UserId == userId);
-        var paymentInfo = await _dbContext.UserCards.FirstOrDefaultAsync(u => u.UserId == userId && u.IsPrimary);
 
-        if (shippingInfo == null || paymentInfo == null)
+        if (shippingInfo == null)
         {
-          throw new InvalidOperationException("Missing shipping or payment information");
+          throw new InvalidOperationException("Missing shipping information");
+        }
+
+        int? userCardId = null;
+        if (paymentMethod == PaymentMethod.CreditCard)
+        {
+          var primaryCard = await _dbContext.UserCards.FirstOrDefaultAsync(u => u.UserId == userId && u.IsPrimary);
+          if (primaryCard == null)
+          {
+            throw new InvalidOperationException("No primary card found for the user");
+          }
+          userCardId = primaryCard.Id;
         }
 
         var order = new Order
@@ -204,8 +214,9 @@ namespace WebProject.Services
           TotalPrice = selectedItems.Sum(item => item.Price * item.Quantity),
           Status = "Pending",
           CreatedAt = DateTime.UtcNow,
-          PaymentMethod = shippingInfo.PaymentMethod.ToString(),
-          ShippingAddress = $"{shippingInfo.ReceiverName}, {shippingInfo.Address}, {shippingInfo.PhoneNumber}"
+          PaymentMethod = paymentMethod.ToString(),
+          ShippingAddress = $"{shippingInfo.ReceiverName}, {shippingInfo.Address}, {shippingInfo.PhoneNumber}",
+          UserCardId = userCardId
         };
 
         _dbContext.Orders.Add(order);
@@ -218,7 +229,7 @@ namespace WebProject.Services
             OrderId = order.Id,
             ItemId = cartItem.ItemId,
             Quantity = cartItem.Quantity,
-            PriceAtTimeOfOrder = cartItem.Price
+            PriceAtTimeOfOrder = cartItem.Price,
           };
 
           _dbContext.OrderItems.Add(orderItem);

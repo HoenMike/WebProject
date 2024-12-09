@@ -15,6 +15,7 @@
 @inject ApplicationDbContext DbContext
 @inject NavigationManager NavigationManager
 @inject IHttpContextAccessor HttpContextAccessor
+@inject ISnackbar Snackbar
 
 @rendermode InteractiveServer
 
@@ -37,12 +38,6 @@
         <MudItem xs="12" md="6">
           <MudCardContent>
             <MudText Typo="Typo.h4">Add New Card</MudText>
-            @if (!string.IsNullOrEmpty(CardStatusMessage))
-            {
-              <MudAlert Severity="@(CardStatusMessageType == "alert-success" ? Severity.Success : Severity.Error)">
-                @CardStatusMessage
-              </MudAlert>
-            }
             @if (ExistingCards.Count >= 3)
             {
               <MudAlert Severity="Severity.Error">
@@ -53,13 +48,18 @@
             {
               <EditForm Model="CardInput" OnValidSubmit="OnValidSubmitCardAsync">
                 <DataAnnotationsValidator />
-                <MudTextField @bind-Value="CardInput.CardHolderName" Label="Card Holder Name" Required="true" RequiredError="Card Holder Name is required" />
+                <MudTextField @bind-Value="CardInput.CardHolderName" Label="Card Holder Name" Required="true"
+                  RequiredError="Card Holder Name is required" />
 
-                <MudTextField @bind-Value="CardInput.CardNumber" Label="Card Number" Required="true" RequiredError="Card Number is required" />
+                <MudTextField Mask="@(new PatternMask("0000 0000 0000 0000"))" @bind-Value="CardInput.CardNumber"
+                  Label="Card Number" Required="true" RequiredError="Card Number is required" Variant="Variant.Text"
+                  Clearable />
 
-                <MudDatePicker @bind-Value="CardInput.ExpiryDate" Label="Expiry Date" Required="true" RequiredError="Expiry Date is required" DateFormat="MM/yyyy" MinDate="@DateTime.Now" OpenTo="OpenTo.Year" FixDay="1" Views="new[] { CalendarView.Year, CalendarView.Month }" />
+                <MudTextField Mask="@(new DateMask("MM/YY", 'Y', 'M'))" @bind-Value="CardInput.ExpiryDateString"
+                  Label="Expiry Date" Required="true" RequiredError="Expiry Date is required" Variant="Variant.Text" />
 
-                <MudTextField @bind-Value="CardInput.Cvv" Label="CVV" Required="true" RequiredError="CVV is required" />
+                <MudTextField Mask="@(new PatternMask("000"))" @bind-Value="CardInput.Cvv" Label="CVV" Required="true"
+                  RequiredError="CVV is required" Variant="Variant.Text" />
 
                 <MudCheckBox T="bool" @bind-Value="CardInput.IsPrimary" Label="Set as Primary Card" />
 
@@ -80,7 +80,7 @@
                 <MudList T="UserCard">
                   @foreach (var card in ExistingCards)
                   {
-                    <MudListItem T="UserCard">
+                    <MudListItem T="UserCard" OnClick="() => SetPrimaryCardAsync(card.Id)">
                       <MudGrid>
                         <MudItem xs="12" md="7">
                           <MudText Typo="Typo.h6">@card.CardHolderName</MudText>
@@ -93,7 +93,8 @@
                           }
                         </MudItem>
                         <MudItem xs="12" md="5" Align="Align.End">
-                          <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="() => DeleteCardAsync(card.Id)">
+                          <MudButton Variant="Variant.Outlined" Color="Color.Error"
+                            OnClick="@(async (e) => { await DeleteCardAsync(card.Id); })">
                             Remove
                           </MudButton>
                         </MudItem>
@@ -113,8 +114,6 @@
 @code {
   private ApplicationUser user = default!;
   private List<UserCard> ExistingCards = new();
-  private string CardStatusMessage = string.Empty;
-  private string CardStatusMessageType = "alert-success";
   private bool isLoading = true;
 
   [SupplyParameterFromForm]
@@ -140,8 +139,7 @@
     catch (Exception ex)
     {
       Logger.LogError(ex, "Error initializing payment info page");
-      CardStatusMessage = $"An error occurred: {ex.Message}";
-      CardStatusMessageType = "alert-danger";
+      Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
     }
     finally
     {
@@ -154,6 +152,7 @@
     if (firstRender)
     {
       isLoading = false;
+      await Task.Yield(); // Ensure the method is awaited
       StateHasChanged();
     }
   }
@@ -165,8 +164,7 @@
       // Check if the user already has 3 cards
       if (ExistingCards.Count >= 3)
       {
-        CardStatusMessage = "You can only add up to 3 cards.";
-        CardStatusMessageType = "alert-danger";
+        Snackbar.Add("You can only add up to 3 cards.", Severity.Error);
         return;
       }
 
@@ -175,6 +173,12 @@
 
       try
       {
+        // If this is the first card, set it as primary
+        if (ExistingCards.Count == 0)
+        {
+          CardInput.IsPrimary = true;
+        }
+
         // If setting this card as primary, update existing primary cards
         if (CardInput.IsPrimary)
         {
@@ -214,8 +218,7 @@
         // Reset input form
         CardInput = new CardInputModel();
 
-        CardStatusMessage = "Card information added successfully.";
-        CardStatusMessageType = "alert-success";
+        Snackbar.Add("Card information added successfully.", Severity.Success);
       }
       catch
       {
@@ -227,8 +230,7 @@
     catch (Exception ex)
     {
       Logger.LogError(ex, "Error saving card information");
-      CardStatusMessage = $"Error: {ex.Message}";
-      CardStatusMessageType = "alert-danger";
+      Snackbar.Add($"Error: {ex.Message}", Severity.Error);
     }
   }
 
@@ -239,6 +241,7 @@
       var cardToRemove = await DbContext.UserCards.FindAsync(cardId);
       if (cardToRemove != null)
       {
+        bool wasPrimary = cardToRemove.IsPrimary;
         DbContext.UserCards.Remove(cardToRemove);
         await DbContext.SaveChangesAsync();
 
@@ -247,15 +250,58 @@
         .Where(c => c.UserId == user.Id)
         .ToListAsync();
 
-        CardStatusMessage = "Card removed successfully.";
-        CardStatusMessageType = "alert-success";
+        if (wasPrimary && ExistingCards.Any())
+        {
+          var newestCard = ExistingCards.OrderByDescending(c => c.Id).First();
+          await SetPrimaryCardAsync(newestCard.Id);
+        }
+
+        Snackbar.Add("Card removed successfully.", Severity.Success);
       }
+    }
+    catch (DbUpdateException dbEx)
+    {
+      Logger.LogError(dbEx, "Error removing card. Inner exception: {InnerException}", dbEx.InnerException?.Message);
+      Snackbar.Add($"Error removing card: {dbEx.InnerException?.Message ?? dbEx.Message}", Severity.Error);
     }
     catch (Exception ex)
     {
       Logger.LogError(ex, "Error removing card");
-      CardStatusMessage = $"Error removing card: {ex.Message}";
-      CardStatusMessageType = "alert-danger";
+      Snackbar.Add($"Error removing card: {ex.Message}", Severity.Error);
+    }
+  }
+
+  private async Task SetPrimaryCardAsync(int cardId)
+  {
+    try
+    {
+      var cardToSetPrimary = await DbContext.UserCards.FindAsync(cardId);
+      if (cardToSetPrimary != null)
+      {
+        var existingPrimaryCards = await DbContext.UserCards
+        .Where(c => c.UserId == user.Id && c.IsPrimary)
+        .ToListAsync();
+
+        foreach (var primaryCard in existingPrimaryCards)
+        {
+          primaryCard.IsPrimary = false;
+        }
+
+        cardToSetPrimary.IsPrimary = true;
+        await DbContext.SaveChangesAsync();
+
+        // Refresh the list of cards
+        ExistingCards = await DbContext.UserCards
+        .Where(c => c.UserId == user.Id)
+        .ToListAsync();
+
+        Snackbar.Add("Primary card set successfully.", Severity.Success);
+      }
+    }
+    catch (Exception ex)
+    {
+      Logger.LogError(ex, "Error setting primary card");
+      Snackbar.Add($"Error setting primary card: {ex.Message}", Severity.Error);
     }
   }
 
@@ -270,13 +316,25 @@
     public string? CardNumber { get; set; }
 
     [Required(ErrorMessage = "Expiry Date is required")]
-    [DataType(DataType.Date)]
-    public DateTime ExpiryDate { get; set; } = DateTime.Now.AddYears(1);
+    [StringLength(5, ErrorMessage = "Expiry Date must be in MM/YY format")]
+    public string? ExpiryDateString { get; set; }
 
     [Required(ErrorMessage = "CVV is required")]
     [StringLength(255, ErrorMessage = "CVV cannot be longer than 255 characters")]
     public string? Cvv { get; set; }
 
     public bool IsPrimary { get; set; }
+
+    public DateTime ExpiryDate
+    {
+      get
+      {
+        if (DateTime.TryParseExact(ExpiryDateString, "MM/yy", null, System.Globalization.DateTimeStyles.None, out var date))
+        {
+          return date;
+        }
+        return DateTime.MinValue;
+      }
+    }
   }
 }
