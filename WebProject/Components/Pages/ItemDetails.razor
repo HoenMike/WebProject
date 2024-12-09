@@ -14,6 +14,7 @@
         border-radius: 10px;
         padding: 30px;
         margin-left: 24px;
+        margin-right: 24px;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
 
@@ -84,10 +85,6 @@
         gap: 8px;
     }
 
-    .rating-filters {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
 </style>
 
 <MudText Typo="Typo.h4" Style="margin: 20px;" class="item-name">Item Detail</MudText>
@@ -97,60 +94,56 @@
         <MudGrid>
             <MudItem xs="12">
                 <MudGrid>
-                    <MudItem xs="12" md="3">
+                    <MudItem xs="12" md="4">
                         <MudImage Src="@item.ThumbnailUrl" Alt="@item.Name" Style="width: 100%; border-radius: 12px;" />
                     </MudItem>
-                    <MudItem xs="12" md="9">
+                    <MudItem xs="12" md="8">
                         <MudText Typo="Typo.h4" class="item-name">@item.Name</MudText>
-                        <MudGrid Class="d-flex align-item-center">
-                            <!-- Rating -->
-                            <MudItem xs="12" md="4" style="display: flex; align-items: center; gap: 8px;">
-                                <MudText Typo="Typo.body1">4.0</MudText>
-                                <MudRating SelectedValue="4" ReadOnly="true" />
-                            </MudItem>
+                        <MudGrid >
+                            <MudItem xs="12" md="12" Class="d-flex align-center flex-wrap" Style="gap: 20px;">
+                                <MudItem style="display: flex; align-items: center; gap: 8px;">
+                                    <MudText Typo="Typo.body1">4.0</MudText>
+                                    <MudRating SelectedValue="4" ReadOnly="true" />
+                                </MudItem>
 
-                            <MudItem xs="12" md="4" class="item-container">
-                                <MudText Typo="Typo.body1" Class="d-flex align-center">
-                                    23 Evaluate
-                                </MudText>
-                            </MudItem>
+                                <MudItem style="display: flex; align-items: center;">
+                                    <MudText Typo="Typo.body1">23 Evaluate</MudText>
+                                </MudItem>
 
-                            <!-- Sold -->
-                            <MudItem xs="12" md="4" class="item-container">
-                                <MudText Typo="Typo.body1" Class="d-flex align-center">
-                                    30 Sold
-                                </MudText>
+                                <MudItem style="display: flex; align-items: center;">
+                                    <MudText Typo="Typo.body1">30 Sold</MudText>
+                                </MudItem>
                             </MudItem>
                         </MudGrid>
 
                         <MudText Typo="Typo.h3" class="item-price">@item.Price.ToString("C")</MudText>
                         <MudText Typo="Typo.body1" Class="mb-4">@item.Description</MudText>
                         <MudText Typo="Typo.body2" Class="mb-4">Stock: @item.StockQuantity</MudText>
-                        <MudGrid>
-                            <MudItem xs="12" md="5" Class="d-flex align-center">
-                                <MudGrid>
-                                    <MudItem xs="12" md="3">
-                                        <MudButton class="quantity-btn" OnClick="DecreaseQuantity">-</MudButton>
+                        <MudGrid >
+                            <!-- Quantity Control -->
+                            <MudItem xs="12" sm="12" md="4" Class="d-flex align-center flex-wrap" Style="gap: 4px;">  
+                                    <MudItem >
+                                        <MudButton Class="quantity-btn" OnClick="DecreaseQuantity">-</MudButton>
                                     </MudItem>
-                                    <MudItem xs="12" md="3">
+                                    <MudItem >
                                         <MudNumericField HideSpinButtons="true" @bind-Value="buyQuantity" Min="1"
-                                            Max="@item.StockQuantity" Variant="Variant.Outlined"
-                                            Style="width: 64px; height: 50px;" />
+                                                        Max="@item.StockQuantity" Variant="Variant.Outlined"
+                                                        Style="width: 64px; height: 50px;" />
                                     </MudItem>
-                                    <MudItem xs="12" md="3">
-                                        <MudButton class="quantity-btn" OnClick="IncreaseQuantity">+</MudButton>
-                                    </MudItem>
-                                </MudGrid>
+                                    <MudItem >
+                                        <MudButton Class="quantity-btn" OnClick="IncreaseQuantity">+</MudButton>
+                                    </MudItem>    
                             </MudItem>
-                            <MudItem xs="12" md="7" Class="d-flex align-center ">
-                                <MudItem xs="12" md="6" Class="d-flex align-center ">
-                                    <MudButton class="add-to-cart-btn" StartIcon="@Icons.Material.Outlined.ShoppingCart"
-                                        OnClick="AddToCart"> Add to cart</MudButton>
-                                </MudItem>
 
-                                <MudItem xs="12" md="6" Class="d-flex align-center ">
-                                    <MudButton class="buy-now-btn" OnClick="BuyNow">Buy Now</MudButton>
-                                </MudItem>
+                            <!-- Action Buttons -->
+                            <MudItem xs="12" sm="12" md="8" Class="d-flex flex-wrap justify-start" Style="gap: 12px;">
+                                    <MudItem >
+                                        <MudButton Class="add-to-cart-btn" StartIcon="@Icons.Material.Outlined.ShoppingCart"
+                                                OnClick="AddToCart"  Style="height: 50px;flex: 1;">Add to cart</MudButton>
+                                    </MudItem>
+                                    <MudItem >
+                                        <MudButton Class="buy-now-btn" OnClick="BuyNow"  Style="height: 50px;flex: 1;">Buy Now</MudButton>
+                                    </MudItem>
                             </MudItem>
                         </MudGrid>
                     </MudItem>
@@ -164,12 +157,12 @@
 
                 <div Class="rating-container mt-4">
                     <MudGrid>
-                        <MudItem xs="12" md="3" Class="average-rating">
+                        <MudItem xs="12" sm="12" md="4" Class="average-rating" style="text-align: center;">
                             <MudText Typo="Typo.h4" Style="color: #FF66A1;font-weight: bold; ">4.0/5</MudText>
                             <MudRating SelectedValue="4" MaxValue="5" ReadOnly="true" Size="Size.Medium" />
                         </MudItem>
 
-                        <MudItem xs="12" md="8" Class="rating-filters">
+                        <MudItem xs="12" sm="12" md="8" style="display: flex; flex-wrap: wrap; gap: 8px;">
                             <MudChip T="string" Variant="Variant.Outlined" Color="Color.Primary">All</MudChip>
                             <MudChip T="string" Variant="Variant.Outlined" Color="Color.Primary">
                                 5
@@ -238,7 +231,7 @@
         {
             var parameters = new DialogParameters { ["ContentText"] = "You need to login to add items to the cart." };
             var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
-            var dialog = DialogService.Show<LoginDialog>("Login Required", parameters, options);
+var dialog = DialogService.Show<LoginDialog>("Login Required", parameters, options);
             var result = await dialog.Result;
 
             if (result != null && !result.Canceled)

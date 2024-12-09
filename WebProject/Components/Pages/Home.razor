@@ -8,7 +8,26 @@
 @using MudBlazor
 
 @rendermode InteractiveServer
+<style>
+    .promotion-container {
+        height: 450px; 
+        width: 100%;
+        display: flex; 
+        justify-content: center; 
+        align-items: center; 
+        background-image: url('https://www.shutterstock.com/image-vector/sweet-food-seamless-pattern-flat-600nw-2477598415.jpg'); 
+        background-size: cover; 
+        background-position: center;
+    }
 
+    .promotion-container::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 450px; 
+    background-color: rgba(255, 255, 255, 0.8); /* Lớp phủ để làm mờ */
+}
+</style>
 <PageTitle>Home</PageTitle>
 <MudPaper Class="pa-4 mb-4">
     <MudGrid>
@@ -20,9 +39,8 @@
     </MudGrid>
 </MudPaper>
 
-<div style="height: 400px; display: flex; justify-content: center; align-items: center;">
-    <MudPaper Class="pa-4 mb-4"
-        Style="height: 100%; width: 600px;display: flex; justify-content: center; align-items: center; ">
+<div style="height: 500px; display: flex; justify-content: center; align-items: center;">
+    <MudPaper Class="promotion-container pa-0 mb-4">
         @if (isPromotesLoading)
         {
             <MudProgressCircular Color="Color.Default" Indeterminate="true" />
@@ -33,8 +51,8 @@
         }
         else
         {
-            <MudCarousel TData="Promote" ShowArrows="true" ShowBullets="true" AutoCycle="true"
-                AutoCycleTime="TimeSpan.FromMilliseconds(3000)" Class="my-4" Style="height: 100%; width: 600px;">
+            <MudCarousel TData="Promote" ShowArrows="true" ShowBullets="true" AutoCycle="true "
+                AutoCycleTime="TimeSpan.FromMilliseconds(3000)" Class="my-4" Style="height: 400px; width: 700px; border-radius: 8px;">
                 @foreach (var promote in activePromotes)
                 {
                     <MudCarouselItem>
