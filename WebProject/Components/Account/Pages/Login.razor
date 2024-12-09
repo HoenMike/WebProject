@@ -19,13 +19,11 @@
             <DataAnnotationsValidator />
             <ValidationSummary class="text-danger" role="alert" />
             <div class="form-group">
-                <InputText @bind-Value="Input.Username" class="form-control" autocomplete="username"
-                    aria-required="true" placeholder="Username" required />
+                <InputText @bind-Value="Input.Username" class="form-control" autocomplete="username" aria-required="true" placeholder="Username" required />
                 <ValidationMessage For="() => Input.Username" class="text-danger" />
             </div>
             <div class="form-group">
-                <InputText type="password" @bind-Value="Input.Password" class="form-control"
-                    autocomplete="current-password" aria-required="true" placeholder="Password" required />
+                <InputText type="password" @bind-Value="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="Password" required />
                 <ValidationMessage For="() => Input.Password" class="text-danger" />
             </div>
             <div class="form-check">
@@ -36,8 +34,7 @@
             </div>
             <button type="submit" class="btn btn-primary">Login</button>
             <div class="form-links">
-                <a
-                    href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">
+                <a href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">
                     Don't have an account? Sign up
                 </a>
             </div>

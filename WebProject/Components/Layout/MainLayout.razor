@@ -7,9 +7,12 @@
 <MudSnackbarProvider />
 
 <div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+    @if (!isLoginPage)
+    {
+        <div class="sidebar">
+            <NavMenu />
+        </div>
+    }
 
     <main>
         <article class="">
@@ -23,3 +26,12 @@
     <a href="" class="reload">Reload</a>
     <a class="dismiss">🗙</a>
 </div>
+
+@code {
+    private bool isLoginPage;
+
+    protected override void OnParametersSet()
+    {
+        isLoginPage = NavigationManager.Uri.Contains("/Account/Login");
+    }
+}
