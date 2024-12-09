@@ -19,7 +19,6 @@
         background-size: cover; 
         background-position: center;
     }
-}
 </style>
 <PageTitle>Home</PageTitle>
 <MudPaper Class="pa-4 mb-4">
@@ -44,7 +43,7 @@
         }
         else
         {
-            <MudCarousel TData="Promote" ShowArrows="true" ShowBullets="true" AutoCycle="true "
+            <MudCarousel TData="Promote"  ShowBullets="true" AutoCycle="true "
                 AutoCycleTime="TimeSpan.FromMilliseconds(3000)" Class="my-4" Style="height: 400px; width: 700px; border-radius: 8px;">
                 @foreach (var promote in activePromotes)
                 {

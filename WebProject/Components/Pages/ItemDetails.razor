@@ -78,11 +78,16 @@
         background-color: #FFFBFE;
 
     }
-
     .average-rating {
         display: flex;
         align-items: center;
         gap: 8px;
+    }
+    .feedback-container {
+        border: 1px solid #414141;
+        border-radius: 8px;
+        padding: 20px;
+
     }
 
 </style>
@@ -157,12 +162,12 @@
 
                 <div Class="rating-container mt-4">
                     <MudGrid>
-                        <MudItem xs="12" sm="12" md="4" Class="average-rating" style="text-align: center;">
+                        <MudItem xs="12" sm="12" md="5" Class="average-rating" style="text-align: center;">
                             <MudText Typo="Typo.h4" Style="color: #FF66A1;font-weight: bold; ">4.0/5</MudText>
                             <MudRating SelectedValue="4" MaxValue="5" ReadOnly="true" Size="Size.Medium" />
                         </MudItem>
 
-                        <MudItem xs="12" sm="12" md="8" style="display: flex; flex-wrap: wrap; gap: 8px;">
+                        <MudItem xs="12" sm="12" md="7" style="display: flex; flex-wrap: wrap; gap: 8px;">
                             <MudChip T="string" Variant="Variant.Outlined" Color="Color.Primary">All</MudChip>
                             <MudChip T="string" Variant="Variant.Outlined" Color="Color.Primary">
                                 5
@@ -187,6 +192,38 @@
                         </MudItem>
                     </MudGrid>
                 </div>
+
+                <div class="feedback-container mt-4">
+                    <MudGrid style="margin-bottom: 10px;">
+                        <MudItem xs="12" md="12" Class="d-flex flex-wrap" Style="gap: 10px;">
+                        <!-- Avatar Section -->
+                        <MudItem >
+                            <MudAvatar Size="Size.Large" Class="mr-2">
+                                <MudImage Src="https://cellphones.com.vn/sforum/wp-content/uploads/2024/02/avatar-anh-meo-cute-1.jpg"></MudImage>
+                            </MudAvatar>
+                        </MudItem>
+
+                        <!-- Content Section -->
+                        <MudItem >
+                            <!-- Reviewer Name -->
+                            <MudText Typo="Typo.h6">Phương Liên</MudText>
+
+                            <!-- Rating -->
+                            <MudRating MaxValue="5" SelectedValue="5" ReadOnly="true" Size="Size.Small" style="padding-right:10px"/>
+
+                            <!-- Date -->
+                            <MudText Typo="Typo.caption" Style="font-style: italic;">22/11/2023</MudText>
+                        </MudItem>
+                        </MudItem>
+                    </MudGrid>
+
+                    <MudText Typo="Typo.body1" style="margin-bottom: 10px;word-break: break-word">
+                                These snacks are incredibly delicious! They have the perfect crunch and are packed with flavor. 
+                                The seasoning is just right—not too strong, but enough to keep you coming back for more. 
+                                Definitely a snack worth trying!
+                    </MudText>
+                </div>
+                
             </MudItem>
         </MudGrid>
 
