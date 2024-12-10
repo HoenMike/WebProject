@@ -3,10 +3,72 @@
 @inject NavigationManager NavigationManager
 
 @rendermode InteractiveServer
+<style>
+    .navigation-container {
+        position: relative;
+    }
 
+    .nav-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px;
+        background-color: white;
+    }
+
+    .mobile-toggle {
+        cursor: pointer;
+    }
+
+    .nav-title {
+        flex-grow: 1;
+        text-align: center;
+    }
+
+    .mud-nav-link .mud-nav-link-text {
+        font-weight: bold;
+    }
+
+    .mud-nav-link {
+        margin: 0 8px;
+        color: black;
+        font-weight: bold;
+        transition: all 0.3s ease;
+    }
+
+    .mud-nav-link:hover {
+        background-color: #ff66a1;
+        color: black;
+    }
+
+
+    .mud-nav-link.active {
+        background-color: #ff66a1;
+        color: white;
+        font-weight: bold;
+    }
+
+    .mud-nav-link.active .mud-nav-link-icon {
+        color: white;
+    }
+
+    .text-pink {
+        color: #ff66a1;
+        font-weight: bold;
+    }
+
+    .text-black {
+        color: black;
+        font-weight: bold;
+    }
+
+    .mud-paper {
+        background-color: white;
+    }
+</style>
 <div class="navigation-container @(isMenuOpen ? "menu-open" : "") mud-elevation-3">
     <div class="nav-header">
-        <MudLink Href="/" Underline="Underline.None" Typo="Typo.h5" Class="nav-title">
+        <MudLink Href="/" Underline="Underline.None" Typo="Typo.h4" Class="nav-title">
             <span class="text-pink">Daily</span><span class="text-black">Store</span>
         </MudLink>
         <div class="mobile-toggle" @onclick="ToggleMenu">
@@ -15,7 +77,7 @@
     </div>
 
     <div class="mud-navmenu-container py-3" Width="250px" Square="true">
-        <MudNavMenu Color="Color.Primary" Bordered="false">
+        <MudNavMenu Color="Color.Secondary" Bordered="true">
             <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">
                 Home
             </MudNavLink>
