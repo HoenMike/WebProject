@@ -37,13 +37,13 @@
       }
       <MudGrid>
         <MudItem xs="12">
-          <EditForm Model="PaymentInput" OnValidSubmit="OnValidSubmitPaymentAsync">
+          <EditForm Model="ShippingInput" OnValidSubmit="OnValidSubmitPaymentAsync">
             <DataAnnotationsValidator />
-            <MudTextField @bind-Value="PaymentInput.ReceiverName" Label="Receiver Name" Required="true"
+            <MudTextField @bind-Value="ShippingInput.ReceiverName" Label="Receiver Name" Required="true"
               RequiredError="Receiver Name is required" />
-            <MudTextField @bind-Value="PaymentInput.Address" Label="Address" Required="true"
+            <MudTextField @bind-Value="ShippingInput.Address" Label="Address" Required="true"
               RequiredError="Address is required" />
-            <MudTextField @bind-Value="PaymentInput.PhoneNumber" Label="Phone Number" Required="true"
+            <MudTextField @bind-Value="ShippingInput.PhoneNumber" Label="Phone Number" Required="true"
               RequiredError="Phone Number is required" />
 
             <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">
@@ -63,7 +63,7 @@
   private bool isLoading = true;
 
   [SupplyParameterFromForm]
-  private PaymentInputModel PaymentInput { get; set; } = new();
+  private ShippingInputModel ShippingInput { get; set; } = new();
 
   protected override async Task OnInitializedAsync()
   {
@@ -78,17 +78,17 @@
       user = await UserAccessor.GetRequiredUserAsync(httpContext);
 
       // Fetch existing payment information for the current user
-      var existingCheckoutInfo = await DbContext.UserShippingInfos
+      var existingShippingInfo = await DbContext.UserShippingInfos
       .FirstOrDefaultAsync(u => u.UserId == user.Id);
 
-      if (existingCheckoutInfo != null)
+      if (existingShippingInfo != null)
       {
-        PaymentInput = new PaymentInputModel
+        ShippingInput = new ShippingInputModel
           {
-            ReceiverName = existingCheckoutInfo.ReceiverName,
-            Address = existingCheckoutInfo.Address,
-            PhoneNumber = existingCheckoutInfo.PhoneNumber,
-            PaymentMethod = existingCheckoutInfo.PaymentMethod
+            ReceiverName = existingShippingInfo.ReceiverName,
+            Address = existingShippingInfo.Address,
+            PhoneNumber = existingShippingInfo.PhoneNumber,
+            PaymentMethod = existingShippingInfo.PaymentMethod
           };
       }
     }
@@ -130,9 +130,9 @@
       {
         // Update the existing shipping info record
         var existingCheckoutInfo = existingCheckoutInfos.First();
-        existingCheckoutInfo.ReceiverName = PaymentInput.ReceiverName ?? string.Empty;
-        existingCheckoutInfo.Address = PaymentInput.Address ?? string.Empty;
-        existingCheckoutInfo.PhoneNumber = PaymentInput.PhoneNumber ?? string.Empty;
+        existingCheckoutInfo.ReceiverName = ShippingInput.ReceiverName ?? string.Empty;
+        existingCheckoutInfo.Address = ShippingInput.Address ?? string.Empty;
+        existingCheckoutInfo.PhoneNumber = ShippingInput.PhoneNumber ?? string.Empty;
 
         DbContext.UserShippingInfos.Update(existingCheckoutInfo);
       }
@@ -142,9 +142,9 @@
         var newShippingInfo = new UserShippingInfo
           {
             UserId = user.Id,
-            ReceiverName = PaymentInput.ReceiverName ?? string.Empty,
-            Address = PaymentInput.Address ?? string.Empty,
-            PhoneNumber = PaymentInput.PhoneNumber ?? string.Empty,
+            ReceiverName = ShippingInput.ReceiverName ?? string.Empty,
+            Address = ShippingInput.Address ?? string.Empty,
+            PhoneNumber = ShippingInput.PhoneNumber ?? string.Empty,
           };
 
         DbContext.UserShippingInfos.Add(newShippingInfo);
@@ -163,7 +163,7 @@
     }
   }
 
-  private sealed class PaymentInputModel
+  private sealed class ShippingInputModel
   {
     [Required(ErrorMessage = "Receiver Name is required")]
     [StringLength(100, ErrorMessage = "Receiver Name cannot be longer than 100 characters")]
