@@ -1,12 +1,10 @@
 @page "/item-details/{Id:int}"
-@inject ApplicationDbContext DbContext
+@inject ItemController ItemController
 @inject CartController CartController
 @inject ISnackbar Snackbar
 @inject NavigationManager Navigation
 @inject IDialogService DialogService
-@using Microsoft.EntityFrameworkCore
 @using MudBlazor
-
 <style>
     .item-details-container {
         display: flex;
@@ -248,7 +246,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        item = await DbContext.Items.FirstOrDefaultAsync(i => i.Id == Id);
+        item = await ItemController.GetItemAsync(Id);
     }
 
     private void IncreaseQuantity()

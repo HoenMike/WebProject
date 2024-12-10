@@ -1,7 +1,5 @@
 @page "/itembrowse"
-@using Microsoft.EntityFrameworkCore
-@using WebProject.Data
-@inject ApplicationDbContext DbContext
+@inject ItemController ItemController
 @inject ISnackbar Snackbar
 @inject IDialogService DialogService
 @inject NavigationManager NavigationManager
@@ -14,7 +12,9 @@
 <MudPaper Class="pa-4 mb-4">
   <MudGrid>
     <MudItem xs="12">
-      <MudTextField Variant="Variant.Outlined" @bind-Value="searchTerm" Label="Search Items" AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" Immediate="true" Clearable="true" OnClearButtonClick="ClearSearch" OnKeyUp="FilterItems" />
+      <MudTextField Variant="Variant.Outlined" @bind-Value="searchTerm" Label="Search Items"
+        AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" Immediate="true" Clearable="true"
+        OnClearButtonClick="ClearSearch" OnKeyUp="FilterItems" />
     </MudItem>
   </MudGrid>
 </MudPaper>
@@ -35,7 +35,8 @@ else
     </HeaderContent>
     <RowTemplate Context="item">
       <MudTd>
-        <MudImage Src="@item?.ThumbnailUrl" Alt="@item?.Name" Style="width: 50px; height: 50px; cursor: pointer;" @onclick="@(() => NavigateToItemDetails(item?.Id ?? 0))" />
+        <MudImage Src="@item?.ThumbnailUrl" Alt="@item?.Name" Style="width: 50px; height: 50px; cursor: pointer;"
+          @onclick="@(() => NavigateToItemDetails(item?.Id ?? 0))" />
       </MudTd>
       <MudTd>
         <MudLink Href="@($"/item-details/{item?.Id}")">
@@ -52,9 +53,7 @@ else
 @code {
   private List<Item> items = new();
   private List<Item> displayedItems = new();
-  private List<Promote> activePromotes = new();
   private bool isLoading = true;
-  private bool isPromotesLoading = true;
   private string searchTerm = string.Empty;
 
   protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -62,7 +61,6 @@ else
     if (firstRender)
     {
       await LoadItems();
-      await LoadActivePromotes();
     }
   }
 
@@ -78,7 +76,7 @@ else
   {
     try
     {
-      items = await DbContext.Items.ToListAsync() ?? new List<Item>();
+      items = await ItemController.GetItemsAsync();
       displayedItems = items;
     }
     catch (Exception ex)
@@ -88,28 +86,6 @@ else
     finally
     {
       isLoading = false;
-      StateHasChanged();
-    }
-  }
-
-  private async Task LoadActivePromotes()
-  {
-    try
-    {
-      var promotes = await DbContext.Promotes
-      .Where(p => p.IsActive)
-      .OrderByDescending(p => p.Id)
-      .Take(10)
-      .ToListAsync() ?? new List<Promote>();
-      activePromotes = promotes;
-    }
-    catch (Exception ex)
-    {
-      Snackbar.Add($"Error loading promotes: {ex.Message}", Severity.Error);
-    }
-    finally
-    {
-      isPromotesLoading = false;
       StateHasChanged();
     }
   }
@@ -192,8 +168,7 @@ else
 
     try
     {
-      DbContext.Items.Remove(item);
-      await DbContext.SaveChangesAsync();
+      await ItemController.DeleteItemAsync(item);
       Snackbar.Add("Item deleted successfully", Severity.Success);
       await LoadItems();
     }
