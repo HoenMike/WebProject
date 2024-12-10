@@ -53,7 +53,7 @@ namespace WebProject.Services
 
       if (user.Identity?.IsAuthenticated != true)
       {
-        throw new InvalidOperationException("User is not authenticated");
+        throw new InvalidOperationException("You have to login first");
       }
 
       return user.FindFirst(ClaimTypes.NameIdentifier)?.Value ??
