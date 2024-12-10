@@ -35,7 +35,7 @@ namespace WebProject.Components.Pages
     private async Task LoadCart()
     {
       isLoading = true;
-      cartItems = await CartService.GetCartItemsAsync();
+      cartItems = await CartController.GetCartItemsAsync();
       totalPrice = cartItems.Sum(item => item.Price * item.Quantity);
 
       // Reset selected items state
@@ -55,12 +55,12 @@ namespace WebProject.Components.Pages
       if (item.Quantity > 1)
       {
         item.Quantity--;
-        var product = await CartService.GetProductByIdAsync(item.ItemId);
+        var product = await CartController.GetProductByIdAsync(item.ItemId);
         if (product != null)
         {
           product.StockQuantity++;
-          await CartService.UpdateQuantityAsync(item.ItemId, item.Quantity);
-          await CartService.UpdateProductStockAsync(product);
+          await CartController.UpdateQuantityAsync(item.ItemId, item.Quantity);
+          await CartController.UpdateProductStockAsync(product);
           await LoadCart();
         }
       }
@@ -68,13 +68,13 @@ namespace WebProject.Components.Pages
 
     private async Task IncreaseQuantity(CartItem item)
     {
-      var product = await CartService.GetProductByIdAsync(item.ItemId);
+      var product = await CartController.GetProductByIdAsync(item.ItemId);
       if (product != null && item.Quantity < product.StockQuantity)
       {
         item.Quantity++;
         product.StockQuantity--;
-        await CartService.UpdateQuantityAsync(item.ItemId, item.Quantity);
-        await CartService.UpdateProductStockAsync(product);
+        await CartController.UpdateQuantityAsync(item.ItemId, item.Quantity);
+        await CartController.UpdateProductStockAsync(product);
         await LoadCart();
       }
       else
@@ -85,7 +85,7 @@ namespace WebProject.Components.Pages
 
     private async Task RemoveFromCart(int itemId)
     {
-      await CartService.RemoveFromCartAsync(itemId);
+      await CartController.RemoveFromCartAsync(itemId);
       await LoadCart();
       Snackbar.Add("Item removed from cart", Severity.Info);
     }
@@ -116,7 +116,7 @@ namespace WebProject.Components.Pages
         try
         {
           var paymentMethod = (PaymentMethod)result.Data;
-          await CartService.CheckoutAsync(selectedItems, paymentMethod);
+          await CartController.CheckoutAsync(selectedItems, paymentMethod);
           Snackbar.Add("Checkout successful", Severity.Success);
           await LoadCart();
         }

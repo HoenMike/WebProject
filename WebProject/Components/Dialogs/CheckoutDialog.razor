@@ -10,7 +10,7 @@
 @inject IDialogService DialogService
 @inject IHttpContextAccessor HttpContextAccessor
 @inject NavigationManager NavigationManager
-@inject CartService CartService
+@inject CartController CartController
 
 @rendermode InteractiveServer
 
@@ -135,7 +135,7 @@
   {
     try
     {
-      var userId = await CartService.GetUserId();
+      var userId = await CartController.GetUserId();
 
       var shippingInfo = await DbContext.UserShippingInfos.FirstOrDefaultAsync(u => u.UserId == userId);
       var paymentInfo = await DbContext.UserCards.FirstOrDefaultAsync(u => u.UserId == userId && u.IsPrimary);
@@ -178,7 +178,7 @@
   {
     try
     {
-      var userId = await CartService.GetUserId();
+      var userId = await CartController.GetUserId();
 
       // Validate both shipping and payment information
       if (missingShippingInfo)

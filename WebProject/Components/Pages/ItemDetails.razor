@@ -1,6 +1,6 @@
 @page "/item-details/{Id:int}"
 @inject ApplicationDbContext DbContext
-@inject CartService CartService
+@inject CartController CartController
 @inject ISnackbar Snackbar
 @inject NavigationManager Navigation
 @inject IDialogService DialogService
@@ -78,18 +78,19 @@
         background-color: #FFFBFE;
 
     }
+
     .average-rating {
         display: flex;
         align-items: center;
         gap: 8px;
     }
+
     .feedback-container {
         border: 1px solid #414141;
         border-radius: 8px;
         padding: 20px;
 
     }
-
 </style>
 
 <MudText Typo="Typo.h4" Style="margin: 20px;" class="item-name">Item Detail</MudText>
@@ -104,7 +105,7 @@
                     </MudItem>
                     <MudItem xs="12" md="8">
                         <MudText Typo="Typo.h4" class="item-name">@item.Name</MudText>
-                        <MudGrid >
+                        <MudGrid>
                             <MudItem xs="12" md="12" Class="d-flex align-center flex-wrap" Style="gap: 20px;">
                                 <MudItem style="display: flex; align-items: center; gap: 8px;">
                                     <MudText Typo="Typo.body1">4.0</MudText>
@@ -124,31 +125,32 @@
                         <MudText Typo="Typo.h3" class="item-price">@item.Price.ToString("C")</MudText>
                         <MudText Typo="Typo.body1" Class="mb-4">@item.Description</MudText>
                         <MudText Typo="Typo.body2" Class="mb-4">Stock: @item.StockQuantity</MudText>
-                        <MudGrid >
+                        <MudGrid>
                             <!-- Quantity Control -->
-                            <MudItem xs="12" sm="12" md="4" Class="d-flex align-center flex-wrap" Style="gap: 4px;">  
-                                    <MudItem >
-                                        <MudButton Class="quantity-btn" OnClick="DecreaseQuantity">-</MudButton>
-                                    </MudItem>
-                                    <MudItem >
-                                        <MudNumericField HideSpinButtons="true" @bind-Value="buyQuantity" Min="1"
-                                                        Max="@item.StockQuantity" Variant="Variant.Outlined"
-                                                        Style="width: 64px; height: 50px;" />
-                                    </MudItem>
-                                    <MudItem >
-                                        <MudButton Class="quantity-btn" OnClick="IncreaseQuantity">+</MudButton>
-                                    </MudItem>    
+                            <MudItem xs="12" sm="12" md="4" Class="d-flex align-center flex-wrap" Style="gap: 4px;">
+                                <MudItem>
+                                    <MudButton Class="quantity-btn" OnClick="DecreaseQuantity">-</MudButton>
+                                </MudItem>
+                                <MudItem>
+                                    <MudNumericField HideSpinButtons="true" @bind-Value="buyQuantity" Min="1"
+                                        Max="@item.StockQuantity" Variant="Variant.Outlined"
+                                        Style="width: 64px; height: 50px;" />
+                                </MudItem>
+                                <MudItem>
+                                    <MudButton Class="quantity-btn" OnClick="IncreaseQuantity">+</MudButton>
+                                </MudItem>
                             </MudItem>
 
                             <!-- Action Buttons -->
                             <MudItem xs="12" sm="12" md="8" Class="d-flex flex-wrap justify-start" Style="gap: 12px;">
-                                    <MudItem >
-                                        <MudButton Class="add-to-cart-btn" StartIcon="@Icons.Material.Outlined.ShoppingCart"
-                                                OnClick="AddToCart"  Style="height: 50px;flex: 1;">Add to cart</MudButton>
-                                    </MudItem>
-                                    <MudItem >
-                                        <MudButton Class="buy-now-btn" OnClick="BuyNow"  Style="height: 50px;flex: 1;">Buy Now</MudButton>
-                                    </MudItem>
+                                <MudItem>
+                                    <MudButton Class="add-to-cart-btn" StartIcon="@Icons.Material.Outlined.ShoppingCart"
+                                        OnClick="AddToCart" Style="height: 50px;flex: 1;">Add to cart</MudButton>
+                                </MudItem>
+                                <MudItem>
+                                    <MudButton Class="buy-now-btn" OnClick="BuyNow" Style="height: 50px;flex: 1;">Buy Now
+                                    </MudButton>
+                                </MudItem>
                             </MudItem>
                         </MudGrid>
                     </MudItem>
@@ -196,34 +198,37 @@
                 <div class="feedback-container mt-4">
                     <MudGrid style="margin-bottom: 10px;">
                         <MudItem xs="12" md="12" Class="d-flex flex-wrap" Style="gap: 10px;">
-                        <!-- Avatar Section -->
-                        <MudItem >
-                            <MudAvatar Size="Size.Large" Class="mr-2">
-                                <MudImage Src="https://cellphones.com.vn/sforum/wp-content/uploads/2024/02/avatar-anh-meo-cute-1.jpg"></MudImage>
-                            </MudAvatar>
-                        </MudItem>
+                            <!-- Avatar Section -->
+                            <MudItem>
+                                <MudAvatar Size="Size.Large" Class="mr-2">
+                                    <MudImage
+                                        Src="https://cellphones.com.vn/sforum/wp-content/uploads/2024/02/avatar-anh-meo-cute-1.jpg">
+                                    </MudImage>
+                                </MudAvatar>
+                            </MudItem>
 
-                        <!-- Content Section -->
-                        <MudItem >
-                            <!-- Reviewer Name -->
-                            <MudText Typo="Typo.h6">Phương Liên</MudText>
+                            <!-- Content Section -->
+                            <MudItem>
+                                <!-- Reviewer Name -->
+                                <MudText Typo="Typo.h6">Phương Liên</MudText>
 
-                            <!-- Rating -->
-                            <MudRating MaxValue="5" SelectedValue="5" ReadOnly="true" Size="Size.Small" style="padding-right:10px"/>
+                                <!-- Rating -->
+                                <MudRating MaxValue="5" SelectedValue="5" ReadOnly="true" Size="Size.Small"
+                                    style="padding-right:10px" />
 
-                            <!-- Date -->
-                            <MudText Typo="Typo.caption" Style="font-style: italic;">22/11/2023</MudText>
-                        </MudItem>
+                                <!-- Date -->
+                                <MudText Typo="Typo.caption" Style="font-style: italic;">22/11/2023</MudText>
+                            </MudItem>
                         </MudItem>
                     </MudGrid>
 
                     <MudText Typo="Typo.body1" style="margin-bottom: 10px;word-break: break-word">
-                                These snacks are incredibly delicious! They have the perfect crunch and are packed with flavor. 
-                                The seasoning is just right—not too strong, but enough to keep you coming back for more. 
-                                Definitely a snack worth trying!
+                        These snacks are incredibly delicious! They have the perfect crunch and are packed with flavor.
+                        The seasoning is just right—not too strong, but enough to keep you coming back for more.
+                        Definitely a snack worth trying!
                     </MudText>
                 </div>
-                
+
             </MudItem>
         </MudGrid>
 
@@ -268,7 +273,7 @@
         {
             var parameters = new DialogParameters { ["ContentText"] = "You need to login to add items to the cart." };
             var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
-var dialog = DialogService.Show<LoginDialog>("Login Required", parameters, options);
+            var dialog = DialogService.Show<LoginDialog>("Login Required", parameters, options);
             var result = await dialog.Result;
 
             if (result != null && !result.Canceled)
@@ -282,7 +287,7 @@ var dialog = DialogService.Show<LoginDialog>("Login Required", parameters, optio
         {
             try
             {
-                await CartService.AddToCartAsync(item, buyQuantity);
+                await CartController.AddToCartAsync(item, buyQuantity);
                 Snackbar.Add($"Added {buyQuantity} {item.Name} to cart", Severity.Success);
             }
             catch (InvalidOperationException ex)

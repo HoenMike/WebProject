@@ -11,12 +11,12 @@ using Microsoft.AspNetCore.Components.Authorization;
 
 namespace WebProject.Services
 {
-  public class CartService
+  public class CartController
   {
     private readonly ApplicationDbContext _dbContext;
     private readonly AuthenticationStateProvider _authStateProvider;
 
-    public CartService(ApplicationDbContext dbContext, AuthenticationStateProvider authStateProvider)
+    public CartController(ApplicationDbContext dbContext, AuthenticationStateProvider authStateProvider)
     {
       _dbContext = dbContext;
       _authStateProvider = authStateProvider;
