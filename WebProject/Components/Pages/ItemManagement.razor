@@ -8,162 +8,164 @@
 @rendermode InteractiveServer
 
 <PageTitle>Item Management</PageTitle>
-<MudPaper Class="pa-4 mb-4" Style="border-radius: 0;">
+
+<MudContainer>
+  <MudPaper Class="pa-4 mb-4" Elevation="3">
     <MudGrid>
-        <MudItem xs="12">
-            <MudTextField Variant="Variant.Outlined" @bind-Value="searchTerm" Label="Search Items"
-                AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" Immediate="true"
-                Clearable="true" OnClearButtonClick="ClearSearch" OnKeyUp="FilterItems" />
-        </MudItem>
-        <MudItem xs="2">
-            <MudButton Variant="Variant.Filled" OnClick="OpenAddItemDialog" Color="Color.Secondary" Class="ml-2">Add
-                Item</MudButton>
-        </MudItem>
+      <MudItem xs="12">
+        <MudTextField Variant="Variant.Outlined" @bind-Value="searchTerm" Label="Search Items"
+          AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" Immediate="true" Clearable="true"
+          OnClearButtonClick="ClearSearch" OnKeyUp="FilterItems" />
+      </MudItem>
+      <MudItem xs="12">
+        <MudButton Variant="Variant.Filled" OnClick="OpenAddItemDialog" Color="Color.Secondary" Class="ml-2">Add
+          Item</MudButton>
+      </MudItem>
     </MudGrid>
-</MudPaper>
+  </MudPaper>
 
-@if (isLoading)
-{
+  @if (isLoading)
+  {
     <MudProgressLinear Indeterminate="true" Color="Color.Primary" Style="margin-bottom: 20px;" />
-}
-else
-{
-    <MudTable Items="@displayedItems" Hover="true" Striped="true" Style="border-radius: 0;">
-        <HeaderContent>
-            <MudTh>Image</MudTh>
-            <MudTh>Name</MudTh>
-            <MudTh>Price</MudTh>
-            <MudTh>Description</MudTh>
-            <MudTh>Stock Quantity</MudTh>
-            <MudTh>Actions</MudTh>
-        </HeaderContent>
-        <RowTemplate Context="item">
-            <MudTd><img src="@item.ThumbnailUrl" alt="@item.Name" style="width: 50px; height: 50px;" /></MudTd>
-            <MudTd>@item.Name</MudTd>
-            <MudTd>@item.Price.ToString("C")</MudTd>
-            <MudTd>@item.Description</MudTd>
-            <MudTd>@item.StockQuantity</MudTd>
-            <MudTd>
-                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary"
-                    OnClick="() => OpenEditItemDialog(item)" />
-                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error"
-                    OnClick="() => OpenDeleteConfirmationDialog(item)" />
-            </MudTd>
-        </RowTemplate>
+  }
+  else
+  {
+    <MudTable Elevation="3" Items="@displayedItems" Hover="true" Striped="true">
+      <HeaderContent>
+        <MudTh>Image</MudTh>
+        <MudTh>Name</MudTh>
+        <MudTh>Price</MudTh>
+        <MudTh>Description</MudTh>
+        <MudTh>Stock Quantity</MudTh>
+        <MudTh>Actions</MudTh>
+      </HeaderContent>
+      <RowTemplate Context="item">
+        <MudTd><img src="@item.ThumbnailUrl" alt="@item.Name" style="width: 50px; height: 50px;" /></MudTd>
+        <MudTd>@item.Name</MudTd>
+        <MudTd>@item.Price.ToString("C")</MudTd>
+        <MudTd>@item.Description</MudTd>
+        <MudTd>@item.StockQuantity</MudTd>
+        <MudTd>
+          <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary"
+            OnClick="() => OpenEditItemDialog(item)" />
+          <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error"
+            OnClick="() => OpenDeleteConfirmationDialog(item)" />
+        </MudTd>
+      </RowTemplate>
     </MudTable>
-}
-
+  }
+</MudContainer>
 @code {
-    private List<Item> items = new();
-    private List<Item> displayedItems = new();
-    private bool isLoading = true;
-    private string searchTerm = string.Empty;
+  private List<Item> items = new();
+  private List<Item> displayedItems = new();
+  private bool isLoading = true;
+  private string searchTerm = string.Empty;
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+  protected override async Task OnAfterRenderAsync(bool firstRender)
+  {
+    if (firstRender)
     {
-        if (firstRender)
-        {
-            await LoadItems();
-        }
+      await LoadItems();
     }
+  }
 
-    private async Task LoadItems()
+  private async Task LoadItems()
+  {
+    try
     {
-        try
-        {
-            items = await ItemController.GetItemsAsync();
-            displayedItems = items;
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add($"Error loading items: {ex.Message}", Severity.Error);
-        }
-        finally
-        {
-            isLoading = false;
-            StateHasChanged();
-        }
+      items = await ItemController.GetItemsAsync();
+      displayedItems = items;
     }
-
-    private void FilterItems()
+    catch (Exception ex)
     {
-        if (string.IsNullOrEmpty(searchTerm))
-        {
-            displayedItems = items;
-        }
-        else
-        {
-            displayedItems = items.Where(item =>
-            item.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
-            ).ToList();
-        }
+      Snackbar.Add($"Error loading items: {ex.Message}", Severity.Error);
     }
-
-    private void ClearSearch()
+    finally
     {
-        searchTerm = string.Empty;
-        displayedItems = items;
-        StateHasChanged();
+      isLoading = false;
+      StateHasChanged();
     }
+  }
 
-    private async Task OpenAddItemDialog()
+  private void FilterItems()
+  {
+    if (string.IsNullOrEmpty(searchTerm))
     {
-        var parameters = new DialogParameters();
-        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
-        var dialog = DialogService.Show<AddItemDialog>("Add Item", parameters, options);
-        var result = await dialog.Result;
-
-        if (result != null && !result.Canceled)
-        {
-            await LoadItems();
-        }
+      displayedItems = items;
     }
-
-    private async Task OpenDeleteConfirmationDialog(Item item)
+    else
     {
-        var parameters = new DialogParameters
-            {
-                ["Message"] = $"Are you sure you want to delete the item '{item.Name}'?"
-            };
-        var options = new DialogOptions
-            {
-                CloseButton = true,
-                MaxWidth = MaxWidth.Small,
-                FullWidth = true
-            };
-        var dialog = DialogService.Show<ConfirmationDialog>("Delete Item", parameters, options);
-        var result = await dialog.Result;
-
-        if (result != null && result.Data is bool confirmed && confirmed)
-        {
-            await DeleteItem(item);
-        }
+      displayedItems = items.Where(item =>
+      item.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+      ).ToList();
     }
+  }
 
-    private async Task OpenEditItemDialog(Item item)
+  private void ClearSearch()
+  {
+    searchTerm = string.Empty;
+    displayedItems = items;
+    StateHasChanged();
+  }
+
+  private async Task OpenAddItemDialog()
+  {
+    var parameters = new DialogParameters();
+    var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+    var dialog = DialogService.Show<AddItemDialog>("Add Item", parameters, options);
+    var result = await dialog.Result;
+
+    if (result != null && !result.Canceled)
     {
-        var parameters = new DialogParameters { ["Item"] = item };
-        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
-        var dialog = DialogService.Show<EditItemDialog>("Edit Item", parameters, options);
-        var result = await dialog.Result;
-
-        if (result != null && !result.Canceled)
-        {
-            await LoadItems();
-        }
+      await LoadItems();
     }
+  }
 
-    private async Task DeleteItem(Item item)
+  private async Task OpenDeleteConfirmationDialog(Item item)
+  {
+    var parameters = new DialogParameters
+      {
+        ["Message"] = $"Are you sure you want to delete the item '{item.Name}'?"
+      };
+    var options = new DialogOptions
+      {
+        CloseButton = true,
+        MaxWidth = MaxWidth.Small,
+        FullWidth = true
+      };
+    var dialog = DialogService.Show<ConfirmationDialog>("Delete Item", parameters, options);
+    var result = await dialog.Result;
+
+    if (result != null && result.Data is bool confirmed && confirmed)
     {
-        try
-        {
-            await ItemController.DeleteItemAsync(item);
-            Snackbar.Add("Item deleted successfully", Severity.Success);
-            await LoadItems();
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add($"Error deleting item: {ex.Message}", Severity.Error);
-        }
+      await DeleteItem(item);
     }
+  }
+
+  private async Task OpenEditItemDialog(Item item)
+  {
+    var parameters = new DialogParameters { ["Item"] = item };
+    var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+    var dialog = DialogService.Show<EditItemDialog>("Edit Item", parameters, options);
+    var result = await dialog.Result;
+
+    if (result != null && !result.Canceled)
+    {
+      await LoadItems();
+    }
+  }
+
+  private async Task DeleteItem(Item item)
+  {
+    try
+    {
+      await ItemController.DeleteItemAsync(item);
+      Snackbar.Add("Item deleted successfully", Severity.Success);
+      await LoadItems();
+    }
+    catch (Exception ex)
+    {
+      Snackbar.Add($"Error deleting item: {ex.Message}", Severity.Error);
+    }
+  }
 }

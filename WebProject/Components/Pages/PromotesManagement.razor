@@ -8,50 +8,52 @@
 
 <PageTitle>Promote Management</PageTitle>
 
-<MudPaper Class="pa-4 mb-4" Style="border-radius: 0;">
-  <MudGrid>
-    <MudItem xs="12" sm="6">
-      <MudTextField Variant="Variant.Outlined" @bind-Value="searchTerm" Label="Search Promotions"
-        AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" Immediate="true" Clearable="true"
-        OnClearButtonClick="ClearSearch" OnKeyUp="FilterPromotions" />
-    </MudItem>
-    <MudItem xs="12" sm="6" Class="d-flex justify-end">
-      <MudButton Variant="Variant.Filled" OnClick="OpenAddPromotionDialog" Color="Color.Secondary">
-        Add Promotion
-      </MudButton>
-    </MudItem>
-  </MudGrid>
-</MudPaper>
-
-@if (isLoading)
-{
-  <MudProgressLinear Indeterminate="true" Color="Color.Primary" Style="margin-bottom: 20px;" />
-}
-else
-{
-  <MudGrid Class="pa-4 mb-4">
-    @foreach (var promote in displayedPromotions)
-    {
-      <MudItem xs="12" sm="6" md="4">
-        <MudCard Class="mb-4">
-          <MudCardMedia Image="@promote.ImageUrl" Height="200" />
-          <MudCardContent>
-            <div class="d-flex justify-space-between align-center">
-              <MudSwitch T="bool" @bind-Value="promote.IsActive" Label="Active"
-                @bind-Value:after="() => UpdatePromotionStatus(promote)" />
-              <div>
-                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary"
-                  OnClick="() => OpenEditPromotionDialog(promote)" />
-                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error"
-                  OnClick="() => OpenDeleteConfirmationDialog(promote)" />
-              </div>
-            </div>
-          </MudCardContent>
-        </MudCard>
+<MudContainer>
+  <MudPaper Class="pa-4 mb-4">
+    <MudGrid>
+      <MudItem xs="12">
+        <MudTextField Variant="Variant.Outlined" @bind-Value="searchTerm" Label="Search Promotions"
+          AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" Immediate="true" Clearable="true"
+          OnClearButtonClick="ClearSearch" OnKeyUp="FilterPromotions" />
       </MudItem>
-    }
-  </MudGrid>
-}
+      <MudItem xs="12" Class="d-flex ">
+        <MudButton Variant="Variant.Filled" OnClick="OpenAddPromotionDialog" Color="Color.Secondary">
+          Add Promotion
+        </MudButton>
+      </MudItem>
+    </MudGrid>
+  </MudPaper>
+
+  @if (isLoading)
+  {
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" Style="margin-bottom: 20px;" />
+  }
+  else
+  {
+    <MudGrid Class="pa-4 mb-4">
+      @foreach (var promote in displayedPromotions)
+      {
+        <MudItem xs="12" sm="6" md="4">
+          <MudCard Class="mb-4">
+            <MudCardMedia Image="@promote.ImageUrl" Height="200" />
+            <MudCardContent>
+              <div class="d-flex justify-space-between align-center">
+                <MudSwitch T="bool" @bind-Value="promote.IsActive" Label="Active"
+                  @bind-Value:after="() => UpdatePromotionStatus(promote)" />
+                <div>
+                  <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary"
+                    OnClick="() => OpenEditPromotionDialog(promote)" />
+                  <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error"
+                    OnClick="() => OpenDeleteConfirmationDialog(promote)" />
+                </div>
+              </div>
+            </MudCardContent>
+          </MudCard>
+        </MudItem>
+      }
+    </MudGrid>
+  }
+</MudContainer>
 
 @code {
   private List<Promote> promotions = new();

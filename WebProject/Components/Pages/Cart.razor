@@ -10,8 +10,7 @@
 
 <PageTitle>Your Cart</PageTitle>
 
-<MudContainer MaxWidth="MaxWidth.ExtraLarge">
-  <MudText Typo="Typo.h3" Class="mb-4">Your Cart</MudText>
+<MudContainer>
 
   @if (isLoading)
   {
@@ -112,7 +111,10 @@
   {
     <MudCard>
       <MudCardContent>
-        <MudAlert Severity="Severity.Normal">Your cart is empty</MudAlert>
+        <MudAlert Severity="Severity.Normal">
+          Your cart is empty. Navigate here to <MudLink Href="/itembrowse">browse items</MudLink> and add to your
+          cart.
+        </MudAlert>
       </MudCardContent>
     </MudCard>
   }

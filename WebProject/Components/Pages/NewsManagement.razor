@@ -10,60 +10,62 @@
 
 <PageTitle>News Management</PageTitle>
 
+<MudContainer>
+    <MudPaper Class="pa-4 mb-4">
+        <MudGrid>
+            <MudItem xs="12">
+                <MudTextField Variant="Variant.Outlined" @bind-Value="searchTerm" Label="Search News"
+                    AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" Immediate="true"
+                    Clearable="true" OnClearButtonClick="ClearSearch" OnKeyUp="FilterNews" />
+            </MudItem>
+            <MudItem xs="12">
+                <MudButton Variant="Variant.Filled" OnClick="OpenAddNewsDialog" Color="Color.Secondary" Class="ml-2">Add
+                    News</MudButton>
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
 
-<MudPaper Class="pa-4 mb-4" Style="border-radius: 0;">
-    <MudGrid>
-        <MudItem xs="12">
-            <MudTextField Variant="Variant.Outlined" @bind-Value="searchTerm" Label="Search News"
-                AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" Immediate="true"
-                Clearable="true" OnClearButtonClick="ClearSearch" OnKeyUp="FilterNews" />
-        </MudItem>
-        <MudItem xs="4">
-            <MudButton Variant="Variant.Filled" OnClick="OpenAddNewsDialog" Color="Color.Secondary" Class="ml-2">Add
-                News</MudButton>
-        </MudItem>
-    </MudGrid>
-</MudPaper>
 
-
-@if (isLoading)
-{
-    <MudProgressLinear Indeterminate="true" Color="Color.Primary" Style="margin-bottom: 20px;" />
-}
-else
-{
-    @foreach (var news in displayedNews)
+    @if (isLoading)
     {
-        <MudExpansionPanel Style="margin: 10px; word-break: break-word" HideIcon="true">
-            <TitleContent>
-                <MudGrid xs="12">
-                    <MudItem xs="10">
-                        <MudText Typo="Typo.h6" GutterBottom="true">@news.Title</MudText>
-                        <MudText Typo="Typo.caption" Style="font-style: italic; margin-bottom: 4px; display: block">
-                            Created at: @news.CreatedAt.ToString("g") - by @news.CreatedBy
-                        </MudText>
-                        @if (news.UpdatedAt.HasValue)
-                        {
-                            <MudText Typo="Typo.caption" Style="font-style: italic;">
-                                Updated at: @news.UpdatedAt.Value.ToString("g") - by @news.UpdatedBy
-                            </MudText>
-                        }
-                    </MudItem>
-                    <MudItem xs="2">
-                        <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary"
-                            OnClick="() => OpenEditNewsDialog(news)" />
-                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error"
-                            OnClick="() => OpenDeleteConfirmationDialog(news)" />
-                    </MudItem>
-                </MudGrid>
-            </TitleContent>
-            <ChildContent>
-                <MudText Typo="Typo.body1">@news.Content</MudText>
-            </ChildContent>
-        </MudExpansionPanel>
+        <MudProgressLinear Indeterminate="true" Color="Color.Primary" Style="margin-bottom: 20px;" />
     }
-}
-
+    else
+    {
+        @foreach (var news in displayedNews)
+        {
+            <MudCard Class="mb-2" Elevation="3">
+                <MudExpansionPanel Style="margin: 10px; word-break: break-word" HideIcon="true">
+                    <TitleContent>
+                        <MudGrid xs="12">
+                            <MudItem xs="10">
+                                <MudText Typo="Typo.h6" GutterBottom="true">@news.Title</MudText>
+                                <MudText Typo="Typo.caption" Style="font-style: italic; margin-bottom: 4px; display: block">
+                                    Created at: @news.CreatedAt.ToString("g") - by @news.CreatedBy
+                                </MudText>
+                                @if (news.UpdatedAt.HasValue)
+                                {
+                                    <MudText Typo="Typo.caption" Style="font-style: italic;">
+                                        Updated at: @news.UpdatedAt.Value.ToString("g") - by @news.UpdatedBy
+                                    </MudText>
+                                }
+                            </MudItem>
+                            <MudItem xs="2">
+                                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary"
+                                    OnClick="() => OpenEditNewsDialog(news)" />
+                                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error"
+                                    OnClick="() => OpenDeleteConfirmationDialog(news)" />
+                            </MudItem>
+                        </MudGrid>
+                    </TitleContent>
+                    <ChildContent>
+                        <MudText Typo="Typo.body1">@news.Content</MudText>
+                    </ChildContent>
+                </MudExpansionPanel>
+            </MudCard>
+        }
+    }
+</MudContainer>
 @code {
     private List<News> news = new();
     private List<News> displayedNews = new();
