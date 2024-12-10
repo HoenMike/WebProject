@@ -16,6 +16,8 @@
     background-color: white;
     z-index: 1000;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    max-height: calc(100vh - 3.5rem); /* Adjust the height as needed */
+    overflow-y: auto;
   }
 }
 
@@ -35,5 +37,7 @@
   .mud-navmenu-container {
     display: block !important;
     width: 100%;
+    max-height: calc(100vh - 3.5rem); /* Adjust the height as needed */
+    overflow-y: auto;
   }
 }
