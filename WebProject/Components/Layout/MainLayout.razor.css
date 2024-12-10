@@ -1,8 +1,19 @@
+html,
+body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background-color: #ffe6ec;
+}
 .page {
+  min-height: 100vh;
+  height: 100vh;
   position: relative;
   display: flex;
   flex-direction: column;
   background-color: #ffe6ec;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 main {
