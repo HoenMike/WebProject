@@ -13,7 +13,7 @@
 <PageTitle>Login</PageTitle>
 <div class="login-container">
     <div class="login-form">
-        <h1>Login</h1>
+        <h1 style="margin-bottom: 20px;">LOGIN</h1>
         <StatusMessage Message="@errorMessage" />
         <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
             <DataAnnotationsValidator />
@@ -34,12 +34,13 @@
                     Remember me
                 </label>
             </div>
-            <button type="submit" class="btn btn-primary">Login</button>
+            <button type="submit" class="btn btn-primary">LOGIN</button>
             <div class="form-links">
-                <a
-                    href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">
-                    Don't have an account? Sign up
+                <p style="display: inline;">Don't have an account?</p>
+                <a href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))" style="display: inline;">
+                    Register
                 </a>
+                <br />
                 <a href="/">Login later</a>
             </div>
         </EditForm>

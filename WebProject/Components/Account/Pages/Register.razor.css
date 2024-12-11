@@ -5,7 +5,8 @@ body {
   height: 100%;
   width: 100%;
 }
-.login-container {
+
+.register-container{
   background-image: url("https://img.pikbest.com/wp/202346/convenience-store-small-portrayed-in-3d-on-a-soft-pink-background-with-ample-space-for-text_9716224.jpg!sw800");
   background-size: cover;
   background-position: center;
@@ -17,7 +18,7 @@ body {
   padding: 20px;
 }
 
-.login-form {
+.register-form{
   background-color: rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(10px);
   padding: 40px;

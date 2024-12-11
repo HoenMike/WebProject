@@ -38,7 +38,7 @@
             <MudCardMedia Image="@promote.ImageUrl" Height="200" />
             <MudCardContent>
               <div class="d-flex justify-space-between align-center">
-                <MudSwitch T="bool" @bind-Value="promote.IsActive" Label="Active"
+                <MudSwitch T="bool" @bind-Value="promote.IsActive" Label="Active" Color="Color.Success"
                   @bind-Value:after="() => UpdatePromotionStatus(promote)" />
                 <div>
                   <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary"
