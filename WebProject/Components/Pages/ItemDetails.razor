@@ -107,16 +107,12 @@
               <MudGrid>
                 <MudItem xs="12" md="12" Class="d-flex align-center flex-wrap" Style="gap: 20px;">
                   <MudItem style="display: flex; align-items: center; gap: 8px;">
-                    <MudText Typo="Typo.body1">4.0</MudText>
-                    <MudRating SelectedValue="4" ReadOnly="true" />
+                    <MudText Typo="Typo.body1">@averageRating.ToString("0.0")</MudText>
+                    <MudRating SelectedValue="@averageRating" ReadOnly="true" />
                   </MudItem>
 
                   <MudItem style="display: flex; align-items: center;">
-                    <MudText Typo="Typo.body1">23 Evaluate</MudText>
-                  </MudItem>
-
-                  <MudItem style="display: flex; align-items: center;">
-                    <MudText Typo="Typo.body1">30 Sold</MudText>
+                    <MudText Typo="Typo.body1">@reviews.Count Evaluate</MudText>
                   </MudItem>
                 </MudItem>
               </MudGrid>
@@ -173,32 +169,34 @@
                 </MudGrid>
               </MudForm>
             </MudPaper>
-            <div Class="rating-container mt-4">
+            <div class="rating-container mt-4">
               <MudGrid>
                 <MudItem xs="12" sm="12" md="5" Class="average-rating" style="text-align: center;">
-                  <MudText Typo="Typo.h4" Style="color: #FF66A1;font-weight: bold; ">4.0/5</MudText>
-                  <MudRating SelectedValue="4" MaxValue="5" ReadOnly="true" Size="Size.Medium" />
+                  <MudText Typo="Typo.h4" Style="color: #FF66A1;font-weight: bold;">@averageRating.ToString("0")/5</MudText>
+                  <MudRating SelectedValue="@averageRating" MaxValue="5" ReadOnly="true" Size="Size.Medium" />
                 </MudItem>
 
                 <MudItem xs="12" sm="12" md="7" style="display: flex; flex-wrap: wrap; gap: 8px;">
-                  <MudChip T="string" Variant="Variant.Outlined" Color="Color.Primary">All</MudChip>
-                  <MudChip T="string" Variant="Variant.Outlined" Color="Color.Primary">
+                  <MudChip T="string" Variant="selectedRatings.Count == 0 ? Variant.Filled : Variant.Outlined" Color="Color.Primary" OnClick="() => { selectedRatings.Clear(); ApplyFilters(); }">
+                    All
+                  </MudChip>
+                  <MudChip T="int" Variant="selectedRatings.Contains(5) ? Variant.Filled : Variant.Outlined" Color="Color.Primary" OnClick="() => ToggleRatingFilter(5)">
                     5
                     <MudRating SelectedValue="1" ReadOnly="true" MaxValue="1" Size="Size.Small" />
                   </MudChip>
-                  <MudChip T="string" Variant="Variant.Outlined" Color="Color.Primary">
+                  <MudChip T="int" Variant="selectedRatings.Contains(4) ? Variant.Filled : Variant.Outlined" Color="Color.Primary" OnClick="() => ToggleRatingFilter(4)">
                     4
                     <MudRating SelectedValue="1" ReadOnly="true" MaxValue="1" Size="Size.Small" />
                   </MudChip>
-                  <MudChip T="string" Variant="Variant.Outlined" Color="Color.Primary">
+                  <MudChip T="int" Variant="selectedRatings.Contains(3) ? Variant.Filled : Variant.Outlined" Color="Color.Primary" OnClick="() => ToggleRatingFilter(3)">
                     3
                     <MudRating SelectedValue="1" ReadOnly="true" MaxValue="1" Size="Size.Small" />
                   </MudChip>
-                  <MudChip T="string" Variant="Variant.Outlined" Color="Color.Primary">
+                  <MudChip T="int" Variant="selectedRatings.Contains(2) ? Variant.Filled : Variant.Outlined" Color="Color.Primary" OnClick="() => ToggleRatingFilter(2)">
                     2
                     <MudRating SelectedValue="1" ReadOnly="true" MaxValue="1" Size="Size.Small" />
                   </MudChip>
-                  <MudChip T="string" Variant="Variant.Outlined" Color="Color.Primary">
+                  <MudChip T="int" Variant="selectedRatings.Contains(1) ? Variant.Filled : Variant.Outlined" Color="Color.Primary" OnClick="() => ToggleRatingFilter(1)">
                     1
                     <MudRating SelectedValue="1" ReadOnly="true" MaxValue="1" Size="Size.Small" />
                   </MudChip>
@@ -210,12 +208,11 @@
 
 
           <MudText Typo="Typo.h5" Class="mt-4">Reviews</MudText>
-          @foreach (var review in reviews)
+          @foreach (var review in filteredReviews)
           {
             <div class="feedback-container mt-4">
               <MudGrid style="margin-bottom: 10px;">
                 <MudItem xs="12" md="12" Class="d-flex flex-wrap" Style="gap: 10px;">
-
                   <!-- Content Section -->
                   <MudItem>
                     <!-- Reviewer Name -->
@@ -253,8 +250,12 @@
   private int buyQuantity = 1;
 
   private List<Review> reviews = new();
+  private List<Review> filteredReviews = new();
   private Review newReview = new();
   private MudForm? reviewForm;
+
+  private List<int> selectedRatings = new();
+  private int averageRating = 0;
 
   protected override async Task OnInitializedAsync()
   {
@@ -262,6 +263,45 @@
     if (item != null)
     {
       reviews = await ReviewController.GetReviewsByItemIdAsync(Id);
+      filteredReviews = new List<Review>(reviews);
+      CalculateAverageRating();
+    }
+  }
+
+  private void ToggleRatingFilter(int rating)
+  {
+    if (selectedRatings.Contains(rating))
+    {
+      selectedRatings.Remove(rating);
+    }
+    else
+    {
+      selectedRatings.Add(rating);
+    }
+    ApplyFilters();
+  }
+
+  private void ApplyFilters()
+  {
+    if (selectedRatings.Any())
+    {
+      filteredReviews = reviews.Where(r => selectedRatings.Contains(r.Rating)).ToList();
+    }
+    else
+    {
+      filteredReviews = new List<Review>(reviews);
+    }
+  }
+
+  private void CalculateAverageRating()
+  {
+    if (filteredReviews.Any())
+    {
+      averageRating = (int)Math.Ceiling(filteredReviews.Average(r => r.Rating));
+    }
+    else
+    {
+      averageRating = 0;
     }
   }
 
@@ -328,10 +368,12 @@
     if (reviewForm.IsValid)
     {
       newReview.ItemId = Id;
-      newReview.UserId = "currentUserId"; // Replace with actual user ID
+      newReview.UserId = "currentUserId";
       await ReviewController.AddReviewAsync(newReview);
       Snackbar.Add("Review submitted successfully", Severity.Success);
       reviews.Add(newReview);
+      ApplyFilters();
+      CalculateAverageRating();
       newReview = new();
     }
   }
