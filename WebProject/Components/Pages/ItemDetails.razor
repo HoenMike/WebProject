@@ -1,308 +1,339 @@
 @page "/item-details/{Id:int}"
 @inject ItemController ItemController
 @inject CartController CartController
+@inject ReviewController ReviewController
 @inject ISnackbar Snackbar
 @inject NavigationManager Navigation
 @inject IDialogService DialogService
 @using MudBlazor
 <style>
-    .item-details-container {
-        display: flex;
-        background-color: #ffffff;
-        border-radius: 10px;
-        padding: 30px;
-        margin-left: 24px;
-        margin-right: 24px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
+  .item-details-container {
+    display: flex;
+    background-color: #ffffff;
+    border-radius: 10px;
+    padding: 30px;
+    margin-left: 24px;
+    margin-right: 24px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
 
-    .item-price {
-        font-size: 26px;
-        font-weight: bold;
-        color: #eb3521;
-        margin-top: 12px;
-        margin-bottom: 12px;
-    }
+  .item-price {
+    font-size: 26px;
+    font-weight: bold;
+    color: #eb3521;
+    margin-top: 12px;
+    margin-bottom: 12px;
+  }
 
-    .item-name {
-        font-size: 30px;
-        font-weight: bold;
-        margin-bottom: 12px;
-    }
+  .item-name {
+    font-size: 30px;
+    font-weight: bold;
+    margin-bottom: 12px;
+  }
 
-    .quantity-btn {
-        background-color: #e5e5e5;
-        border: none;
-        border-radius: 5px;
-        font-size: 20px;
-        height: 50px;
-    }
+  .quantity-btn {
+    background-color: #e5e5e5;
+    border: none;
+    border-radius: 5px;
+    font-size: 20px;
+    height: 50px;
+  }
 
-    .quantity-btn:hover {
-        background-color: #aeaeae;
-    }
+  .quantity-btn:hover {
+    background-color: #aeaeae;
+  }
 
-    .add-to-cart-btn {
-        color: #ff66a1;
-        border: 2px solid #ff66a1;
-        font-size: 15px;
-        border-radius: 8px;
-        padding: 8px 16px;
-    }
+  .add-to-cart-btn {
+    color: #ff66a1;
+    border: 2px solid #ff66a1;
+    font-size: 15px;
+    border-radius: 8px;
+    padding: 8px 16px;
+  }
 
-    .buy-now-btn {
-        background-color: #ff66a1;
-        color: white;
-        padding: 8px 20px;
-        border: none;
-        border-radius: 8px;
-        font-size: 15px;
-        cursor: pointer;
-    }
+  .buy-now-btn {
+    background-color: #ff66a1;
+    color: white;
+    padding: 8px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    cursor: pointer;
+  }
 
-    .add-to-cart-btn:hover {
-        background-color: #ff1871;
-        color: #ffffff
-    }
+  .add-to-cart-btn:hover {
+    background-color: #ff1871;
+    color: #ffffff
+  }
 
-    .buy-now-btn:hover {
-        background-color: #ff1871;
-    }
+  .buy-now-btn:hover {
+    background-color: #ff1871;
+  }
 
-    .rating-container {
-        border: 1px solid #FF66A1;
-        border-radius: 8px;
-        padding: 20px;
-        background-color: #FFFBFE;
+  .rating-container {
+    border: 1px solid #FF66A1;
+    border-radius: 8px;
+    padding: 20px;
+    background-color: #FFFBFE;
 
-    }
+  }
 
-    .average-rating {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
+  .average-rating {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
 
-    .feedback-container {
-        border: 1px solid #414141;
-        border-radius: 8px;
-        padding: 20px;
+  .feedback-container {
+    border: 1px solid #414141;
+    border-radius: 8px;
+    padding: 20px;
 
-    }
+  }
 </style>
 <MudContainer>
-    <div class="item-details-container">
-        @if (item != null)
-        {
-            <MudGrid>
-                <MudItem xs="12">
-                    <MudGrid>
-                        <MudItem xs="12" md="4">
-                            <MudImage Src="@item.ThumbnailUrl" Alt="@item.Name" Style="width: 100%; border-radius: 12px;" />
-                        </MudItem>
-                        <MudItem xs="12" md="8">
-                            <MudText Typo="Typo.h4" class="item-name">@item.Name</MudText>
-                            <MudGrid>
-                                <MudItem xs="12" md="12" Class="d-flex align-center flex-wrap" Style="gap: 20px;">
-                                    <MudItem style="display: flex; align-items: center; gap: 8px;">
-                                        <MudText Typo="Typo.body1">4.0</MudText>
-                                        <MudRating SelectedValue="4" ReadOnly="true" />
-                                    </MudItem>
+  <div class="item-details-container">
+    @if (item != null)
+    {
+      <MudGrid>
+        <MudItem xs="12">
+          <MudGrid>
+            <MudItem xs="12" md="4">
+              <MudImage Src="@item.ThumbnailUrl" Alt="@item.Name" Style="width: 100%; border-radius: 12px;" />
+            </MudItem>
+            <MudItem xs="12" md="8">
+              <MudText Typo="Typo.h4" class="item-name">@item.Name</MudText>
+              <MudGrid>
+                <MudItem xs="12" md="12" Class="d-flex align-center flex-wrap" Style="gap: 20px;">
+                  <MudItem style="display: flex; align-items: center; gap: 8px;">
+                    <MudText Typo="Typo.body1">4.0</MudText>
+                    <MudRating SelectedValue="4" ReadOnly="true" />
+                  </MudItem>
 
-                                    <MudItem style="display: flex; align-items: center;">
-                                        <MudText Typo="Typo.body1">23 Evaluate</MudText>
-                                    </MudItem>
+                  <MudItem style="display: flex; align-items: center;">
+                    <MudText Typo="Typo.body1">23 Evaluate</MudText>
+                  </MudItem>
 
-                                    <MudItem style="display: flex; align-items: center;">
-                                        <MudText Typo="Typo.body1">30 Sold</MudText>
-                                    </MudItem>
-                                </MudItem>
-                            </MudGrid>
+                  <MudItem style="display: flex; align-items: center;">
+                    <MudText Typo="Typo.body1">30 Sold</MudText>
+                  </MudItem>
+                </MudItem>
+              </MudGrid>
 
-                            <MudText Typo="Typo.h3" class="item-price">@item.Price.ToString("C")</MudText>
-                            <MudText Typo="Typo.body1" Class="mb-4">@item.Description</MudText>
-                            <MudText Typo="Typo.body2" Class="mb-4">Stock: @item.StockQuantity</MudText>
-                            <MudGrid>
-                                <!-- Quantity Control -->
-                                <MudItem xs="12" sm="12" md="4" Class="d-flex align-center flex-wrap" Style="gap: 4px;">
-                                    <MudItem>
-                                        <MudButton Class="quantity-btn" OnClick="DecreaseQuantity">-</MudButton>
-                                    </MudItem>
-                                    <MudItem>
-                                        <MudNumericField HideSpinButtons="true" @bind-Value="buyQuantity" Min="1"
-                                            Max="@item.StockQuantity" Variant="Variant.Outlined"
-                                            Style="width: 64px; height: 50px;" />
-                                    </MudItem>
-                                    <MudItem>
-                                        <MudButton Class="quantity-btn" OnClick="IncreaseQuantity">+</MudButton>
-                                    </MudItem>
-                                </MudItem>
-
-                                <!-- Action Buttons -->
-                                <MudItem xs="12" sm="12" md="8" Class="d-flex flex-wrap justify-start" Style="gap: 12px;">
-                                    <MudItem>
-                                        <MudButton Class="add-to-cart-btn" StartIcon="@Icons.Material.Outlined.ShoppingCart"
-                                            OnClick="AddToCart" Style="height: 50px;flex: 1;">Add to cart</MudButton>
-                                    </MudItem>
-                                    <MudItem>
-                                        <MudButton Class="buy-now-btn" OnClick="BuyNow" Style="height: 50px;flex: 1;">Buy
-                                            Now
-                                        </MudButton>
-                                    </MudItem>
-                                </MudItem>
-                            </MudGrid>
-                        </MudItem>
-                    </MudGrid>
+              <MudText Typo="Typo.h3" class="item-price">@item.Price.ToString("C")</MudText>
+              <MudText Typo="Typo.body1" Class="mb-4">@item.Description</MudText>
+              <MudText Typo="Typo.body2" Class="mb-4">Stock: @item.StockQuantity</MudText>
+              <MudGrid>
+                <!-- Quantity Control -->
+                <MudItem xs="12" sm="12" md="4" Class="d-flex align-center flex-wrap" Style="gap: 4px;">
+                  <MudItem>
+                    <MudButton Class="quantity-btn" OnClick="DecreaseQuantity">-</MudButton>
+                  </MudItem>
+                  <MudItem>
+                    <MudNumericField HideSpinButtons="true" @bind-Value="buyQuantity" Min="1" Max="@item.StockQuantity" Variant="Variant.Outlined" Style="width: 64px; height: 50px;" />
+                  </MudItem>
+                  <MudItem>
+                    <MudButton Class="quantity-btn" OnClick="IncreaseQuantity">+</MudButton>
+                  </MudItem>
                 </MudItem>
 
-                <MudItem xs="12" Outlined="true">
-                    <MudText Typo="Typo.h6" Class="rating-title">
-                        Đánh giá sản phẩm
-                    </MudText>
-
-                    <div Class="rating-container mt-4">
-                        <MudGrid>
-                            <MudItem xs="12" sm="12" md="5" Class="average-rating" style="text-align: center;">
-                                <MudText Typo="Typo.h4" Style="color: #FF66A1;font-weight: bold; ">4.0/5</MudText>
-                                <MudRating SelectedValue="4" MaxValue="5" ReadOnly="true" Size="Size.Medium" />
-                            </MudItem>
-
-                            <MudItem xs="12" sm="12" md="7" style="display: flex; flex-wrap: wrap; gap: 8px;">
-                                <MudChip T="string" Variant="Variant.Outlined" Color="Color.Primary">All</MudChip>
-                                <MudChip T="string" Variant="Variant.Outlined" Color="Color.Primary">
-                                    5
-                                    <MudRating SelectedValue="1" ReadOnly="true" MaxValue="1" Size="Size.Small" />
-                                </MudChip>
-                                <MudChip T="string" Variant="Variant.Outlined" Color="Color.Primary">
-                                    4
-                                    <MudRating SelectedValue="1" ReadOnly="true" MaxValue="1" Size="Size.Small" />
-                                </MudChip>
-                                <MudChip T="string" Variant="Variant.Outlined" Color="Color.Primary">
-                                    3
-                                    <MudRating SelectedValue="1" ReadOnly="true" MaxValue="1" Size="Size.Small" />
-                                </MudChip>
-                                <MudChip T="string" Variant="Variant.Outlined" Color="Color.Primary">
-                                    2
-                                    <MudRating SelectedValue="1" ReadOnly="true" MaxValue="1" Size="Size.Small" />
-                                </MudChip>
-                                <MudChip T="string" Variant="Variant.Outlined" Color="Color.Primary">
-                                    1
-                                    <MudRating SelectedValue="1" ReadOnly="true" MaxValue="1" Size="Size.Small" />
-                                </MudChip>
-                            </MudItem>
-                        </MudGrid>
-                    </div>
-
-                    <div class="feedback-container mt-4">
-                        <MudGrid style="margin-bottom: 10px;">
-                            <MudItem xs="12" md="12" Class="d-flex flex-wrap" Style="gap: 10px;">
-                                <!-- Avatar Section -->
-                                <MudItem>
-                                    <MudAvatar Size="Size.Large" Class="mr-2">
-                                        <MudImage
-                                            Src="https://cellphones.com.vn/sforum/wp-content/uploads/2024/02/avatar-anh-meo-cute-1.jpg">
-                                        </MudImage>
-                                    </MudAvatar>
-                                </MudItem>
-
-                                <!-- Content Section -->
-                                <MudItem>
-                                    <!-- Reviewer Name -->
-                                    <MudText Typo="Typo.h6">Phương Liên</MudText>
-
-                                    <!-- Rating -->
-                                    <MudRating MaxValue="5" SelectedValue="5" ReadOnly="true" Size="Size.Small"
-                                        style="padding-right:10px" />
-
-                                    <!-- Date -->
-                                    <MudText Typo="Typo.caption" Style="font-style: italic;">22/11/2023</MudText>
-                                </MudItem>
-                            </MudItem>
-                        </MudGrid>
-
-                        <MudText Typo="Typo.body1" style="margin-bottom: 10px;word-break: break-word">
-                            These snacks are incredibly delicious! They have the perfect crunch and are packed with flavor.
-                            The seasoning is just right—not too strong, but enough to keep you coming back for more.
-                            Definitely a snack worth trying!
-                        </MudText>
-                    </div>
-
+                <!-- Action Buttons -->
+                <MudItem xs="12" sm="12" md="8" Class="d-flex flex-wrap justify-start" Style="gap: 12px;">
+                  <MudItem>
+                    <MudButton Class="add-to-cart-btn" StartIcon="@Icons.Material.Outlined.ShoppingCart" OnClick="AddToCart" Style="height: 50px;flex: 1;">Add to cart</MudButton>
+                  </MudItem>
+                  <MudItem>
+                    <MudButton Class="buy-now-btn" OnClick="BuyNow" Style="height: 50px;flex: 1;">Buy
+                      Now
+                    </MudButton>
+                  </MudItem>
                 </MudItem>
-            </MudGrid>
+              </MudGrid>
+            </MudItem>
+          </MudGrid>
+        </MudItem>
 
-        }
-        else
-        {
-            <MudText Typo="Typo.body1">Item not found</MudText>
-        }
-    </div>
+        <MudItem xs="12" Outlined="true">
+
+          <!-- Review Section -->
+          <MudItem xs="12">
+            <MudPaper Elevation="4" Class="p-4 mt-2">
+              <MudText Typo="Typo.h5">Add a Review</MudText>
+              <MudForm @ref="reviewForm" Model="newReview" Validated="OnReviewValidated">
+                <MudRating @bind-SelectedValue="newReview.Rating" MaxValue="5" Label="Rating" Required="true" />
+                <MudTextField @bind-Value="newReview.Comment" Label="Comment" Required="true" Lines="4" />
+                <MudGrid>
+                  <MudItem xs="12" style="padding-top: 30px;" Class="d-flex justify-end">
+                    <MudButton Size="Size.Medium" Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitReview">Submit</MudButton>
+                  </MudItem>
+                </MudGrid>
+              </MudForm>
+            </MudPaper>
+            <div Class="rating-container mt-4">
+              <MudGrid>
+                <MudItem xs="12" sm="12" md="5" Class="average-rating" style="text-align: center;">
+                  <MudText Typo="Typo.h4" Style="color: #FF66A1;font-weight: bold; ">4.0/5</MudText>
+                  <MudRating SelectedValue="4" MaxValue="5" ReadOnly="true" Size="Size.Medium" />
+                </MudItem>
+
+                <MudItem xs="12" sm="12" md="7" style="display: flex; flex-wrap: wrap; gap: 8px;">
+                  <MudChip T="string" Variant="Variant.Outlined" Color="Color.Primary">All</MudChip>
+                  <MudChip T="string" Variant="Variant.Outlined" Color="Color.Primary">
+                    5
+                    <MudRating SelectedValue="1" ReadOnly="true" MaxValue="1" Size="Size.Small" />
+                  </MudChip>
+                  <MudChip T="string" Variant="Variant.Outlined" Color="Color.Primary">
+                    4
+                    <MudRating SelectedValue="1" ReadOnly="true" MaxValue="1" Size="Size.Small" />
+                  </MudChip>
+                  <MudChip T="string" Variant="Variant.Outlined" Color="Color.Primary">
+                    3
+                    <MudRating SelectedValue="1" ReadOnly="true" MaxValue="1" Size="Size.Small" />
+                  </MudChip>
+                  <MudChip T="string" Variant="Variant.Outlined" Color="Color.Primary">
+                    2
+                    <MudRating SelectedValue="1" ReadOnly="true" MaxValue="1" Size="Size.Small" />
+                  </MudChip>
+                  <MudChip T="string" Variant="Variant.Outlined" Color="Color.Primary">
+                    1
+                    <MudRating SelectedValue="1" ReadOnly="true" MaxValue="1" Size="Size.Small" />
+                  </MudChip>
+                </MudItem>
+              </MudGrid>
+            </div>
+          </MudItem>
+
+
+
+          <MudText Typo="Typo.h5" Class="mt-4">Reviews</MudText>
+          @foreach (var review in reviews)
+          {
+            <div class="feedback-container mt-4">
+              <MudGrid style="margin-bottom: 10px;">
+                <MudItem xs="12" md="12" Class="d-flex flex-wrap" Style="gap: 10px;">
+
+                  <!-- Content Section -->
+                  <MudItem>
+                    <!-- Reviewer Name -->
+                    <MudText Typo="Typo.h6">@(review.User?.UserName ?? "Anonymous")</MudText>
+
+                    <!-- Rating -->
+                    <MudRating MaxValue="5" SelectedValue="@review.Rating" ReadOnly="true" Size="Size.Small" style="padding-right:10px" />
+
+                    <!-- Date -->
+                    <MudText Typo="Typo.caption" Style="font-style: italic;">@review.CreatedAt.ToString("dd/MM/yyyy")</MudText>
+                  </MudItem>
+                </MudItem>
+              </MudGrid>
+
+              <MudText Typo="Typo.body1" style="margin-bottom: 10px;word-break: break-word">
+                @review.Comment
+              </MudText>
+            </div>
+          }
+        </MudItem>
+      </MudGrid>
+    }
+    else
+    {
+      <MudText Typo="Typo.body1">Item not found</MudText>
+    }
+  </div>
 </MudContainer>
 
 @code {
-    [Parameter]
-    public int Id { get; set; }
+  [Parameter]
+  public int Id { get; set; }
 
-    private Item? item;
-    private int buyQuantity = 1;
+  private Item? item;
+  private int buyQuantity = 1;
 
-    protected override async Task OnInitializedAsync()
+  private List<Review> reviews = new();
+  private Review newReview = new();
+  private MudForm? reviewForm;
+
+  protected override async Task OnInitializedAsync()
+  {
+    item = await ItemController.GetItemAsync(Id);
+    if (item != null)
     {
-        item = await ItemController.GetItemAsync(Id);
+      reviews = await ReviewController.GetReviewsByItemIdAsync(Id);
+    }
+  }
+
+  private void IncreaseQuantity()
+  {
+    if (buyQuantity < item?.StockQuantity)
+    {
+      buyQuantity++;
+    }
+  }
+
+  private void DecreaseQuantity()
+  {
+    if (buyQuantity > 1)
+    {
+      buyQuantity--;
+    }
+  }
+
+  private async Task AddToCart()
+  {
+    if (!IsUserLoggedIn())
+    {
+      var parameters = new DialogParameters { ["ContentText"] = "You need to login to add items to the cart." };
+      var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+      var dialog = DialogService.Show<LoginDialog>("Login Required", parameters, options);
+      var result = await dialog.Result;
+
+      if (result != null && !result.Canceled)
+      {
+        Navigation.NavigateTo("/Account/Login");
+      }
+      return;
     }
 
-    private void IncreaseQuantity()
+    if (item != null)
     {
-        if (buyQuantity < item?.StockQuantity)
-        {
-            buyQuantity++;
-        }
+      try
+      {
+        await CartController.AddToCartAsync(item, buyQuantity);
+        Snackbar.Add($"Added {buyQuantity} {item.Name} to cart", Severity.Success);
+      }
+      catch (InvalidOperationException ex)
+      {
+        Snackbar.Add(ex.Message, Severity.Error);
+      }
     }
+  }
 
-    private void DecreaseQuantity()
+  private async Task BuyNow()
+  {
+    // Implement buy now functionality
+  }
+
+  private bool IsUserLoggedIn()
+  {
+    return true;
+  }
+
+  private async Task SubmitReview()
+  {
+    await reviewForm.Validate();
+
+    if (reviewForm.IsValid)
     {
-        if (buyQuantity > 1)
-        {
-            buyQuantity--;
-        }
+      newReview.ItemId = Id;
+      newReview.UserId = "currentUserId"; // Replace with actual user ID
+      await ReviewController.AddReviewAsync(newReview);
+      Snackbar.Add("Review submitted successfully", Severity.Success);
+      reviews.Add(newReview);
+      newReview = new();
     }
+  }
 
-    private async Task AddToCart()
-    {
-        if (!IsUserLoggedIn())
-        {
-            var parameters = new DialogParameters { ["ContentText"] = "You need to login to add items to the cart." };
-            var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
-            var dialog = DialogService.Show<LoginDialog>("Login Required", parameters, options);
-            var result = await dialog.Result;
-
-            if (result != null && !result.Canceled)
-            {
-                Navigation.NavigateTo("/Account/Login");
-            }
-            return;
-        }
-
-        if (item != null)
-        {
-            try
-            {
-                await CartController.AddToCartAsync(item, buyQuantity);
-                Snackbar.Add($"Added {buyQuantity} {item.Name} to cart", Severity.Success);
-            }
-            catch (InvalidOperationException ex)
-            {
-                Snackbar.Add(ex.Message, Severity.Error);
-            }
-        }
-    }
-
-    private async Task BuyNow()
-    {
-        // Implement buy now functionality
-    }
-
-    private bool IsUserLoggedIn()
-    {
-        return true;
-    }
+  private void OnReviewValidated()
+  {
+    // Handle validation if needed
+  }
 }

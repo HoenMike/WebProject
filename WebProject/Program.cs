@@ -20,6 +20,7 @@ builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<ItemController>();
 builder.Services.AddScoped<CartController>();
+builder.Services.AddScoped<ReviewController>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
 
 builder.Services.AddMudServices();
