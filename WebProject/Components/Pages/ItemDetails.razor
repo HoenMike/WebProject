@@ -2,6 +2,7 @@
 @inject ItemController ItemController
 @inject CartController CartController
 @inject ReviewController ReviewController
+@inject WishlistController WishlistController
 @inject ISnackbar Snackbar
 @inject NavigationManager Navigation
 @inject IDialogService DialogService
@@ -145,6 +146,9 @@
                   <MudItem>
                     <MudButton Class="buy-now-btn" OnClick="BuyNow" Style="height: 50px;flex: 1;">Buy
                       Now
+                    </MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="AddToWishlist">
+                      Add to Wishlist
                     </MudButton>
                   </MudItem>
                 </MudItem>
@@ -329,6 +333,15 @@
       Snackbar.Add("Review submitted successfully", Severity.Success);
       reviews.Add(newReview);
       newReview = new();
+    }
+  }
+
+  private async Task AddToWishlist()
+  {
+    if (item != null)
+    {
+      await WishlistController.AddToWishlistAsync(item.Id);
+      Snackbar.Add("Item added to wishlist", Severity.Success);
     }
   }
 

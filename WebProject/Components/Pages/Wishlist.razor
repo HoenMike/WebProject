@@ -1,0 +1,73 @@
+@page "/wishlist"
+@inject WishlistController WishlistController
+@inject ItemController ItemController
+@inject NavigationManager NavigationManager
+@using MudBlazor
+
+<PageTitle>My Wishlist</PageTitle>
+
+<MudContainer>
+  <MudText Typo="Typo.h4" Class="mb-4">My Wishlist</MudText>
+
+  @if (isLoading)
+  {
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+  }
+  else if (wishlistItems.Any())
+  {
+    <MudTable Items="@itemDetails" Hover="true" Striped="true">
+      <HeaderContent>
+        <MudTh>Image</MudTh>
+        <MudTh>Name</MudTh>
+        <MudTh>Price</MudTh>
+        <MudTh>Description</MudTh>
+        <MudTh></MudTh>
+      </HeaderContent>
+      <RowTemplate Context="item">
+        <MudTd>
+          <MudImage Src="@item.ThumbnailUrl" Alt="@item.Name" Style="width: 50px; height: 50px; cursor: pointer;" @onclick="() => NavigateToItemDetails(item.Id)" />
+        </MudTd>
+        <MudTd>@item.Name</MudTd>
+        <MudTd>@item.Price.ToString("C")</MudTd>
+        <MudTd>@item.Description</MudTd>
+        <MudTd>
+          <MudButton Variant="Variant.Outlined" Color="Color.Primary" @onclick="() => NavigateToItemDetails(item.Id)">
+            View Details
+          </MudButton>
+        </MudTd>
+      </RowTemplate>
+    </MudTable>
+  }
+  else
+  {
+    <MudText>No items in your wishlist.</MudText>
+  }
+</MudContainer>
+
+@code {
+  private List<WishList> wishlistItems = new();
+  private List<Item> itemDetails = new();
+  private bool isLoading = true;
+
+  protected override async Task OnInitializedAsync()
+  {
+    wishlistItems = await WishlistController.GetWishlistAsync();
+    if (wishlistItems.Any())
+    {
+      foreach (var wish in wishlistItems)
+      {
+        var item = await ItemController.GetItemAsync(wish.ItemId);
+        if (item != null)
+        {
+          itemDetails.Add(item);
+        }
+      }
+    }
+    isLoading = false;
+  }
+
+  private void NavigateToItemDetails(int itemId)
+  {
+    NavigationManager.NavigateTo($"/item-details/{itemId}");
+  }
+}

@@ -10,12 +10,14 @@ namespace WebProject.Models
     public int Id { get; set; }
 
     [ForeignKey("User")]
-    public int UserId { get; set; }
+    public string? UserId { get; set; }
 
     [ForeignKey("Item")]
     public int ItemId { get; set; }
 
     public DateTime AddedAt { get; set; }
 
+    // Navigation property
+    public Item Item { get; set; }
   }
 }
