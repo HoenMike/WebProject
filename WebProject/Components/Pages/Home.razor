@@ -13,40 +13,46 @@
 
 @rendermode InteractiveServer
 <style>
-    .promotion-container {
-        height: 450px;
-        width: 100%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background-image: url('https://www.shutterstock.com/image-vector/sweet-food-seamless-pattern-flat-600nw-2477598415.jpg');
-        background-size: cover;
-        background-position: center;
-    }
-    .add-to-cart-btn {
-        color: #ff66a1;
-        border: 2px solid #ff66a1;
-        padding: 8px 16px;
-    }
-    .add-to-cart-btn:hover {
-        background-color: #ff1871;
-        color: #ffffff
-    }
-    .item-name{
-        text-decoration: none;
-        font-weight: bold;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-    .item-name:hover {
-        color: #ff1871;
-    }
-    .item-price {
-        font-weight: bold;
-        color: #ff1871;
-    }
-    .quantity-btn {
+  .promotion-container {
+    height: 450px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-image: url('https://www.shutterstock.com/image-vector/sweet-food-seamless-pattern-flat-600nw-2477598415.jpg');
+    background-size: cover;
+    background-position: center;
+  }
+
+  .add-to-cart-btn {
+    color: #ff66a1;
+    border: 2px solid #ff66a1;
+    padding: 8px 16px;
+  }
+
+  .add-to-cart-btn:hover {
+    background-color: #ff1871;
+    color: #ffffff
+  }
+
+  .item-name {
+    text-decoration: none;
+    font-weight: bold;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .item-name:hover {
+    color: #ff1871;
+  }
+
+  .item-price {
+    font-weight: bold;
+    color: #ff1871;
+  }
+
+  .quantity-btn {
     background-color: #ffffff;
     border: 1px #c5bfbf solid;
   }
@@ -58,330 +64,314 @@
 </style>
 <PageTitle>Home</PageTitle>
 <MudContainer>
-    <MudPaper Elevation="3" Class="pa-4">
-        <MudGrid>
-            <MudItem xs="12">
-                <MudTextField Variant="Variant.Outlined" @bind-Value="searchTerm" Label="Search Items" AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" Immediate="true" Clearable="true" OnClearButtonClick="ClearSearch" OnKeyUp="FilterItems" />
-            </MudItem>
-        </MudGrid>
-    </MudPaper>
-
-
-    <div style="height: 500px; display: flex; justify-content: center; align-items: center;">
-        <MudPaper Elevation="3" Class="promotion-container pa-0">
-            @if (isPromotesLoading)
-            {
-                <MudProgressCircular Color="Color.Default" Indeterminate="true" />
-            }
-            else if (!activePromotes.Any())
-            {
-                <MudText>No Promotion available</MudText>
-            }
-            else
-            {
-                <MudCarousel TData="Promote" ShowBullets="true" AutoCycle="true " AutoCycleTime="TimeSpan.FromMilliseconds(3000)" Class="my-4" Style="height: 400px; width: 700px; border-radius: 8px;">
-                    @foreach (var promote in activePromotes)
-                    {
-                        <MudCarouselItem>
-                            <MudImage Src="@promote.ImageUrl" Alt="Promotion Image" ObjectFit="ObjectFit.Contain" Class="rounded-lg" Style="width: 100%; height: 100%;" />
-                        </MudCarouselItem>
-                    }
-                </MudCarousel>
-            }
-        </MudPaper>
-    </div>
-
-
-<h3>New Arrivals</h3>
-@if (isLoading)
-{
-    <MudProgressLinear Indeterminate="true" Color="Color.Primary" Style="margin-bottom: 20px;" />
-}
-else
-{
+  <MudPaper Elevation="3" Class="pa-4">
     <MudGrid>
-        @foreach (var item in displayedItems)
-        {
-            <MudItem Style="width:300px">
-                <MudCard Style="word-break: break-word; border-radius:15px;">
-                    <div class="image-container" style="position: relative">
-                    <MudImage Src="@item.ThumbnailUrl" Alt="@item.Name" Style="width: 150px; height: 250px; min-height: 250px; width: 100%; cursor: pointer; padding:15px; z-index: 1;"
-                    @onclick="@(() => NavigateToItemDetails(item?.Id ?? 0))" />  
-                    <MudButton Class="wishlist-button"
-                            Style="z-index: 2; position: absolute; top: 0px; right: 0px; background-color: #ffffff; border-radius: 40px; height: 65px; align-items: center;"  
-                            OnClick="AddToWishlist">
-                            <MudIcon Icon="@Icons.Material.Filled.Favorite" FontSize="50px" />
-                    </MudButton>
-                    </div>              
-                    <MudCardContent>
-                                <MudLink Href="@($"/item-details/{item?.Id}")">
-                                    <MudText Typo="Typo.h5" class="item-name">@item?.Name</MudText>
-                                </MudLink>
-                        <MudText Typo="Typo.h6" class="item-price">@item?.Price.ToString("C")</MudText>
-                    </MudCardContent>
-                    <MudCardActions>
-                        <MudGrid Style="margin-left:2px">
-                            <MudItem xs="2" Class="d-flex justify-center" Style="width:100%">
-                                <MudButton Class="quantity-btn"
-                                         OnClick="DecreaseQuantity">-</MudButton>
-                            </MudItem>
-                            <MudItem xs="3" Class="d-flex justify-center" Style="width: 100%">
-                                <MudNumericField HideSpinButtons="true"
-                                               @bind-Value="buyQuantity"
-                                               Min="1"
-                                               Max="@item.StockQuantity"
-                                               Variant="Variant.Outlined"
-                                               Style="width: 100%" />
-                            </MudItem>
-                            <MudItem xs="2" Class="d-flex justify-center" Style="width:100%">
-                                <MudButton Class="quantity-btn"
-                                         OnClick="IncreaseQuantity">+</MudButton>
-                            </MudItem>
-                            <MudItem xs="5" Class="d-flex justify-center">
-                                <MudButton Class="add-to-cart-btn"
-                                         StartIcon="@Icons.Material.Outlined.ShoppingCart"
-                                         OnClick="AddToCart"
-                                         Style="width:100%; padding-left: 25px;">
-                                </MudButton>
-                            </MudItem>
-                        </MudGrid>
-                    </MudCardActions>
-                </MudCard>
-            </MudItem>
-        }
+      <MudItem xs="12">
+        <MudTextField Variant="Variant.Outlined" @bind-Value="searchTerm" Label="Search Items" AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" Immediate="true" Clearable="true" OnClearButtonClick="ClearSearch" OnKeyUp="FilterItems" />
+      </MudItem>
     </MudGrid>
-}
-<br>
-<br>
-<h3>Latest News</h3>
-    @if (isNewsLoading)
-{
+  </MudPaper>
+
+
+  <div style="height: 500px; display: flex; justify-content: center; align-items: center;">
+    <MudPaper Elevation="3" Class="promotion-container pa-0">
+      @if (isPromotesLoading)
+      {
+        <MudProgressCircular Color="Color.Default" Indeterminate="true" />
+      }
+      else if (!activePromotes.Any())
+      {
+        <MudText>No Promotion available</MudText>
+      }
+      else
+      {
+        <MudCarousel TData="Promote" ShowBullets="true" AutoCycle="true " AutoCycleTime="TimeSpan.FromMilliseconds(3000)" Class="my-4" Style="height: 400px; width: 700px; border-radius: 8px;">
+          @foreach (var promote in activePromotes)
+          {
+            <MudCarouselItem>
+              <MudImage Src="@promote.ImageUrl" Alt="Promotion Image" ObjectFit="ObjectFit.Contain" Class="rounded-lg" Style="width: 100%; height: 100%;" />
+            </MudCarouselItem>
+          }
+        </MudCarousel>
+      }
+    </MudPaper>
+  </div>
+
+
+  <h3>New Arrivals</h3>
+  @if (isLoading)
+  {
     <MudProgressLinear Indeterminate="true" Color="Color.Primary" Style="margin-bottom: 20px;" />
-}
-else
-{
+  }
+  else
+  {
     <MudGrid>
-    @foreach (var news in displayedNews)
-    {
+      @foreach (var item in displayedItems)
+      {
+        <MudItem Style="width:300px">
+          <MudCard Style="word-break: break-word; border-radius:15px;">
+            <div class="image-container" style="position: relative">
+              <MudImage Src="@item.ThumbnailUrl" Alt="@item.Name" Style="width: 150px; height: 250px; min-height: 250px; width: 100%; cursor: pointer; padding:15px; z-index: 1;" @onclick="@(() => NavigateToItemDetails(item?.Id ?? 0))" />
+              <MudButton Class="wishlist-button" Style="z-index: 2; position: absolute; top: 0px; right: 0px; background-color: #ffffff; border-radius: 40px; height: 65px; align-items: center;" OnClick="AddToWishlist">
+                <MudIcon Icon="@Icons.Material.Filled.Favorite" FontSize="50px" />
+              </MudButton>
+            </div>
+            <MudCardContent>
+              <MudLink Href="@($"/item-details/{item?.Id}")">
+                <MudText Typo="Typo.h5" class="item-name">@item?.Name</MudText>
+              </MudLink>
+              <MudText Typo="Typo.h6" class="item-price">@item?.Price.ToString("C")</MudText>
+            </MudCardContent>
+            <MudCardActions>
+              <MudGrid Style="margin-left:2px">
+                <MudItem xs="2" Class="d-flex justify-center" Style="width:100%">
+                  <MudButton Class="quantity-btn" OnClick="DecreaseQuantity">-</MudButton>
+                </MudItem>
+                <MudItem xs="3" Class="d-flex justify-center" Style="width: 100%">
+                  <MudNumericField HideSpinButtons="true" @bind-Value="buyQuantity" Min="1" Max="@item.StockQuantity" Variant="Variant.Outlined" Style="width: 100%" />
+                </MudItem>
+                <MudItem xs="2" Class="d-flex justify-center" Style="width:100%">
+                  <MudButton Class="quantity-btn" OnClick="IncreaseQuantity">+</MudButton>
+                </MudItem>
+                <MudItem xs="5" Class="d-flex justify-center">
+                  <MudButton Class="add-to-cart-btn" StartIcon="@Icons.Material.Outlined.ShoppingCart" OnClick="AddToCart" Style="width:100%; padding-left: 25px;">
+                  </MudButton>
+                </MudItem>
+              </MudGrid>
+            </MudCardActions>
+          </MudCard>
+        </MudItem>
+      }
+    </MudGrid>
+  }
+  <br>
+  <br>
+  <h3>Latest News</h3>
+  @if (isNewsLoading)
+  {
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" Style="margin-bottom: 20px;" />
+  }
+  else
+  {
+    <MudGrid>
+      @foreach (var news in displayedNews)
+      {
         <MudItem xs="6">
-        <MudExpansionPanel Style="margin: 10px; word-break: break-word">
+          <MudExpansionPanel Style="margin: 10px; word-break: break-word">
             <TitleContent>
-                <MudText Typo="Typo.h6" GutterBottom="true">@news.Title</MudText>
-                <MudText Typo="Typo.caption" Style="font-style: italic; margin-bottom: 4px; display: block">Created By: @news.CreatedBy - @news.CreatedAt</MudText>
-                @if (news.UpdatedAt.HasValue)
-                {
-                    <MudText Typo="Typo.caption" Style="font-style: italic;">Latest Update: @news.UpdatedAt.Value.ToString("g")</MudText>
-                }
+              <MudText Typo="Typo.h6" GutterBottom="true">@news.Title</MudText>
+              <MudText Typo="Typo.caption" Style="font-style: italic; margin-bottom: 4px; display: block">Created By: @news.CreatedBy - @news.CreatedAt</MudText>
+              @if (news.UpdatedAt.HasValue)
+              {
+                <MudText Typo="Typo.caption" Style="font-style: italic;">Latest Update: @news.UpdatedAt.Value.ToString("g")</MudText>
+              }
             </TitleContent>
             <ChildContent>
-                <MudText Typo="Typo.body1">@news.Content</MudText>
+              <MudText Typo="Typo.body1">@news.Content</MudText>
             </ChildContent>
-        </MudExpansionPanel>
+          </MudExpansionPanel>
         </MudItem>
-    }
+      }
     </MudGrid>
-}
+  }
 </MudContainer>
 
 
 @code {
-    private List<Item> items = new();
-    private List<Item> displayedItems = new();
-    private List<Promote> activePromotes = new();
-    private bool isLoading = true;
-    private bool isPromotesLoading = true;
-    private string searchTerm = string.Empty;
-    private List<News> news = new();
-    private List<News> displayedNews = new();
-    private bool isNewsLoading = true;
-    [Parameter]
-    public int Id { get; set; }
-    private Item? item;
-    private int buyQuantity = 1;
+  private List<Item> items = new();
+  private List<Item> displayedItems = new();
+  private List<Promote> activePromotes = new();
+  private bool isLoading = true;
+  private bool isPromotesLoading = true;
+  private string searchTerm = string.Empty;
+  private List<News> news = new();
+  private List<News> displayedNews = new();
+  private bool isNewsLoading = true;
+  [Parameter]
+  public int Id { get; set; }
+  private Item? item;
+  private int buyQuantity = 1;
 
 
 
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+  protected override async Task OnAfterRenderAsync(bool firstRender)
+  {
+    if (firstRender)
     {
-        if (firstRender)
-        {
-            await LoadItems();
-            await LoadActivePromotes();
-            await LoadNews();
-        }
+      await LoadItems();
+      await LoadActivePromotes();
+      await LoadNews();
+    }
+  }
+
+
+  private void NavigateToItemDetails(int itemId)
+  {
+    NavigationManager.NavigateTo($"/item-details/{itemId}");
+  }
+
+
+  private async Task LoadItems()
+  {
+    try
+    {
+      items = await DbContext.Items.OrderByDescending(item => item.Id).Take(8).ToListAsync();
+      displayedItems = items;
+    }
+    catch (Exception ex)
+    {
+      Snackbar.Add($"Error loading items: {ex.Message}", Severity.Error);
+    }
+    finally
+    {
+      isLoading = false;
+      StateHasChanged();
+    }
+  }
+
+
+  private async Task LoadActivePromotes()
+  {
+    try
+    {
+      var promotes = await DbContext.Promotes
+      .Where(p => p.IsActive)
+      .OrderByDescending(p => p.Id)
+      .Take(10)
+      .ToListAsync();
+      activePromotes = promotes;
+    }
+    catch (Exception ex)
+    {
+      Snackbar.Add($"Error loading promotes: {ex.Message}", Severity.Error);
+    }
+    finally
+    {
+      isPromotesLoading = false;
+      StateHasChanged();
+    }
+  }
+
+
+  private void FilterItems()
+  {
+    if (string.IsNullOrEmpty(searchTerm))
+    {
+      displayedItems = items;
+    }
+    else
+    {
+      displayedItems = items.Where(item =>
+      item.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+      ).ToList();
+    }
+  }
+
+
+  private void ClearSearch()
+  {
+    searchTerm = string.Empty;
+    displayedItems = items;
+    StateHasChanged();
+  }
+
+
+  protected override async Task OnInitializedAsync()
+  {
+    item = await DbContext.Items.FirstOrDefaultAsync(i => i.Id == Id);
+  }
+
+
+
+
+  private void IncreaseQuantity()
+  {
+    if (buyQuantity < item?.StockQuantity)
+    {
+      buyQuantity++;
+    }
+  }
+
+  private void DecreaseQuantity()
+  {
+    if (buyQuantity > 1)
+    {
+      buyQuantity--;
+    }
+  }
+
+
+
+
+  private async Task AddToCart()
+  {
+    if (!IsUserLoggedIn())
+    {
+      var parameters = new DialogParameters { ["ContentText"] = "You need to login to add items to the cart." };
+      var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+      var dialog = DialogService.Show<LoginDialog>("Login Required", parameters, options);
+      var result = await dialog.Result;
+
+
+
+
+      if (result != null && !result.Canceled)
+      {
+        Navigation.NavigateTo("/Account/Login");
+      }
+      return;
     }
 
 
-    private void NavigateToItemDetails(int itemId)
+
+
+    if (item != null)
     {
-        NavigationManager.NavigateTo($"/item-details/{itemId}");
+      try
+      {
+        await CartController.AddToCartAsync(item, buyQuantity);
+        Snackbar.Add($"Added {buyQuantity} {item.Name} to cart", Severity.Success);
+      }
+      catch (InvalidOperationException ex)
+      {
+        Snackbar.Add(ex.Message, Severity.Error);
+      }
     }
-
-
-    private async Task LoadItems()
-    {
-        try
-        {
-            items = await DbContext.Items.OrderByDescending(item => item.Id).Take(8).ToListAsync();
-            displayedItems = items;
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add($"Error loading items: {ex.Message}", Severity.Error);
-        }
-        finally
-        {
-            isLoading = false;
-            StateHasChanged();
-        }
-    }
-
-
-    private async Task LoadActivePromotes()
-    {
-        try
-        {
-            var promotes = await DbContext.Promotes
-            .Where(p => p.IsActive)
-            .OrderByDescending(p => p.Id)
-            .Take(10)
-            .ToListAsync();
-            activePromotes = promotes;
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add($"Error loading promotes: {ex.Message}", Severity.Error);
-        }
-        finally
-        {
-            isPromotesLoading = false;
-            StateHasChanged();
-        }
-    }
-
-
-    private void FilterItems()
-    {
-        if (string.IsNullOrEmpty(searchTerm))
-        {
-            displayedItems = items;
-        }
-        else
-        {
-            displayedItems = items.Where(item =>
-            item.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
-            ).ToList();
-        }
-    }
-
-
-    private void ClearSearch()
-    {
-        searchTerm = string.Empty;
-        displayedItems = items;
-        StateHasChanged();
-    }
-
-
-    protected override async Task OnInitializedAsync()
-    {
-        item = await DbContext.Items.FirstOrDefaultAsync(i => i.Id == Id);
-    }
-
-
-
-
-    private void IncreaseQuantity()
-    {
-        if (buyQuantity < item?.StockQuantity)
-        {
-            buyQuantity++;
-        }
-    }
-
-
-
-
-    private void DecreaseQuantity()
-    {
-        if (buyQuantity > 1)
-        {
-            buyQuantity--;
-        }
-    }
-
-
-
-
-    private async Task AddToCart()
-    {
-        if (!IsUserLoggedIn())
-        {
-            var parameters = new DialogParameters { ["ContentText"] = "You need to login to add items to the cart." };
-            var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
-var dialog = DialogService.Show<LoginDialog>("Login Required", parameters, options);
-            var result = await dialog.Result;
-
-
-
-
-            if (result != null && !result.Canceled)
-            {
-                Navigation.NavigateTo("/Account/Login");
-            }
-            return;
-        }
-
-
-
-
-        if (item != null)
-        {
-            try
-            {
-                await CartController.AddToCartAsync(item, buyQuantity);
-                Snackbar.Add($"Added {buyQuantity} {item.Name} to cart", Severity.Success);
-            }
-            catch (InvalidOperationException ex)
-            {
-                Snackbar.Add(ex.Message, Severity.Error);
-            }
-        }
-    }
-    private async Task AddToWishlist()
-    {
+  }
+  private async Task AddToWishlist()
+  {
     if (item != null)
     {
       await WishlistController.AddToWishlistAsync(item.Id);
       Snackbar.Add("Item added to wishlist", Severity.Success);
     }
-    }
+  }
 
 
 
 
-    private bool IsUserLoggedIn()
+  private bool IsUserLoggedIn()
+  {
+    return true;
+  }
+
+
+  private async Task LoadNews()
+  {
+    try
     {
-        return true;
+      news = await DbContext.News.ToListAsync();
+      displayedNews = news.OrderByDescending(news => news.CreatedAt).Take(2).ToList();
     }
-
-
-    private async Task LoadNews()
+    catch (Exception ex)
     {
-        try
-        {
-            news = await DbContext.News.ToListAsync();
-            displayedNews = news.OrderByDescending(news => news.CreatedAt).Take(2).ToList();
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add($"Error loading news: {ex.Message}", Severity.Error);
-        }
-        finally
-        {
-            isNewsLoading = false;
-            StateHasChanged();
-        }
+      Snackbar.Add($"Error loading news: {ex.Message}", Severity.Error);
     }
+    finally
+    {
+      isNewsLoading = false;
+      StateHasChanged();
+    }
+  }
 }
