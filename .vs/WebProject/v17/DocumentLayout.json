@@ -9,10 +9,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{6CD405FA-3B99-4815-B758-350F264651FF}|WebProject\\WebProject.csproj|d:\\webproject\\webproject\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
       "RelativeMoniker": "D:0:0:{6CD405FA-3B99-4815-B758-350F264651FF}|WebProject\\WebProject.csproj|solutionrelative:webproject\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6CD405FA-3B99-4815-B758-350F264651FF}|WebProject\\WebProject.csproj|d:\\webproject\\webproject\\components\\layout\\mainlayout.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{6CD405FA-3B99-4815-B758-350F264651FF}|WebProject\\WebProject.csproj|solutionrelative:webproject\\components\\layout\\mainlayout.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     }
   ],
   "DocumentGroupContainers": [
@@ -36,9 +32,9 @@
               "RelativeDocumentMoniker": "WebProject\\appsettings.json",
               "ToolTip": "D:\\WebProject\\WebProject\\appsettings.json",
               "RelativeToolTip": "WebProject\\appsettings.json",
-              "ViewState": "AgIAAAAAAAAAAAAAAADwvwIAAAAVAQAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAARAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2024-11-21T02:02:23.233Z",
+              "WhenOpened": "2024-12-12T08:33:21.771Z",
               "EditorCaption": ""
             },
             {
@@ -49,22 +45,9 @@
               "RelativeDocumentMoniker": "WebProject\\Program.cs",
               "ToolTip": "D:\\WebProject\\WebProject\\Program.cs",
               "RelativeToolTip": "WebProject\\Program.cs",
-              "ViewState": "AgIAABEAAAAAAAAAAAAAAB4AAAAtAAAAAAAAAA==",
+              "ViewState": "AgIAABgAAAAAAAAAAADwvwAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-11-18T14:51:10.027Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "MainLayout.razor",
-              "DocumentMoniker": "D:\\WebProject\\WebProject\\Components\\Layout\\MainLayout.razor",
-              "RelativeDocumentMoniker": "WebProject\\Components\\Layout\\MainLayout.razor",
-              "ToolTip": "D:\\WebProject\\WebProject\\Components\\Layout\\MainLayout.razor",
-              "RelativeToolTip": "WebProject\\Components\\Layout\\MainLayout.razor",
-              "ViewState": "AgIAAAMAAAAAAAAAAAAAABUAAAAdAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2024-11-18T14:47:33.373Z",
+              "WhenOpened": "2024-12-12T08:30:15.893Z",
               "EditorCaption": ""
             }
           ]

@@ -2,20 +2,19 @@
 
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.Identity
-@using WebProject.Components.Account
 @using WebProject.Data
 @using WebProject.Models
 @using Microsoft.EntityFrameworkCore
-@using Microsoft.AspNetCore.Http
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
 
 @inject UserManager<ApplicationUser> UserManager
 @inject SignInManager<ApplicationUser> SignInManager
-@inject IdentityUserAccessor UserAccessor
 @inject ILogger<UserCard> Logger
 @inject ApplicationDbContext DbContext
 @inject NavigationManager NavigationManager
-@inject IHttpContextAccessor HttpContextAccessor
 @inject ISnackbar Snackbar
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 @rendermode InteractiveServer
 
@@ -112,24 +111,30 @@
 </MudContainer>
 
 @code {
-  private ApplicationUser user = default!;
+  private ApplicationUser user;
   private List<UserCard> ExistingCards = new();
   private bool isLoading = true;
 
-  [SupplyParameterFromForm]
   private CardInputModel CardInput { get; set; } = new();
 
   protected override async Task OnInitializedAsync()
   {
     try
     {
-      var httpContext = HttpContextAccessor.HttpContext;
-      if (httpContext == null)
+      var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+      var userPrincipal = authState.User;
+
+      if (userPrincipal.Identity?.IsAuthenticated != true)
       {
-        throw new InvalidOperationException("HttpContext is null");
+        throw new InvalidOperationException("User is not authenticated.");
       }
 
-      user = await UserAccessor.GetRequiredUserAsync(httpContext);
+      user = await UserManager.GetUserAsync(userPrincipal);
+
+      if (user == null)
+      {
+        throw new InvalidOperationException("Unable to load authenticated user.");
+      }
 
       // Fetch existing cards for the current user
       ExistingCards = await DbContext.UserCards
@@ -144,16 +149,6 @@
     finally
     {
       isLoading = false;
-    }
-  }
-
-  protected override async Task OnAfterRenderAsync(bool firstRender)
-  {
-    if (firstRender)
-    {
-      isLoading = false;
-      await Task.Yield(); // Ensure the method is awaited
-      StateHasChanged();
     }
   }
 

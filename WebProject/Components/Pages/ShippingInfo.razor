@@ -2,19 +2,19 @@
 
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.Identity
-@using WebProject.Components.Account
 @using WebProject.Data
 @using WebProject.Models
 @using Microsoft.EntityFrameworkCore
-@using Microsoft.AspNetCore.Http
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
 
 @inject UserManager<ApplicationUser> UserManager
 @inject SignInManager<ApplicationUser> SignInManager
-@inject IdentityUserAccessor UserAccessor
 @inject ILogger<ShippingInfo> Logger
 @inject ApplicationDbContext DbContext
 @inject NavigationManager NavigationManager
-@inject IHttpContextAccessor HttpContextAccessor
+@inject ISnackbar Snackbar
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 @rendermode InteractiveServer
 
@@ -37,7 +37,7 @@
       }
       <MudGrid>
         <MudItem xs="12">
-          <EditForm Model="ShippingInput" OnValidSubmit="OnValidSubmitPaymentAsync">
+          <EditForm Model="ShippingInput" OnValidSubmit="OnValidSubmitShippingAsync">
             <DataAnnotationsValidator />
             <MudTextField @bind-Value="ShippingInput.ReceiverName" Label="Receiver Name" Required="true"
               RequiredError="Receiver Name is required" />
@@ -57,27 +57,33 @@
 </MudContainer>
 
 @code {
-  private ApplicationUser user = default!;
+  private ApplicationUser user;
   private string ShippingStatusMessage = string.Empty;
   private string ShippingStatusMessageType = "alert-success";
   private bool isLoading = true;
 
-  [SupplyParameterFromForm]
   private ShippingInputModel ShippingInput { get; set; } = new();
 
   protected override async Task OnInitializedAsync()
   {
     try
     {
-      var httpContext = HttpContextAccessor.HttpContext;
-      if (httpContext == null)
+      var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+      var userPrincipal = authState.User;
+
+      if (userPrincipal.Identity?.IsAuthenticated != true)
       {
-        throw new InvalidOperationException("HttpContext is null");
+        throw new InvalidOperationException("User is not authenticated.");
       }
 
-      user = await UserAccessor.GetRequiredUserAsync(httpContext);
+      user = await UserManager.GetUserAsync(userPrincipal);
 
-      // Fetch existing payment information for the current user
+      if (user == null)
+      {
+        throw new InvalidOperationException("Unable to load authenticated user.");
+      }
+
+      // Fetch existing shipping information for the current user
       var existingShippingInfo = await DbContext.UserShippingInfos
       .FirstOrDefaultAsync(u => u.UserId == user.Id);
 
@@ -104,37 +110,29 @@
     }
   }
 
-  protected override async Task OnAfterRenderAsync(bool firstRender)
-  {
-    if (firstRender)
-    {
-      isLoading = false;
-      StateHasChanged();
-    }
-  }
-  private async Task OnValidSubmitPaymentAsync()
+  private async Task OnValidSubmitShippingAsync()
   {
     try
     {
-      // Check if a checkout info already exists for this user
-      var existingCheckoutInfos = await DbContext.UserShippingInfos
+      // Check if a shipping info already exists for this user
+      var existingShippingInfos = await DbContext.UserShippingInfos
       .Where(u => u.UserId == user.Id)
       .ToListAsync();
 
-      if (existingCheckoutInfos.Count > 1)
+      if (existingShippingInfos.Count > 1)
       {
         // Remove all existing shipping info records for the user
-        DbContext.UserShippingInfos.RemoveRange(existingCheckoutInfos);
+        DbContext.UserShippingInfos.RemoveRange(existingShippingInfos);
       }
-      else if (existingCheckoutInfos.Count == 1)
+      else if (existingShippingInfos.Count == 1)
       {
         // Update the existing shipping info record
-        var existingCheckoutInfo = existingCheckoutInfos.First();
-        existingCheckoutInfo.ReceiverName = ShippingInput.ReceiverName ?? string.Empty;
-        existingCheckoutInfo.Address = ShippingInput.Address ?? string.Empty;
-        existingCheckoutInfo.PhoneNumber = ShippingInput.PhoneNumber ?? string.Empty;
+        var existingShippingInfo = existingShippingInfos.First();
+        existingShippingInfo.ReceiverName = ShippingInput.ReceiverName ?? string.Empty;
+        existingShippingInfo.Address = ShippingInput.Address ?? string.Empty;
+        existingShippingInfo.PhoneNumber = ShippingInput.PhoneNumber ?? string.Empty;
 
-        DbContext.UserShippingInfos.Update(existingCheckoutInfo);
+        DbContext.UserShippingInfos.Update(existingShippingInfo);
       }
       else
       {
