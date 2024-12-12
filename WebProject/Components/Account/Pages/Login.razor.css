@@ -1,73 +1,73 @@
 html,
 body {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  width: 100%;
+	margin: 0;
+	padding: 0;
+	height: 100%;
+	width: 100%;
 }
 .login-container {
-  background-image: url("https://img.pikbest.com/wp/202346/convenience-store-small-portrayed-in-3d-on-a-soft-pink-background-with-ample-space-for-text_9716224.jpg!sw800");
-  background-size: cover;
-  background-position: center;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  width: 100%;
-  padding: 20px;
+	background-image: url("https://img.pikbest.com/wp/202346/convenience-store-small-portrayed-in-3d-on-a-soft-pink-background-with-ample-space-for-text_9716224.jpg!sw800");
+	background-size: cover;
+	background-position: center;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 100vh;
+	width: 100%;
+	padding: 20px;
 }
 
 .login-form {
-  background-color: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(10px);
-  padding: 40px;
-  border-radius: 10px;
-  color: #fff;
-  text-align: center;
-  width: 100%;
-  max-width: 400px; /* Set a max-width for larger screens */
-  box-sizing: border-box; /* Ensure padding is included in width */
+	background-color: rgba(0, 0, 0, 0.7);
+	backdrop-filter: blur(10px);
+	padding: 40px;
+	border-radius: 10px;
+	color: #fff;
+	text-align: center;
+	width: 100%;
+	max-width: 400px; /* Set a max-width for larger screens */
+	box-sizing: border-box; /* Ensure padding is included in width */
 }
 
 .form-group {
-  margin-bottom: 20px;
+	margin-bottom: 20px;
 }
 
 .form-control {
-  background-color: transparent;
-  border: 1px solid #ccc;
-  border-radius: 20px;
-  padding: 10px 20px;
-  color: #fff;
-  width: 100%; /* Make input fields take full width */
-  box-sizing: border-box; /* Ensure padding is included in width */
+	background-color: transparent;
+	border: 1px solid #ccc;
+	border-radius: 20px;
+	padding: 10px 20px;
+	color: #fff;
+	width: 100%; /* Make input fields take full width */
+	box-sizing: border-box; /* Ensure padding is included in width */
 }
 
 .form-check {
-  margin-bottom: 20px;
-  text-align: left;
+	margin-bottom: 20px;
+	text-align: left;
 }
 
 .form-check-input {
-  border-color: #ff69b4;
+	border-color: #ff69b4;
 }
 
 .btn-primary {
-  background-color: #FF66A1;
-  border-color: #FF66A1;
-  border-radius: 8px;
-  padding: 10px 30px;
-  font-size: 16px;
-  font-weight: bold;
-  width: 100%; /* Make button take full width */
-  box-sizing: border-box; /* Ensure padding is included in width */
+	background-color: #ff66a1;
+	border-color: #ff66a1;
+	border-radius: 8px;
+	padding: 10px 30px;
+	font-size: 16px;
+	font-weight: bold;
+	width: 100%; /* Make button take full width */
+	box-sizing: border-box; /* Ensure padding is included in width */
 }
-.form-links{
-  margin-top: 12px;
+.form-links {
+	margin-top: 12px;
 }
 .form-links a {
-  color: #87ceeb;
-  text-decoration: none;
-  display: block; /* Make links block elements */
-  margin-top: 10px; /* Add margin for spacing */
+	color: #87ceeb;
+	text-decoration: none;
+	display: block; /* Make links block elements */
+	margin-top: 10px; /* Add margin for spacing */
 }

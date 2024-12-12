@@ -7,7 +7,7 @@
 <MudSnackbarProvider />
 
 <div class="page">
-    @if (!isLoginPage)
+    @if (!isLoginPage && !isRegisterPage)
     {
         <div class="sidebar">
             <NavMenu />
@@ -15,7 +15,7 @@
     }
 
     <main>
-        <article class="page-body" style="padding: 5px;">
+        <article class="page-body">
             @Body
         </article>
     </main>
@@ -29,9 +29,11 @@
 
 @code {
     private bool isLoginPage;
+    private bool isRegisterPage;
 
     protected override void OnParametersSet()
     {
+        isRegisterPage = NavigationManager.Uri.Contains("/Account/Register");
         isLoginPage = NavigationManager.Uri.Contains("/Account/Login");
     }
 }
