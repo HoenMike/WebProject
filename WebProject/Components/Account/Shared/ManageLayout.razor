@@ -1,27 +1,47 @@
 ﻿@inherits LayoutComponentBase
 @layout AccountLayout
 
-<PageTitle>Manage your account</PageTitle>
+<style>
+    .login-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
 
-<MudContainer Class="d-flex align-items-center justify-content-center pt-4">
-    <MudPaper Elevation="4" Class="p-3 " Style="width: 80%; max-width: 900px;">
+    .login-form {
+        background-color: rgba(255, 255, 255, 0.8);
+        padding: 20px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        height: 100%;
+    }
+</style>
+
+<PageTitle>Manage your account</PageTitle>
+<div class="login-container">
+    <div class="login-form">
         <div>
             <h2>Change your account settings</h2>
-            <MudDivider />
-            <MudGrid>
-                <MudItem xs="12" md="3">
+            <hr />
+            <div class="row">
+                <div class="col-md-3">
                     <ManageNavMenu />
-                    <MudButton Color="Color.Primary" StartIcon="@Icons.Material.Filled.ExitToApp" OnClick="Logout">
-                        Logout
-                    </MudButton>
-                </MudItem>
-                <MudItem xs="12" md="9">
+                    <form action="Account/Logout" method="post">
+                        <AntiforgeryToken />
+                        <input type="hidden" name="ReturnUrl" value="@currentUrl" />
+                        <button type="submit" class="nav-link">
+                            <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> Logout
+                        </button>
+                    </form>
+                </div>
+                <div class="col-md-9">
                     @Body
-                </MudItem>
-            </MudGrid>
+                </div>
+            </div>
         </div>
-    </MudPaper>
-</MudContainer>
+    </div>
+</div>
 
 @code {
     private string? currentUrl;
@@ -41,11 +61,5 @@
     public void Dispose()
     {
         NavigationManager.LocationChanged -= OnLocationChanged;
-    }
-
-    private async Task Logout()
-    {
-        // Implement logout logic here
-        NavigationManager.NavigateTo("Account/Logout", forceLoad: true);
     }
 }
