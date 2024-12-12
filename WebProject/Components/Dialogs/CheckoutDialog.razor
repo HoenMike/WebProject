@@ -15,7 +15,7 @@
 @rendermode InteractiveServer
 
 <DialogContent>
-  <MudText Typo="Typo.h4">Checkout</MudText>
+  
 
   @if (isLoading)
   {
@@ -115,7 +115,7 @@
       </MudItem>
 
       <MudItem xs="12">
-        <MudButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true"
+        <MudButton ButtonType="ButtonType.Button" Variant="Variant.Filled" class="check-out-btn" style="padding: 12px 0;" FullWidth="true"
           OnClick="OnValidSubmitAsync">
           Proceed to Checkout
         </MudButton>

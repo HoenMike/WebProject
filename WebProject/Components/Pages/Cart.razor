@@ -7,8 +7,30 @@
 @using MudBlazor
 
 @rendermode InteractiveServer
-
+<style>
+  .check-out-btn{
+    background-color: #ff66a1;
+    color: white;
+  }
+  .check-out-btn:hover {
+    background-color: #ff1871;
+    color: #ffffff
+    }
+  .delete-btn{
+    background-color: black; 
+    color: #ffffff; 
+    border-radius:8px;
+    padding: 6px 6px;
+  }
+  .delete-btn:hover{
+    background-color: #dc0000;
+    color: #ffffff
+  }
+}
+</style>
 <PageTitle>Your Cart</PageTitle>
+
+<h2 style="color: rgb(0, 0, 0);text-align: center;margin-top:20px">Your Cart</h2>
 
 <MudContainer>
 
@@ -22,37 +44,37 @@
   }
   else if (cartItems.Count > 0)
   {
-    <MudGrid>
-      <MudItem xs="12" md="7">
+    <MudGrid style="margin-top: 8px;">
+      <MudItem xs="12" md="8">
         <MudCard>
           <MudCardContent>
             <MudTable Items="@cartItems" Hover="true" Elevation="0" Context="item">
               <HeaderContent>
                 <MudTh>
                   <MudCheckBox T="bool" @bind-Value="selectAll" @bind-Value:after="() => SelectAllChanged(selectAll)"
-                    Color="Color.Primary" />
+                    Color="Color.Secondary" />
                 </MudTh>
-                <MudTh>Product</MudTh>
-                <MudTh>Unit Price</MudTh>
-                <MudTh>Quantity</MudTh>
-                <MudTh>Item Total</MudTh>
-                <MudTh>Actions</MudTh>
+                <MudTh style="text-align: center; white-space: nowrap;">Product</MudTh>
+                <MudTh style="text-align: center; white-space: nowrap;">Unit Price</MudTh>
+                <MudTh style="text-align: center; white-space: nowrap;">Quantity</MudTh>
+                <MudTh style="text-align: center; white-space: nowrap;">Item Total</MudTh>
+                <MudTh style="text-align: center; white-space: nowrap;">Actions</MudTh>
               </HeaderContent>
               <RowTemplate>
                 <MudTd>
                   <MudCheckBox T="bool" @bind-Value="item.IsSelected"
-                    @bind-Value:after="() => OnItemSelectedChanged(item, item.IsSelected)" Color="Color.Primary" />
+                    @bind-Value:after="() => OnItemSelectedChanged(item, item.IsSelected)" Color="Color.Secondary" />
                 </MudTd>
                 <MudTd DataLabel="Product">
                   <div class="d-flex align-center">
                     <MudAvatar Size="Size.Large" Class="mr-3">
                       <MudImage Src="@item.ThumbnailUrl"></MudImage>
                     </MudAvatar>
-                    <MudText>@item.Name</MudText>
+                    <MudText Class="product-name">@item.Name</MudText>
                   </div>
                 </MudTd>
-                <MudTd DataLabel="Unit Price">@item.Price.ToString("C")</MudTd>
-                <MudTd DataLabel="Quantity">
+                <MudTd DataLabel="Unit Price" style="text-align: center;">@item.Price.ToString("C")</MudTd>
+                <MudTd DataLabel="Quantity" style="text-align: center;">
                   <div class="d-flex align-center">
                     <MudIconButton Icon="@Icons.Material.Filled.Remove" Color="Color.Default" Size="Size.Small"
                       Disabled="@(item.Quantity <= 1)" OnClick="() => DecreaseQuantity(item)" />
@@ -61,14 +83,14 @@
                       OnClick="() => IncreaseQuantity(item)" />
                   </div>
                 </MudTd>
-                <MudTd DataLabel="Item Total">
+                <MudTd DataLabel="Item Total" style="text-align: center;">
                   @{
                     var itemTotal = item.Price * item.Quantity;
                   }
                   @itemTotal.ToString("C")
                 </MudTd>
-                <MudTd DataLabel="Actions">
-                  <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error"
+                <MudTd DataLabel="Actions" style="text-align: center;">
+                  <MudIconButton Icon="@Icons.Material.Outlined.Delete" class="delete-btn"
                     OnClick="() => RemoveFromCart(item.ItemId)" />
                 </MudTd>
               </RowTemplate>
@@ -77,10 +99,10 @@
         </MudCard>
       </MudItem>
 
-      <MudItem xs="12" md="5">
+      <MudItem xs="12" md="4">
         <MudCard>
           <MudCardHeader>
-            <MudText Typo="Typo.h6">Order Summary</MudText>
+            <MudText Typo="Typo.h5">Order Summary</MudText>
           </MudCardHeader>
           <MudCardContent>
             <MudGrid>
@@ -88,7 +110,7 @@
                 <MudText Typo="Typo.h6">Selected Items</MudText>
               </MudItem>
               <MudItem xs="6" Class="d-flex justify-end">
-                <MudText>@selectedItemsCount</MudText>
+                <MudText Typo="Typo.body1">@selectedItemsCount</MudText>
               </MudItem>
               <MudItem xs="6">
                 <MudText Typo="Typo.h6">Selected Total</MudText>
@@ -99,7 +121,7 @@
             </MudGrid>
           </MudCardContent>
           <MudCardActions>
-            <MudButton Color="Color.Primary" Variant="Variant.Filled" FullWidth="true" OnClick="ProceedToCheckout">
+            <MudButton class="check-out-btn" Variant="Variant.Filled" FullWidth="true" OnClick="ProceedToCheckout">
               Proceed to Checkout
             </MudButton>
           </MudCardActions>

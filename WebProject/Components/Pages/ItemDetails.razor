@@ -13,8 +13,18 @@
     background-color: #ffffff;
     border-radius: 10px;
     padding: 30px;
+    margin-top: 20px;
     margin-left: 24px;
     margin-right: 24px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .item-details-container {
+    display: flex;
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 30px;
+    margin-top: 20px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   }
 
@@ -101,14 +111,14 @@
         <MudItem xs="12">
           <MudGrid>
             <MudItem xs="12" md="4">
-              <MudImage Src="@item.ThumbnailUrl" Alt="@item.Name" Style="width: 100%; border-radius: 12px;" />
+              <MudImage Src="@item.ThumbnailUrl" Alt="@item.Name" Style="width: 100%; border-radius: 8px;" />
             </MudItem>
             <MudItem xs="12" md="8">
               <MudText Typo="Typo.h4" class="item-name">@item.Name</MudText>
               <MudGrid>
                 <MudItem xs="12" md="12" Class="d-flex align-center flex-wrap" Style="gap: 20px;">
                   <MudItem style="display: flex; align-items: center; gap: 8px;">
-                    <MudText Typo="Typo.body1">@averageRating.ToString("0.0")</MudText>
+                    <MudText Typo="Typo.body1">@averageRating.ToString("0")</MudText>
                     <MudRating SelectedValue="@averageRating" ReadOnly="true" />
                   </MudItem>
 
