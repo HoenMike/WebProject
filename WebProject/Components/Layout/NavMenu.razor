@@ -89,9 +89,9 @@
                 News
             </MudNavLink>
 
-            <MudDivider Class="my-2" />
 
             <AuthorizeView Roles="Admin">
+                <MudDivider Class="my-2" />
                 <MudNavLink Href="items" Icon="@Icons.Material.Filled.List">
                     Item Management
                 </MudNavLink>
@@ -103,8 +103,8 @@
                 </MudNavLink>
             </AuthorizeView>
 
-            <MudDivider Class="my-2" />
             <AuthorizeView Roles="Admin,Shipper">
+                <MudDivider Class="my-2" />
                 <MudNavLink Href="itemorders" Icon="@Icons.Material.Filled.Campaign">
                     Show Orders
                 </MudNavLink>
