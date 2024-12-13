@@ -102,8 +102,15 @@
                     Promotes Manage
                 </MudNavLink>
             </AuthorizeView>
+            <AuthorizeView>
 
+                <MudDivider Class="my-2" />
+                <MudNavLink Href="ordereditems" Icon="@Icons.Material.Filled.Campaign">
+                    Ordered Items
+                </MudNavLink>
+            </AuthorizeView>
             <AuthorizeView Roles="Admin,Shipper">
+
                 <MudDivider Class="my-2" />
                 <MudNavLink Href="itemorders" Icon="@Icons.Material.Filled.Campaign">
                     Show Orders

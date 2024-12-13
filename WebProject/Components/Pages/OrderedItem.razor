@@ -1,0 +1,98 @@
+@page "/ordereditems"
+@using WebProject.Models
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.EntityFrameworkCore
+@using System.Security.Claims
+@inject ApplicationDbContext DbContext
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject ISnackbar Snackbar
+@inject ShippingController ShippingController
+@using WebProject.Components.Account.Pages
+
+@rendermode InteractiveServer
+
+<PageTitle>Ordered Items</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge">
+  <MudDataGrid Items="@orderedItems" Elevation="4" Dense="true" Hover="true" Striped="true" QuickFilter="@_quickFilter">
+    <ToolBarContent>
+      <MudText Typo="Typo.h6">Ordered Items</MudText>
+      <MudSpacer />
+      <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start"
+        AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0">
+      </MudTextField>
+    </ToolBarContent>
+    <Columns>
+      <PropertyColumn Property="x => x.Id" Title="Order ID" />
+      <PropertyColumn Property="x => x.TotalPrice" Title="Total Price">
+        <CellTemplate>
+          @context.Item.TotalPrice.ToString("C")
+        </CellTemplate>
+      </PropertyColumn>
+      <PropertyColumn Property="x => x.Status" Title="Status">
+        <CellTemplate>
+          <MudChip Size="Size.Small" Color="@GetStatusColor(context.Item.Status)">
+            @context.Item.Status
+          </MudChip>
+        </CellTemplate>
+      </PropertyColumn>
+      <PropertyColumn Property="x => x.ShippingAddress" Title="Address" />
+      <PropertyColumn Property="x => x.CreatedAt" Title="Created At">
+        <CellTemplate>
+          @context.Item.CreatedAt.ToString("g")
+        </CellTemplate>
+      </PropertyColumn>
+    </Columns>
+    <PagerContent>
+      <MudDataGridPager T="Order" />
+    </PagerContent>
+  </MudDataGrid>
+</MudContainer>
+
+@code {
+  private List<Order> orderedItems = new();
+  private string _searchString = string.Empty;
+
+  // Quick filter function
+  private Func<Order, bool> _quickFilter => x =>
+  {
+    if (string.IsNullOrWhiteSpace(_searchString))
+      return true;
+
+    var searchString = _searchString.Trim().ToLower();
+    return x.Id.ToString().Contains(searchString) ||
+  x.TotalPrice.ToString().Contains(searchString) ||
+  x.Status.ToLower().Contains(searchString) ||
+  x.ShippingAddress.ToLower().Contains(searchString);
+  };
+
+  protected override async Task OnInitializedAsync()
+  {
+    await LoadOrderedItems();
+  }
+
+  private async Task LoadOrderedItems()
+  {
+    var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+    var user = authState.User;
+    var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
+
+    if (!string.IsNullOrEmpty(userId))
+    {
+      orderedItems = await DbContext.Orders
+      .Where(o => o.UserId == userId)
+      .ToListAsync();
+    }
+    StateHasChanged();
+  }
+
+  private Color GetStatusColor(string status) => status switch
+  {
+    "Cancelled" => Color.Error,
+    "Pending" => Color.Default,
+    "Success" => Color.Success,
+    "On Delivery" => Color.Info,
+    "Delivery Successful" => Color.Success,
+    _ => Color.Warning
+  };
+}
