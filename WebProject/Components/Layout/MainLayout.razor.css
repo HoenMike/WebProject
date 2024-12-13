@@ -1,3 +1,54 @@
+html,
+body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background-color: #ffe6ec;
+}
+.page {
+  min-height: 100vh;
+  height: 100vh;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background-color: #ffe6ec;
+  overflow-y: auto;
+  overflow-x: auto;
+}
+
+main {
+  flex: 1;
+}
+
+.sidebar {
+  background-color: white;
+}
+
+.top-row {
+  background-color: white;
+  border-bottom: 1px solid pink;
+  height: 3.5rem;
+  display: flex;
+  align-items: center;
+}
+
+.top-row ::deep a,
+.top-row ::deep .btn-link {
+  white-space: nowrap;
+  margin-left: 1.5rem;
+  text-decoration: none;
+}
+
+.top-row ::deep a:hover,
+.top-row ::deep .btn-link:hover {
+  text-decoration: underline;
+}
+
+.top-row ::deep a:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 @media (max-width: 640.98px) {
   .top-row {
     justify-content: space-between;
