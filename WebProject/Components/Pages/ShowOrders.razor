@@ -9,6 +9,8 @@
 @inject ShippingController ShippingController
 @using WebProject.Components.Account.Pages
 
+@rendermode InteractiveServer
+
 <PageTitle>Item Orders</PageTitle>
 
 <MudContainer>
@@ -38,13 +40,19 @@
         <AuthorizeView Roles="Admin">
           <Authorized>
             @{
-              var shipper = itemShippers.FirstOrDefault(itemShipper => itemShipper.OrderId == order.Id)?.ShipperId;
-              var shipperName = shipper != null ? DbContext.Users.FirstOrDefault(user => user.Id == shipper)?.UserName :
-                      null;
+              var itemShipper = itemShippers.FirstOrDefault(itemShipper => itemShipper.OrderId == order.Id);
+              var shipperName = itemShipper != null
+                      ? DbContext.Users.FirstOrDefault(user => user.Id == itemShipper.ShipperId)?.UserName
+                      : null;
             }
             @if (shipperName != null)
             {
-              <span>Assigned Shipper: @shipperName</span>
+              <MudStack Row="true" AlignItems="AlignItems.Center">
+                <MudText>Assigned: @shipperName</MudText>
+                <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="() => CancelOrder(order.Id)">
+                  Cancel Order
+                </MudButton>
+              </MudStack>
             }
             else
             {
@@ -60,23 +68,44 @@
 @code {
   private List<Order> orders = new();
   private List<ItemShipper> itemShippers = new();
+  private string currentUserRole;
 
   protected override async Task OnInitializedAsync()
   {
+    var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+    var user = authState.User;
+
+    currentUserRole = user.IsInRole("Admin") ? "Admin"
+    : user.IsInRole("Shipper") ? "Shipper"
+    : "";
+
     await LoadOrders();
     await LoadItemShippers();
   }
 
   private async Task LoadOrders()
   {
-    orders = await DbContext.Orders
-    .Where(o => o.Status == "Pending")
-    .ToListAsync();
+    if (currentUserRole == "Admin")
+    {
+      // For Admin, load ALL orders
+      orders = await DbContext.Orders.ToListAsync();
+    }
+    else if (currentUserRole == "Shipper")
+    {
+      // For Shipper, load only unassigned orders and orders with Status = Cancelled
+      orders = await DbContext.Orders
+      .Where(o => (o.Status == "Pending" &&
+      !DbContext.ItemShippers.Any(itemShipper => itemShipper.OrderId == o.Id)) ||
+      o.Status == "Cancelled")
+      .ToListAsync();
+    }
+    StateHasChanged();
   }
 
   private async Task LoadItemShippers()
   {
     itemShippers = await DbContext.ItemShippers.ToListAsync();
+    StateHasChanged();
   }
 
   private async Task AssignOrderToShipper(int orderId)
@@ -90,7 +119,23 @@
     }
     catch (InvalidOperationException ex)
     {
-      Snackbar.Add(ex.Message, Severity.Error);
+      Snackbar.Add($"{ex.Message}. Please refresh the page and try again.", Severity.Error);
+    }
+  }
+
+  private async Task CancelOrder(int orderId)
+  {
+    try
+    {
+      await ShippingController.CancelOrder(orderId);
+      Snackbar.Add("Order cancelled successfully", Severity.Success);
+      await LoadOrders();
+      await LoadItemShippers();
+      StateHasChanged();
+    }
+    catch (InvalidOperationException ex)
+    {
+      Snackbar.Add($"{ex.Message}. Please refresh the page and try again.", Severity.Error);
     }
   }
 }
