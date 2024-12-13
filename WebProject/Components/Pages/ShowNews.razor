@@ -36,10 +36,13 @@
               <MudText Typo="Typo.caption" Style="font-style: italic;">Latest Update: @news.UpdatedAt.Value.ToString("g")
               </MudText>
             }
-
           </TitleContent>
           <ChildContent>
             <MudText Typo="Typo.body1">@news.Content</MudText>
+            @if (!string.IsNullOrEmpty(news.ImageUrl))
+            {
+              <MudImage Src="@news.ImageUrl" Alt="News Image" Style="width: 100%; height: auto;" />
+            }
           </ChildContent>
         </MudExpansionPanel>
       </MudCard>

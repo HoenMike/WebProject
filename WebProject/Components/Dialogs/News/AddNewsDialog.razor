@@ -7,7 +7,11 @@
                 <MudTextField @bind-Value="newNews.Title" Label="Title" Required="true" />
             </MudItem>
             <MudItem xs="12">
-                <MudTextField @bind-Value="newNews.Content" Label="Content" Required="true" Textarea="true" Lines="15" />
+                <MudTextField @bind-Value="newNews.Content" Label="Content" Required="true" Textarea="true"
+                    Lines="15" />
+            </MudItem>
+            <MudItem xs="12">
+                <MudTextField @bind-Value="newNews.ImageUrl" Label="Image URL" />
             </MudItem>
         </MudGrid>
     </DialogContent>

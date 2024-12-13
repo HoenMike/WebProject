@@ -27,5 +27,7 @@ namespace WebProject.Models
 
     public DateTime? UpdatedAt { get; set; }
 
+    public string? ImageUrl { get; set; }
+
   }
 }

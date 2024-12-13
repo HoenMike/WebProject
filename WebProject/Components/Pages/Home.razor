@@ -11,7 +11,6 @@
 @inject WishlistController WishlistController
 @using MudBlazor
 
-
 @rendermode InteractiveServer
 <style>
   .promotion-container {
@@ -84,7 +83,6 @@
     </MudGrid>
   </MudPaper>
 
-
   <div style="height: 500px; display: flex; justify-content: center; align-items: center;">
     <MudPaper Elevation="3" Class="promotion-container pa-0">
       @if (isPromotesLoading)
@@ -110,7 +108,6 @@
       }
     </MudPaper>
   </div>
-
 
   <h4 style="color: rgb(0, 0, 0)">New Arrivals</h4>
   @if (isLoading)
@@ -168,11 +165,9 @@
             </MudCardActions>
           </MudCard>
         </MudItem>
-
       }
     </MudGrid>
   }
-
 
   <br>
   <br>
@@ -200,6 +195,10 @@
             </TitleContent>
             <ChildContent>
               <MudText Typo="Typo.body1">@news.Content</MudText>
+              @if (!string.IsNullOrEmpty(news.ImageUrl))
+              {
+                <MudImage Src="@news.ImageUrl" Alt="News Image" Style="width: 100%; height: auto;" />
+              }
             </ChildContent>
           </MudExpansionPanel>
         </MudItem>
@@ -207,7 +206,6 @@
     </MudGrid>
   }
 </MudContainer>
-
 
 @code {
   private List<Item> items = new();
@@ -244,7 +242,6 @@
     }
   }
 
-
   protected override async Task OnAfterRenderAsync(bool firstRender)
   {
     if (firstRender)
@@ -256,12 +253,10 @@
     }
   }
 
-
   private void NavigateToItemDetails(int itemId)
   {
     NavigationManager.NavigateTo($"/item-details/{itemId}");
   }
-
 
   private async Task LoadItems()
   {
@@ -280,7 +275,6 @@
       StateHasChanged();
     }
   }
-
 
   private async Task LoadActivePromotes()
   {
@@ -308,9 +302,8 @@
   {
     try
     {
-      // Lấy danh sách yêu thích từ cơ sở dữ liệu
       var wishlist = await WishlistController.GetWishlistAsync();
-      wishlistItems = new HashSet<int>(wishlist.Select(w => w.ItemId)); // Lưu ID vào danh sách
+      wishlistItems = new HashSet<int>(wishlist.Select(w => w.ItemId));
       StateHasChanged();
     }
     catch (Exception ex)
@@ -318,6 +311,7 @@
       Snackbar.Add($"Error loading wishlist: {ex.Message}", Severity.Error);
     }
   }
+
   private void FilterItems()
   {
     if (string.IsNullOrEmpty(searchTerm))
@@ -332,15 +326,12 @@
     }
   }
 
-
   private void ClearSearch()
   {
     searchTerm = string.Empty;
     displayedItems = items;
     StateHasChanged();
   }
-
-
 
   private void IncreaseQuantity(int itemId)
   {
@@ -352,11 +343,6 @@
     }
   }
 
-
-
-
-
-
   private void DecreaseQuantity(int itemId)
   {
     if (GetItemQuantity(itemId) > 1)
@@ -365,8 +351,6 @@
       StateHasChanged();
     }
   }
-
-
 
   private async Task AddToCart(Item item)
   {
@@ -377,14 +361,12 @@
       var dialog = DialogService.Show<LoginDialog>("Login Required", parameters, options);
       var result = await dialog.Result;
 
-
       if (result != null && !result.Canceled)
       {
         Navigation.NavigateTo("/Account/Login");
       }
       return;
     }
-
 
     try
     {
@@ -396,7 +378,6 @@
       Snackbar.Add(ex.Message, Severity.Error);
     }
   }
-
 
   private async Task AddToWishlist(Item item)
   {
@@ -416,8 +397,6 @@
     }
   }
 
-
-
   private bool IsInWishlist(int itemId)
   {
     return wishlistItems.Contains(itemId);
@@ -431,14 +410,12 @@
       {
         if (IsInWishlist(item.Id))
         {
-          // Remove from wishlist
           await WishlistController.RemoveFromWishlistAsync(item.Id);
           wishlistItems.Remove(item.Id);
           Snackbar.Add("Item removed from wishlist", Severity.Success);
         }
         else
         {
-          // Add to wishlist
           await WishlistController.AddToWishlistAsync(item.Id);
           wishlistItems.Add(item.Id);
           Snackbar.Add("Item added to wishlist", Severity.Success);
@@ -452,12 +429,10 @@
     }
   }
 
-
   private bool IsUserLoggedIn()
   {
     return true;
   }
-
 
   private async Task LoadNews()
   {

@@ -6,7 +6,11 @@
                 <MudTextField @bind-Value="editNews.Title" Label="Title" Required="true" />
             </MudItem>
             <MudItem xs="12">
-                <MudTextField @bind-Value="editNews.Content" Label="Content" Required="true" Textarea="true" Lines="15" />
+                <MudTextField @bind-Value="editNews.Content" Label="Content" Required="true" Textarea="true"
+                    Lines="15" />
+            </MudItem>
+            <MudItem xs="12">
+                <MudTextField @bind-Value="editNews.ImageUrl" Label="Image URL" />
             </MudItem>
         </MudGrid>
     </DialogContent>
@@ -32,7 +36,8 @@
                 Content = News.Content,
                 CreatedBy = News.CreatedBy,
                 CreatedAt = News.CreatedAt,
-                UpdatedAt = News.UpdatedAt
+                UpdatedAt = News.UpdatedAt,
+                ImageUrl = News.ImageUrl
             };
     }
 
@@ -56,6 +61,7 @@
                 news.Content = editNews.Content;
                 news.UpdatedAt = DateTime.Now;
                 news.UpdatedBy = userName;
+                news.ImageUrl = editNews.ImageUrl;
                 await DbContext.SaveChangesAsync();
                 Snackbar.Add("News updated successfully", Severity.Success);
                 MudDialog.Close(DialogResult.Ok(editNews));
