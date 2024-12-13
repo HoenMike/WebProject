@@ -251,7 +251,6 @@
       await LoadItems();
       await LoadActivePromotes();
       await LoadNews();
-      await LoadWishlist();
     }
   }
 
@@ -303,20 +302,6 @@
     }
   }
 
-  private async Task LoadWishlist()
-  {
-    try
-    {
-      // Lấy danh sách yêu thích từ cơ sở dữ liệu
-      var wishlist = await WishlistController.GetWishlistAsync();
-      wishlistItems = new HashSet<int>(wishlist.Select(w => w.ItemId)); // Lưu ID vào danh sách
-      StateHasChanged();
-    }
-    catch (Exception ex)
-    {
-      Snackbar.Add($"Error loading wishlist: {ex.Message}", Severity.Error);
-    }
-  }
   private void FilterItems()
   {
     if (string.IsNullOrEmpty(searchTerm))
@@ -397,25 +382,36 @@
   }
 
 
-  private async Task AddToWishlist(Item item)
-  {
-    if (item != null)
+    private async Task ToggleWishlist(Item item)
     {
-      try
-      {
-        await WishlistController.AddToWishlistAsync(item.Id);
-        wishlistItems.Add(item.Id);
-        Snackbar.Add("Item added to wishlist", Severity.Success);
-        StateHasChanged();
-      }
-      catch (Exception ex)
-      {
-        Snackbar.Add($"Error adding to wishlist: {ex.Message}", Severity.Error);
-      }
+        if (item != null)
+        {
+            try
+            {
+                var wishlist = await WishlistController.GetWishlistAsync();
+                wishlistItems = new HashSet<int>(wishlist.Select(w => w.ItemId));
+                StateHasChanged();
+
+                if (IsInWishlist(item.Id))
+                {
+                    await WishlistController.RemoveFromWishlistAsync(item.Id);
+                    wishlistItems.Remove(item.Id);
+                    Snackbar.Add("Item removed from wishlist", Severity.Success);
+                }
+                else
+                {
+                    await WishlistController.AddToWishlistAsync(item.Id);
+                    wishlistItems.Add(item.Id);
+                    Snackbar.Add("Item added to wishlist", Severity.Success);
+                }
+                StateHasChanged();
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add($"Error updating wishlist: {ex.Message}", Severity.Error);
+            }
+        }
     }
-  }
-
-
 
   private bool IsInWishlist(int itemId)
   {

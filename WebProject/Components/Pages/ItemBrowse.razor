@@ -11,7 +11,6 @@
 @inject NavigationManager Navigation
 @inject WishlistController WishlistController
 
-
 @rendermode InteractiveServer
 <style>
     .add-to-cart-btn {
@@ -40,313 +39,272 @@
         color: #ff1871;
     }
     .quantity-btn {
-    background-color: #ededed;
-    border: none;
-    border-radius: 4px;
-    width: 50px;
-    height: 50px;
-  }
-  .mud-input-root input {
-    text-align: center; 
-  }
-  
-  .quantity-btn:hover {
-    background-color: #bcbcbc;
-  }
+        background-color: #ededed;
+        border: none;
+        border-radius: 4px;
+        width: 50px;
+        height: 50px;
+    }
+    .mud-input-root input {
+        text-align: center; 
+    }
+    
+    .quantity-btn:hover {
+        background-color: #bcbcbc;
+    }
 </style>
+
 <PageTitle>Browse</PageTitle>
 <MudContainer>
-  <MudPaper Elevation="3" Class="pa-4 mb-4">
-    <MudGrid>
-      <MudItem xs="12">
-        <MudTextField Variant="Variant.Outlined" @bind-Value="searchTerm" Label="Search Items"
-          AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" Immediate="true" Clearable="true"
-          OnClearButtonClick="ClearSearch" OnKeyUp="FilterItems" />
-      </MudItem>
-    </MudGrid>
-  </MudPaper>
-  @if (isLoading)
-  {
-      <MudProgressLinear Indeterminate="true" Color="Color.Primary" Style="margin-bottom: 20px;" />
-  }
-  else
-  {
-      <MudGrid>
-        @foreach (var item in displayedItems)
-        {
-            <MudItem Style="width:300px">
-                <MudCard Style="word-break: break-word; border-radius:12px;">
-                    <div class="image-container" style="position: relative">
-                        <MudImage Src="@item.ThumbnailUrl" Alt="@item.Name" 
-                            Style="width: 150px; height: 260px; min-height: 260px; width: 100%; cursor: pointer; padding:20px; padding-bottom:0px;z-index: 1;"
-                            @onclick="@(() => NavigateToItemDetails(item.Id))" />  
-                            
-                        <MudButton Class="wishlist-button"
-                                Style="z-index: 2; position: absolute; top: 0px; right: 0px; background-color: #ffffff; border-radius: 40px; height: 65px; align-items: center;"  
-                                OnClick="@(() => ToggleWishlist(item))">
-                                <MudIcon Icon="@Icons.Material.Filled.Favorite" 
-                                       Color="@(IsInWishlist(item.Id) ? Color.Error : Color.Default)"
-                                       FontSize="50px" />
-                        </MudButton>
-                    </div>              
-                    <MudCardContent>
-                        <MudLink Href="@($"/item-details/{item.Id}")"  style="text-decoration: none;">
-                            <MudText Typo="Typo.h6" class="item-name">@item.Name</MudText>
-                        </MudLink>
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <MudText Typo="Typo.h6" class="item-price">@item.Price.ToString("C")</MudText>
-                            <MudText Typo="Typo.body2" >Stock: @item.StockQuantity</MudText>
-                        </div>
-                    </MudCardContent>
-
-                    <MudCardActions>
-                        <MudGrid Style="margin-left:4px; margin-right: 4px; margin-bottom: 10px;">
-                            <MudItem xs="2" Class="d-flex justify-center" Style="width:100%">
-                                <MudIconButton Icon="@Icons.Material.Filled.Remove"
-                                    Class="quantity-btn"
-                                    OnClick="@(() => DecreaseQuantity(item.Id))" />
-                            </MudItem>
-                            <MudItem xs="3" Class="d-flex justify-center" >
-                                <MudNumericField HideSpinButtons="true"
-                                               Value="@GetItemQuantity(item.Id)"
-                                               ValueChanged="@((int value) => SetItemQuantity(item.Id, value))"
-                                               Min="1"
-                                               Max="@item.StockQuantity"
-                                               Variant="Variant.Outlined"
-                                               Class="mud-input-root" 
-                                               Style="width:50px;height:50px" />
-                            </MudItem>
-                            <MudItem xs="3" Class="d-flex justify-center" Style="width:100%">
-                                <MudIconButton Icon="@Icons.Material.Filled.Add"
-                                    Class="quantity-btn"
-                                    OnClick="@(() => IncreaseQuantity(item.Id))" />
-                            </MudItem>
-                            <MudItem xs="4" Class="d-flex justify-center">
-                                <MudIconButton Icon="@Icons.Material.Outlined.ShoppingCart" 
-                                Class="add-to-cart-btn" OnClick="@(() => AddToCart(item))" Size="Size.Medium" 
-                                />
-                            </MudItem>
-                        </MudGrid>
-                    </MudCardActions>
-                </MudCard>
+    <MudPaper Elevation="3" Class="pa-4 mb-4">
+        <MudGrid>
+            <MudItem xs="12">
+                <MudTextField Variant="Variant.Outlined" @bind-Value="searchTerm" Label="Search Items"
+                    AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" Immediate="true" Clearable="true"
+                    OnClearButtonClick="ClearSearch" OnKeyUp="FilterItems" />
             </MudItem>
-
-        }
-    </MudGrid>
-  }
-</MudContainer>
-
-
-@code {
-  private List<Item> items = new();
-  private List<Item> displayedItems = new();
-  private bool isLoading = true;
-  private string searchTerm = string.Empty;
-  private Dictionary<int, int> itemQuantities = new();
-  private HashSet<int> wishlistItems = new();
-
-  private int GetItemQuantity(int itemId)
-  {
-    if (!itemQuantities.ContainsKey(itemId))
+        </MudGrid>
+    </MudPaper>
+    @if (isLoading)
     {
-        itemQuantities[itemId] = 1;
-    }
-    return itemQuantities[itemId];
-  }
-
-  private void SetItemQuantity(int itemId, int value)
-  {
-    if (value >= 1)
-    {
-        var item = items.FirstOrDefault(i => i.Id == itemId);
-        if (item != null && value <= item.StockQuantity)
-        {
-            itemQuantities[itemId] = value;
-            StateHasChanged();
-        }
-    }
-  }
-
-
-  protected override async Task OnAfterRenderAsync(bool firstRender)
-  {
-    if (firstRender)
-    {
-      await LoadItems();
-      await LoadWishlist();
-    }
-  }
-
-
-  private void NavigateToItemDetails(int itemId)
-  {
-    if (itemId > 0)
-    {
-      NavigationManager.NavigateTo($"/item-details/{itemId}");
-    }
-  }
-
-
-  private async Task LoadItems()
-  {
-    try
-    {
-      items = await DbContext.Items.OrderByDescending(item => item.Id).ToListAsync();
-      displayedItems = items;
-    }
-    catch (Exception ex)
-    {
-      Snackbar.Add($"Error loading items: {ex.Message}", Severity.Error);
-    }
-    finally
-    {
-      isLoading = false;
-      StateHasChanged();
-    }
-  }
-
-  private async Task LoadWishlist()
-  {
-      try
-      {
-          // Lấy danh sách yêu thích từ cơ sở dữ liệu
-          var wishlist = await WishlistController.GetWishlistAsync();
-          wishlistItems = new HashSet<int>(wishlist.Select(w => w.ItemId)); // Lưu ID vào danh sách
-          StateHasChanged();
-      }
-      catch (Exception ex)
-      {
-          Snackbar.Add($"Error loading wishlist: {ex.Message}", Severity.Error);
-      }
-  }
-  private void FilterItems()
-  {
-    if (string.IsNullOrEmpty(searchTerm))
-    {
-      displayedItems = items;
+        <MudProgressLinear Indeterminate="true" Color="Color.Primary" Style="margin-bottom: 20px;" />
     }
     else
     {
-      displayedItems = items.Where(item =>
-      item.Name?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) == true
-      ).ToList();
+        <MudGrid>
+            @foreach (var item in displayedItems)
+            {
+                <MudItem Style="width:300px">
+                    <MudCard Style="word-break: break-word; border-radius:12px;">
+                        <div class="image-container" style="position: relative">
+                            <MudImage Src="@item.ThumbnailUrl" Alt="@item.Name" 
+                                Style="width: 150px; height: 260px; min-height: 260px; width: 100%; cursor: pointer; padding:20px; padding-bottom:0px;z-index: 1;"
+                                @onclick="@(() => NavigateToItemDetails(item.Id))" />  
+                                
+                            <MudButton Class="wishlist-button"
+                                    Style="z-index: 2; position: absolute; top: 0px; right: 0px; background-color: #ffffff; border-radius: 40px; height: 65px; align-items: center;"  
+                                    OnClick="@(() => ToggleWishlist(item))">
+                                    <MudIcon Icon="@Icons.Material.Filled.Favorite" 
+                                           Color="@(IsInWishlist(item.Id) ? Color.Error : Color.Default)"
+                                           FontSize="50px" />
+                            </MudButton>
+                        </div>              
+                        <MudCardContent>
+                            <MudLink Href="@($"/item-details/{item.Id}")"  style="text-decoration: none;">
+                                <MudText Typo="Typo.h6" class="item-name">@item.Name</MudText>
+                            </MudLink>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <MudText Typo="Typo.h6" class="item-price">@item.Price.ToString("C")</MudText>
+                                <MudText Typo="Typo.body2" >Stock: @item.StockQuantity</MudText>
+                            </div>
+                        </MudCardContent>
+
+                        <MudCardActions>
+                            <MudGrid Style="margin-left:4px; margin-right: 4px; margin-bottom: 10px;">
+                                <MudItem xs="2" Class="d-flex justify-center" Style="width:100%">
+                                    <MudIconButton Icon="@Icons.Material.Filled.Remove"
+                                        Class="quantity-btn"
+                                        OnClick="@(() => DecreaseQuantity(item.Id))" />
+                                </MudItem>
+                                <MudItem xs="3" Class="d-flex justify-center" >
+                                    <MudNumericField HideSpinButtons="true"
+                                                   Value="@GetItemQuantity(item.Id)"
+                                                   ValueChanged="@((int value) => SetItemQuantity(item.Id, value))"
+                                                   Min="1"
+                                                   Max="@item.StockQuantity"
+                                                   Variant="Variant.Outlined"
+                                                   Class="mud-input-root" 
+                                                   Style="width:50px;height:50px" />
+                                </MudItem>
+                                <MudItem xs="3" Class="d-flex justify-center" Style="width:100%">
+                                    <MudIconButton Icon="@Icons.Material.Filled.Add"
+                                        Class="quantity-btn"
+                                        OnClick="@(() => IncreaseQuantity(item.Id))" />
+                                </MudItem>
+                                <MudItem xs="4" Class="d-flex justify-center">
+                                    <MudIconButton Icon="@Icons.Material.Outlined.ShoppingCart" 
+                                    Class="add-to-cart-btn" OnClick="@(() => AddToCart(item))" Size="Size.Medium" 
+                                    />
+                                </MudItem>
+                            </MudGrid>
+                        </MudCardActions>
+                    </MudCard>
+                </MudItem>
+            }
+        </MudGrid>
     }
-  }
+</MudContainer>
 
-  private void ClearSearch()
-  {
-    searchTerm = string.Empty;
-    displayedItems = items;
-    StateHasChanged();
-  }
+@code {
+    private List<Item> items = new();
+    private List<Item> displayedItems = new();
+    private bool isLoading = true;
+    private string searchTerm = string.Empty;
+    private Dictionary<int, int> itemQuantities = new();
+    private HashSet<int> wishlistItems = new();
 
-  private void IncreaseQuantity(int itemId)
-  {
-      var item = items.FirstOrDefault(i => i.Id == itemId);
-      if (item != null && GetItemQuantity(itemId) < item.StockQuantity)
-      {
-          itemQuantities[itemId] = GetItemQuantity(itemId) + 1;
-          StateHasChanged();
-      }
-  }
+    private int GetItemQuantity(int itemId)
+    {
+        if (!itemQuantities.ContainsKey(itemId))
+        {
+            itemQuantities[itemId] = 1;
+        }
+        return itemQuantities[itemId];
+    }
 
+    private void SetItemQuantity(int itemId, int value)
+    {
+        if (value >= 1)
+        {
+            var item = items.FirstOrDefault(i => i.Id == itemId);
+            if (item != null && value <= item.StockQuantity)
+            {
+                itemQuantities[itemId] = value;
+                StateHasChanged();
+            }
+        }
+    }
 
-  private void DecreaseQuantity(int itemId)
-  {
-      if (GetItemQuantity(itemId) > 1)
-      {
-          itemQuantities[itemId] = GetItemQuantity(itemId) - 1;
-          StateHasChanged();
-      }
-  }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await LoadItems();
+        }
+    }
 
+    private void NavigateToItemDetails(int itemId)
+    {
+        if (itemId > 0)
+        {
+            NavigationManager.NavigateTo($"/item-details/{itemId}");
+        }
+    }
 
-  private async Task AddToCart(Item item)
-  {
-      if (!IsUserLoggedIn())
-      {
-          var parameters = new DialogParameters { ["ContentText"] = "You need to login to add items to the cart." };
-          var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
-          var dialog = DialogService.Show<LoginDialog>("Login Required", parameters, options);
-          var result = await dialog.Result;
-
-
-          if (result != null && !result.Canceled)
-          {
-              Navigation.NavigateTo("/Account/Login");
-          }
-          return;
-      }
-
-
-      try
-      {
-          await CartController.AddToCartAsync(item, GetItemQuantity(item.Id));
-          Snackbar.Add($"Added {GetItemQuantity(item.Id)} {item.Name} to cart", Severity.Success);
-      }
-      catch (InvalidOperationException ex)
-      {
-          Snackbar.Add(ex.Message, Severity.Error);
-      }
-  }
-
-
-  private async Task AddToWishlist(Item item)
-  {
-      if (item != null)
-      {
-          try
-          {
-              await WishlistController.AddToWishlistAsync(item.Id);
-              wishlistItems.Add(item.Id);
-              Snackbar.Add("Item added to wishlist", Severity.Success);
-              StateHasChanged();
-          }
-          catch (Exception ex)
-          {
-              Snackbar.Add($"Error adding to wishlist: {ex.Message}", Severity.Error);
-          }
-      }
-  }
+    private async Task LoadItems()
+    {
+        try
+        {
+            items = await DbContext.Items.OrderByDescending(item => item.Id).ToListAsync();
+            displayedItems = items;
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error loading items: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
 
 
-  private bool IsInWishlist(int itemId)
-  {
-      return wishlistItems.Contains(itemId);
-  }
+    private void FilterItems()
+    {
+        if (string.IsNullOrEmpty(searchTerm))
+        {
+            displayedItems = items;
+        }
+        else
+        {
+            displayedItems = items.Where(item =>
+            item.Name?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) == true
+            ).ToList();
+        }
+    }
 
-  private async Task ToggleWishlist(Item item)
-  {
-      if (item != null)
-      {
-          try
-          {
-              if (IsInWishlist(item.Id))
-              {
-                  // Remove from wishlist
-                  await WishlistController.RemoveFromWishlistAsync(item.Id);
-                  wishlistItems.Remove(item.Id);
-                  Snackbar.Add("Item removed from wishlist", Severity.Success);
-              }
-              else
-              {
-                  // Add to wishlist
-                  await WishlistController.AddToWishlistAsync(item.Id);
-                  wishlistItems.Add(item.Id);
-                  Snackbar.Add("Item added to wishlist", Severity.Success);
-              }
-              StateHasChanged();
-          }
-          catch (Exception ex)
-          {
-              Snackbar.Add($"Error updating wishlist: {ex.Message}", Severity.Error);
-          }
-      }
-  }
+    private void ClearSearch()
+    {
+        searchTerm = string.Empty;
+        displayedItems = items;
+        StateHasChanged();
+    }
 
-  private bool IsUserLoggedIn()
-  {
-      return true;
-  }
+    private void IncreaseQuantity(int itemId)
+    {
+        var item = items.FirstOrDefault(i => i.Id == itemId);
+        if (item != null && GetItemQuantity(itemId) < item.StockQuantity)
+        {
+            itemQuantities[itemId] = GetItemQuantity(itemId) + 1;
+            StateHasChanged();
+        }
+    }
 
+    private void DecreaseQuantity(int itemId)
+    {
+        if (GetItemQuantity(itemId) > 1)
+        {
+            itemQuantities[itemId] = GetItemQuantity(itemId) - 1;
+            StateHasChanged();
+        }
+    }
+
+    private async Task AddToCart(Item item)
+    {
+        if (!IsUserLoggedIn())
+        {
+            var parameters = new DialogParameters { ["ContentText"] = "You need to login to add items to the cart." };
+            var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+            var dialog = DialogService.Show<LoginDialog>("Login Required", parameters, options);
+            var result = await dialog.Result;
+
+            if (result != null && !result.Canceled)
+            {
+                Navigation.NavigateTo("/Account/Login");
+            }
+            return;
+        }
+
+        try
+        {
+            await CartController.AddToCartAsync(item, GetItemQuantity(item.Id));
+            Snackbar.Add($"Added {GetItemQuantity(item.Id)} {item.Name} to cart", Severity.Success);
+        }
+        catch (InvalidOperationException ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+    }
+
+    private bool IsInWishlist(int itemId)
+    {
+        return wishlistItems.Contains(itemId);
+    }
+
+    private async Task ToggleWishlist(Item item)
+    {
+        if (item != null)
+        {
+            try
+            {
+                var wishlist = await WishlistController.GetWishlistAsync();
+                wishlistItems = new HashSet<int>(wishlist.Select(w => w.ItemId));
+                StateHasChanged();
+
+                if (IsInWishlist(item.Id))
+                {
+                    await WishlistController.RemoveFromWishlistAsync(item.Id);
+                    wishlistItems.Remove(item.Id);
+                    Snackbar.Add("Item removed from wishlist", Severity.Success);
+                }
+                else
+                {
+                    await WishlistController.AddToWishlistAsync(item.Id);
+                    wishlistItems.Add(item.Id);
+                    Snackbar.Add("Item added to wishlist", Severity.Success);
+                }
+                StateHasChanged();
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add($"Error updating wishlist: {ex.Message}", Severity.Error);
+            }
+        }
+    }
+
+    private bool IsUserLoggedIn()
+    {
+        return true;
+    }
 }
