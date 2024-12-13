@@ -2,10 +2,12 @@
 @using WebProject.Models
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.EntityFrameworkCore
+@using System.Security.Claims
 @inject ApplicationDbContext DbContext
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject ISnackbar Snackbar
 @inject ShippingController ShippingController
+@using WebProject.Components.Account.Pages
 
 <PageTitle>Item Orders</PageTitle>
 
@@ -26,9 +28,30 @@
       <MudTd>@order.ShippingAddress</MudTd>
       <MudTd>@order.CreatedAt.ToString("g")</MudTd>
       <MudTd>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => AssignOrderToShipper(order.Id)">
-          Assign to Me
-        </MudButton>
+        <AuthorizeView Roles="Shipper">
+          <Authorized>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => AssignOrderToShipper(order.Id)">
+              Assign to Me
+            </MudButton>
+          </Authorized>
+        </AuthorizeView>
+        <AuthorizeView Roles="Admin">
+          <Authorized>
+            @{
+              var shipper = itemShippers.FirstOrDefault(itemShipper => itemShipper.OrderId == order.Id)?.ShipperId;
+              var shipperName = shipper != null ? DbContext.Users.FirstOrDefault(user => user.Id == shipper)?.UserName :
+                      null;
+            }
+            @if (shipperName != null)
+            {
+              <span>Assigned Shipper: @shipperName</span>
+            }
+            else
+            {
+              <span>Not Assigned</span>
+            }
+          </Authorized>
+        </AuthorizeView>
       </MudTd>
     </RowTemplate>
   </MudTable>
@@ -36,15 +59,24 @@
 
 @code {
   private List<Order> orders = new();
+  private List<ItemShipper> itemShippers = new();
 
   protected override async Task OnInitializedAsync()
   {
     await LoadOrders();
+    await LoadItemShippers();
   }
 
   private async Task LoadOrders()
   {
-    orders = await DbContext.Orders.ToListAsync();
+    orders = await DbContext.Orders
+    .Where(o => o.Status == "Pending")
+    .ToListAsync();
+  }
+
+  private async Task LoadItemShippers()
+  {
+    itemShippers = await DbContext.ItemShippers.ToListAsync();
   }
 
   private async Task AssignOrderToShipper(int orderId)
@@ -54,6 +86,7 @@
       await ShippingController.AssignOrderToShipper(orderId);
       Snackbar.Add("Order assigned successfully", Severity.Success);
       await LoadOrders();
+      await LoadItemShippers();
     }
     catch (InvalidOperationException ex)
     {

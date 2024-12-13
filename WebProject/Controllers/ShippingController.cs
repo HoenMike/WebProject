@@ -22,11 +22,11 @@ namespace WebProject.Controllers
       var userId = await _cartController.GetUserId();
 
       var existingItemShipper = await _dbContext.ItemShippers
-          .FirstOrDefaultAsync(itemShipper => itemShipper.OrderId == orderId && itemShipper.ShipperId == userId);
+          .FirstOrDefaultAsync(itemShipper => itemShipper.OrderId == orderId);
 
       if (existingItemShipper != null)
       {
-        throw new InvalidOperationException("This order is already assigned to you.");
+        throw new InvalidOperationException("This order is already assigned to another shipper.");
       }
 
       var itemShipper = new ItemShipper
