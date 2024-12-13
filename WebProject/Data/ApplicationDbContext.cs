@@ -22,7 +22,7 @@ namespace WebProject.Data
     public DbSet<ItemPhoto> ItemPhotos { get; set; }
     public DbSet<WishList> WishLists { get; set; }
     public DbSet<Promote> Promotes { get; set; }
-
+    public DbSet<ItemShipper> ItemShippers { get; set; }
 
   }
 }

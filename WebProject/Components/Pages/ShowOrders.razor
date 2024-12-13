@@ -1,0 +1,63 @@
+@page "/itemorders"
+@using WebProject.Models
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.EntityFrameworkCore
+@inject ApplicationDbContext DbContext
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject ISnackbar Snackbar
+@inject ShippingController ShippingController
+
+<PageTitle>Item Orders</PageTitle>
+
+<MudContainer>
+  <MudTable Items="@orders" Hover="true" Striped="true">
+    <HeaderContent>
+      <MudTh>Order ID</MudTh>
+      <MudTh>Total Price</MudTh>
+      <MudTh>Status</MudTh>
+      <MudTh>Address</MudTh>
+      <MudTh>Created At</MudTh>
+      <MudTh>Actions</MudTh>
+    </HeaderContent>
+    <RowTemplate Context="order">
+      <MudTd>@order.Id</MudTd>
+      <MudTd>@order.TotalPrice.ToString("C")</MudTd>
+      <MudTd>@order.Status</MudTd>
+      <MudTd>@order.ShippingAddress</MudTd>
+      <MudTd>@order.CreatedAt.ToString("g")</MudTd>
+      <MudTd>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => AssignOrderToShipper(order.Id)">
+          Assign to Me
+        </MudButton>
+      </MudTd>
+    </RowTemplate>
+  </MudTable>
+</MudContainer>
+
+@code {
+  private List<Order> orders = new();
+
+  protected override async Task OnInitializedAsync()
+  {
+    await LoadOrders();
+  }
+
+  private async Task LoadOrders()
+  {
+    orders = await DbContext.Orders.ToListAsync();
+  }
+
+  private async Task AssignOrderToShipper(int orderId)
+  {
+    try
+    {
+      await ShippingController.AssignOrderToShipper(orderId);
+      Snackbar.Add("Order assigned successfully", Severity.Success);
+      await LoadOrders();
+    }
+    catch (InvalidOperationException ex)
+    {
+      Snackbar.Add(ex.Message, Severity.Error);
+    }
+  }
+}

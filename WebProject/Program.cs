@@ -22,6 +22,7 @@ builder.Services.AddScoped<ItemController>();
 builder.Services.AddScoped<CartController>();
 builder.Services.AddScoped<ReviewController>();
 builder.Services.AddScoped<WishlistController>();
+builder.Services.AddScoped<ShippingController>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
 
 builder.Services.AddMudServices();
