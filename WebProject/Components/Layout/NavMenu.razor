@@ -98,11 +98,22 @@
                 <MudNavLink Href="news_management" Icon="@Icons.Material.Filled.EditNote">
                     News Management
                 </MudNavLink>
-                <MudNavLink Href="/promote_management" Icon="@Icons.Material.Filled.Campaign">
+                <MudNavLink Href="promote_management" Icon="@Icons.Material.Filled.Campaign">
                     Promotes Manage
                 </MudNavLink>
             </AuthorizeView>
 
+            <MudDivider Class="my-2" />
+            <AuthorizeView Roles="Admin,Shipper">
+                <MudNavLink Href="itemorders" Icon="@Icons.Material.Filled.Campaign">
+                    Show Orders
+                </MudNavLink>
+            </AuthorizeView>
+            <AuthorizeView Roles="Shipper">
+                <MudNavLink Href="shipperdashboard" Icon="@Icons.Material.Filled.Campaign">
+                    Shipper Dashboard
+                </MudNavLink>
+            </AuthorizeView>
             <AuthorizeView>
                 <MudNavLink Href="assign-roles" Icon="@Icons.Material.Filled.Lock">
                     Role Assign

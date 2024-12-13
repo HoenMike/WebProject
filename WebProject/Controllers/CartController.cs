@@ -215,7 +215,7 @@ namespace WebProject.Services
           Status = "Pending",
           CreatedAt = DateTime.UtcNow,
           PaymentMethod = paymentMethod.ToString(),
-          ShippingAddress = $"{shippingInfo.ReceiverName}, {shippingInfo.Address}, {shippingInfo.PhoneNumber}",
+          ShippingAddress = $"Name: {shippingInfo.ReceiverName}, Address: {shippingInfo.Address}, PhoneNumber: {shippingInfo.PhoneNumber}",
           UserCardId = userCardId
         };
 

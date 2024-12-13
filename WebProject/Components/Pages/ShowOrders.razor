@@ -1,0 +1,188 @@
+@page "/itemorders"
+@using WebProject.Models
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.EntityFrameworkCore
+@using System.Security.Claims
+@inject ApplicationDbContext DbContext
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject ISnackbar Snackbar
+@inject ShippingController ShippingController
+@using WebProject.Components.Account.Pages
+
+@rendermode InteractiveServer
+
+<PageTitle>Item Orders</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge">
+  <MudDataGrid Items="@orders" Elevation="4" Dense="true" Hover="true" Striped="true" QuickFilter="@_quickFilter">
+    <ToolBarContent>
+      <MudText Typo="Typo.h6">Item Orders</MudText>
+      <MudSpacer />
+      <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start"
+        AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0">
+      </MudTextField>
+    </ToolBarContent>
+    <Columns>
+      <PropertyColumn Property="x => x.Id" Title="Order ID" />
+      <PropertyColumn Property="x => x.TotalPrice" Title="Total Price">
+        <CellTemplate>
+          @context.Item.TotalPrice.ToString("C")
+        </CellTemplate>
+      </PropertyColumn>
+      <PropertyColumn Property="x => x.Status" Title="Status">
+        <CellTemplate>
+          <MudChip Size="Size.Small" Color="@GetStatusColor(context.Item.Status)">
+            @context.Item.Status
+          </MudChip>
+        </CellTemplate>
+      </PropertyColumn>
+      <PropertyColumn Property="x => x.ShippingAddress" Title="Address" />
+      <PropertyColumn Property="x => x.CreatedAt" Title="Created At">
+        <CellTemplate>
+          @context.Item.CreatedAt.ToString("g")
+        </CellTemplate>
+      </PropertyColumn>
+      <TemplateColumn Title="" Sortable="false">
+        <CellTemplate Context="cellContext">
+          <AuthorizeView Roles="Shipper" Context="authContext">
+            <Authorized>
+              <MudButton Variant="Variant.Filled" Color="Color.Secondary"
+                OnClick="() => AssignOrderToShipper(cellContext.Item.Id)">
+                Accept Order
+              </MudButton>
+            </Authorized>
+          </AuthorizeView>
+          <AuthorizeView Roles="Admin" Context="adminAuthContext">
+            <Authorized>
+              @{
+                  var itemShipper = itemShippers.FirstOrDefault(itemShipper => itemShipper.OrderId == cellContext.Item.Id);
+                  var shipperName = itemShipper != null
+                            ? DbContext.Users.FirstOrDefault(user => user.Id == itemShipper.ShipperId)?.UserName
+                            : null;
+                }
+                @if (shipperName != null)
+                {
+                  <MudStack Row="true" AlignItems="AlignItems.Center">
+                    <MudText>Assigned Shipper: @shipperName</MudText>
+                    @if (cellContext.Item.Status != "Delivery Successful")
+                    {
+                      <MudButton Size="Size.Small" Variant="Variant.Filled" Color="Color.Error"
+                        OnClick="() => CancelOrder(cellContext.Item.Id)">
+                        Cancel
+                      </MudButton>
+                    }
+                  </MudStack>
+                }
+                else
+                {
+                  <span>Not Assigned</span>
+                }
+              </Authorized>
+            </AuthorizeView>
+          </CellTemplate>
+        </TemplateColumn>
+      </Columns>
+      <PagerContent>
+        <MudDataGridPager T="Order" />
+      </PagerContent>
+    </MudDataGrid>
+  </MudContainer>
+
+  @code {
+  private List<Order> orders = new();
+  private List<ItemShipper> itemShippers = new();
+  private string currentUserRole;
+  private string _searchString = string.Empty;
+
+  // Quick filter function
+  private Func<Order, bool> _quickFilter => x =>
+  {
+    if (string.IsNullOrWhiteSpace(_searchString))
+      return true;
+
+    var searchString = _searchString.Trim().ToLower();
+    return x.Id.ToString().Contains(searchString) ||
+  x.TotalPrice.ToString().Contains(searchString) ||
+  x.Status.ToLower().Contains(searchString) ||
+  x.ShippingAddress.ToLower().Contains(searchString);
+  };
+
+  protected override async Task OnInitializedAsync()
+  {
+    var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+    var user = authState.User;
+
+    currentUserRole = user.IsInRole("Admin") ? "Admin"
+    : user.IsInRole("Shipper") ? "Shipper"
+    : "";
+
+    await LoadOrders();
+    await LoadItemShippers();
+  }
+
+  private async Task LoadOrders()
+  {
+    if (currentUserRole == "Admin")
+    {
+      // For Admin, load ALL orders
+      orders = await DbContext.Orders.ToListAsync();
+    }
+    else if (currentUserRole == "Shipper")
+    {
+      // For Shipper, load only unassigned orders and orders with Status = Cancelled
+      orders = await DbContext.Orders
+      .Where(o => (o.Status == "Pending" &&
+      !DbContext.ItemShippers.Any(itemShipper => itemShipper.OrderId == o.Id)) ||
+      o.Status == "Cancelled")
+      .ToListAsync();
+    }
+    StateHasChanged();
+  }
+
+  private async Task LoadItemShippers()
+  {
+    itemShippers = await DbContext.ItemShippers.ToListAsync();
+    StateHasChanged();
+  }
+
+  private async Task AssignOrderToShipper(int orderId)
+  {
+    try
+    {
+      await ShippingController.AssignOrderToShipper(orderId);
+      Snackbar.Add("Order assigned successfully", Severity.Success);
+      await LoadOrders();
+      await LoadItemShippers();
+    }
+    catch (InvalidOperationException ex)
+    {
+      Snackbar.Add($"{ex.Message}. Please refresh the page and try again.", Severity.Error);
+    }
+  }
+
+  private async Task CancelOrder(int orderId)
+  {
+    try
+    {
+      await ShippingController.CancelOrder(orderId);
+      Snackbar.Add("Order cancelled successfully", Severity.Success);
+      await LoadOrders();
+      await LoadItemShippers();
+      StateHasChanged();
+    }
+    catch (InvalidOperationException ex)
+    {
+      Snackbar.Add($"{ex.Message}. Please refresh the page and try again.", Severity.Error);
+    }
+  }
+
+  private Color GetStatusColor(string status) => status switch
+  {
+    "Cancelled" => Color.Error,
+    "Pending" => Color.Default,
+    "Success" => Color.Success,
+    "On Delivery" => Color.Info,
+    "Delivery Successful" => Color.Success,
+    _ => Color.Warning
+  };
+}

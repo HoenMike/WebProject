@@ -1,0 +1,208 @@
+@page "/shipperdashboard"
+@using WebProject.Models
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.EntityFrameworkCore
+@using System.Security.Claims
+@inject ApplicationDbContext DbContext
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject ISnackbar Snackbar
+@inject ShippingController ShippingController
+@inject IDialogService DialogService
+
+<PageTitle>Shipper Dashboard</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge">
+  <MudDataGrid Items="@assignedOrders" Elevation="4" Dense="true" Hover="true" Striped="true"
+    QuickFilter="@_quickFilter">
+    <ToolBarContent>
+      <MudText Typo="Typo.h6">Assigned Orders</MudText>
+      <MudSpacer />
+      <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start"
+        AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0">
+      </MudTextField>
+    </ToolBarContent>
+    <Columns>
+      <PropertyColumn Property="x => x.Id" Title="Order ID" />
+      <PropertyColumn Property="x => x.TotalPrice" Title="Total Price">
+        <CellTemplate>
+          @context.Item.TotalPrice.ToString("C")
+        </CellTemplate>
+      </PropertyColumn>
+      <PropertyColumn Property="x => x.Status" Title="Status">
+        <CellTemplate>
+          <MudChip Size="Size.Small" Color="@GetStatusColor(context.Item.Status)">
+            @context.Item.Status
+          </MudChip>
+        </CellTemplate>
+      </PropertyColumn>
+      <PropertyColumn Property="x => x.ShippingAddress" Title="Information" />
+      <PropertyColumn Property="x => x.AssignedAt" Title="Assigned At">
+        <CellTemplate>
+          @context.Item.AssignedAt.ToLocalTime().ToString("g")
+        </CellTemplate>
+      </PropertyColumn>
+      <TemplateColumn Title="" Sortable="false">
+        <CellTemplate>
+          <MudGrid GutterSize="GutterSize.Small" Justify="Justify.Center">
+            <MudItem>
+              <MudButton FullWidth="true" Size="Size.Small" Variant="Variant.Filled" Color="Color.Info"
+                OnClick="() => UpdateOrderStatus(context.Item.Id, OrderStatus.OnDelivery)">
+                Delivering
+              </MudButton>
+            </MudItem>
+            <MudItem>
+              <MudButton FullWidth="true" Size="Size.Small" Variant="Variant.Filled" Color="Color.Success"
+                OnClick="() => UpdateOrderStatus(context.Item.Id, OrderStatus.DeliverySuccessful)">
+                Successful
+              </MudButton>
+            </MudItem>
+            <MudItem>
+              <MudButton FullWidth="true" Size="Size.Small" Variant="Variant.Filled" Color="Color.Error"
+                OnClick="() => ConfirmCancelOrder(context.Item.Id)">
+                Cancel
+              </MudButton>
+            </MudItem>
+          </MudGrid>
+        </CellTemplate>
+      </TemplateColumn>
+    </Columns>
+    <PagerContent>
+      <MudDataGridPager T="OrderViewModel" />
+    </PagerContent>
+  </MudDataGrid>
+</MudContainer>
+
+@code {
+  public enum OrderStatus
+  {
+    OnDelivery,
+    DeliverySuccessful,
+    Cancelled
+  }
+
+  private List<OrderViewModel> assignedOrders = new();
+  private string currentUserId = string.Empty;
+  private string _searchString = string.Empty;
+
+  // Quick filter function
+  private Func<OrderViewModel, bool> _quickFilter => x =>
+  {
+    if (string.IsNullOrWhiteSpace(_searchString))
+      return true;
+
+    var searchString = _searchString.Trim().ToLower();
+    return x.Id.ToString().Contains(searchString) ||
+  x.TotalPrice.ToString().Contains(searchString) ||
+  x.Status.ToLower().Contains(searchString) ||
+  x.ShippingAddress.ToLower().Contains(searchString);
+  };
+
+  protected override async Task OnInitializedAsync()
+  {
+    var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+    var user = authState.User;
+    currentUserId = user.FindFirstValue(ClaimTypes.NameIdentifier);
+
+    await LoadAssignedOrders();
+  }
+
+  private async Task LoadAssignedOrders()
+  {
+    assignedOrders = await DbContext.ItemShippers
+    .Where(itemShipper => itemShipper.ShipperId == currentUserId)
+    .Include(itemShipper => itemShipper.Order)
+    .Select(itemShipper => new OrderViewModel
+      {
+        Id = itemShipper.Order.Id,
+        TotalPrice = itemShipper.Order.TotalPrice,
+        Status = itemShipper.Order.Status,
+        ShippingAddress = itemShipper.Order.ShippingAddress,
+        AssignedAt = itemShipper.AssignedAt
+      })
+    .ToListAsync();
+
+    StateHasChanged();
+  }
+
+  private async Task UpdateOrderStatus(int orderId, OrderStatus newStatus)
+  {
+    string statusString = newStatus switch
+    {
+      OrderStatus.OnDelivery => "On Delivery",
+      OrderStatus.DeliverySuccessful => "Delivery Successful",
+      OrderStatus.Cancelled => "Cancelled",
+      _ => newStatus.ToString()
+    };
+
+    var parameters = new DialogParameters
+      {
+        ["Message"] = $"Are you sure you want to set the order status to '{statusString}'?"
+      };
+    var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+    var dialog = DialogService.Show<ConfirmationDialog>("Confirm Status Update", parameters, options);
+    var result = await dialog.Result;
+
+    if (!result.Canceled && result.Data is bool confirmed && confirmed)
+    {
+      try
+      {
+        await ShippingController.UpdateOrderStatus(orderId, statusString);
+        Snackbar.Add("Order status updated successfully", Severity.Success);
+        await LoadAssignedOrders();
+      }
+      catch (InvalidOperationException ex)
+      {
+        Snackbar.Add($"{ex.Message}. Please refresh the page and try again.", Severity.Error);
+      }
+    }
+  }
+
+  private async Task ConfirmCancelOrder(int orderId)
+  {
+    var parameters = new DialogParameters
+      {
+        ["Message"] = "Are you sure you want to cancel this order?"
+      };
+    var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+    var dialog = DialogService.Show<ConfirmationDialog>("Cancel Order", parameters, options);
+    var result = await dialog.Result;
+
+    if (!result.Canceled && result.Data is bool confirmed && confirmed)
+    {
+      await CancelOrder(orderId);
+    }
+  }
+
+  private async Task CancelOrder(int orderId)
+  {
+    try
+    {
+      await ShippingController.CancelOrder(orderId);
+      Snackbar.Add("Order cancelled successfully", Severity.Success);
+      await LoadAssignedOrders();
+    }
+    catch (InvalidOperationException ex)
+    {
+      Snackbar.Add($"{ex.Message}. Please refresh the page and try again.", Severity.Error);
+    }
+  }
+
+  private Color GetStatusColor(string status) => status switch
+  {
+    "Cancelled" => Color.Error,
+    "Pending" => Color.Default,
+    "Success" => Color.Success,
+    "On Delivery" => Color.Info,
+    "Delivery Successful" => Color.Success,
+    _ => Color.Warning
+  };
+
+  private class OrderViewModel
+  {
+    public int Id { get; set; }
+    public decimal TotalPrice { get; set; }
+    public string Status { get; set; }
+    public string ShippingAddress { get; set; }
+    public DateTime AssignedAt { get; set; }
+  }
+}

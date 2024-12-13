@@ -40,6 +40,21 @@ namespace WebProject.Services
       }
     }
 
+    public async Task RemoveFromWishlistAsync(int itemId)
+    {
+      try
+      {
+        var userId = await GetUserId();
+        var wishlistItems = await _dbContext.WishLists.Where(ci => ci.ItemId == itemId && ci.UserId == userId).ToListAsync();
+        _dbContext.WishLists.RemoveRange(wishlistItems);
+        await _dbContext.SaveChangesAsync();
+      }
+      catch (Exception ex)
+      {
+        Console.Error.WriteLine($"Error in RemoveFromWishListAsync: {ex.Message}");
+      }
+    }
+
     public async Task<List<WishList>> GetWishlistAsync()
     {
       var userId = await GetUserId();
