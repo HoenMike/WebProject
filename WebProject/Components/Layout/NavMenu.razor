@@ -104,12 +104,16 @@
             </AuthorizeView>
 
             <MudDivider Class="my-2" />
-            <MudNavLink Href="itemorders" Icon="@Icons.Material.Filled.Campaign">
-                Show Orders
-            </MudNavLink>
-            <MudNavLink Href="shipperdashboard" Icon="@Icons.Material.Filled.Campaign">
-                Shipper Dashboard
-            </MudNavLink>
+            <AuthorizeView Roles="Admin,Shipper">
+                <MudNavLink Href="itemorders" Icon="@Icons.Material.Filled.Campaign">
+                    Show Orders
+                </MudNavLink>
+            </AuthorizeView>
+            <AuthorizeView Roles="Shipper">
+                <MudNavLink Href="shipperdashboard" Icon="@Icons.Material.Filled.Campaign">
+                    Shipper Dashboard
+                </MudNavLink>
+            </AuthorizeView>
             <AuthorizeView>
                 <MudNavLink Href="assign-roles" Icon="@Icons.Material.Filled.Lock">
                     Role Assign

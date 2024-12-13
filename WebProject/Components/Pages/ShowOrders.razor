@@ -14,69 +14,98 @@
 <PageTitle>Item Orders</PageTitle>
 
 <MudContainer MaxWidth="MaxWidth.ExtraLarge">
-  <MudTable Dense Items="@orders" Hover="true" Striped="true">
-    <HeaderContent>
-      <MudTh>Order ID</MudTh>
-      <MudTh>Total Price</MudTh>
-      <MudTh>Status</MudTh>
-      <MudTh>Address</MudTh>
-      <MudTh>Created At</MudTh>
-      <MudTh></MudTh>
-    </HeaderContent>
-    <RowTemplate Context="order">
-      <MudTd>@order.Id</MudTd>
-      <MudTd>@order.TotalPrice.ToString("C")</MudTd>
-      <MudTd>
-        <MudChip Size="Size.Small" T="string" Color="@GetStatusColor(order.Status)">
-          <MudText>@order.Status</MudText>
-        </MudChip>
-      </MudTd>
-      <MudTd>@order.ShippingAddress</MudTd>
-      <MudTd>@order.CreatedAt.ToString("g")</MudTd>
-      <MudTd>
-        <AuthorizeView Roles="Shipper">
-          <Authorized>
-            <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="() => AssignOrderToShipper(order.Id)">
-              Accept Order
-            </MudButton>
-          </Authorized>
-        </AuthorizeView>
-        <AuthorizeView Roles="Admin">
-          <Authorized>
-            @{
-              var itemShipper = itemShippers.FirstOrDefault(itemShipper => itemShipper.OrderId == order.Id);
-              var shipperName = itemShipper != null
-                      ? DbContext.Users.FirstOrDefault(user => user.Id == itemShipper.ShipperId)?.UserName
-                      : null;
-            }
-            @if (shipperName != null)
-            {
-              <MudStack Row="true" AlignItems="AlignItems.Center">
-                <MudText>Assigned Shipper: @shipperName</MudText>
-                @if (order.Status != "Delivery Successful")
-                {
-                  <MudButton Size="Size.Small" Variant="Variant.Filled" Color="Color.Error"
-                    OnClick="() => CancelOrder(order.Id)">
-                    Cancel
-                  </MudButton>
+  <MudDataGrid Items="@orders" Elevation="4" Dense="true" Hover="true" Striped="true" QuickFilter="@_quickFilter">
+    <ToolBarContent>
+      <MudText Typo="Typo.h6">Item Orders</MudText>
+      <MudSpacer />
+      <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start"
+        AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0">
+      </MudTextField>
+    </ToolBarContent>
+    <Columns>
+      <PropertyColumn Property="x => x.Id" Title="Order ID" />
+      <PropertyColumn Property="x => x.TotalPrice" Title="Total Price">
+        <CellTemplate>
+          @context.Item.TotalPrice.ToString("C")
+        </CellTemplate>
+      </PropertyColumn>
+      <PropertyColumn Property="x => x.Status" Title="Status">
+        <CellTemplate>
+          <MudChip Size="Size.Small" Color="@GetStatusColor(context.Item.Status)">
+            @context.Item.Status
+          </MudChip>
+        </CellTemplate>
+      </PropertyColumn>
+      <PropertyColumn Property="x => x.ShippingAddress" Title="Address" />
+      <PropertyColumn Property="x => x.CreatedAt" Title="Created At">
+        <CellTemplate>
+          @context.Item.CreatedAt.ToString("g")
+        </CellTemplate>
+      </PropertyColumn>
+      <TemplateColumn Title="" Sortable="false">
+        <CellTemplate Context="cellContext">
+          <AuthorizeView Roles="Shipper" Context="authContext">
+            <Authorized>
+              <MudButton Variant="Variant.Filled" Color="Color.Secondary"
+                OnClick="() => AssignOrderToShipper(cellContext.Item.Id)">
+                Accept Order
+              </MudButton>
+            </Authorized>
+          </AuthorizeView>
+          <AuthorizeView Roles="Admin" Context="adminAuthContext">
+            <Authorized>
+              @{
+                  var itemShipper = itemShippers.FirstOrDefault(itemShipper => itemShipper.OrderId == cellContext.Item.Id);
+                  var shipperName = itemShipper != null
+                            ? DbContext.Users.FirstOrDefault(user => user.Id == itemShipper.ShipperId)?.UserName
+                            : null;
                 }
-              </MudStack>
-            }
-            else
-            {
-              <span>Not Assigned</span>
-            }
-          </Authorized>
-        </AuthorizeView>
-      </MudTd>
-    </RowTemplate>
-  </MudTable>
-</MudContainer>
+                @if (shipperName != null)
+                {
+                  <MudStack Row="true" AlignItems="AlignItems.Center">
+                    <MudText>Assigned Shipper: @shipperName</MudText>
+                    @if (cellContext.Item.Status != "Delivery Successful")
+                    {
+                      <MudButton Size="Size.Small" Variant="Variant.Filled" Color="Color.Error"
+                        OnClick="() => CancelOrder(cellContext.Item.Id)">
+                        Cancel
+                      </MudButton>
+                    }
+                  </MudStack>
+                }
+                else
+                {
+                  <span>Not Assigned</span>
+                }
+              </Authorized>
+            </AuthorizeView>
+          </CellTemplate>
+        </TemplateColumn>
+      </Columns>
+      <PagerContent>
+        <MudDataGridPager T="Order" />
+      </PagerContent>
+    </MudDataGrid>
+  </MudContainer>
 
-@code {
+  @code {
   private List<Order> orders = new();
   private List<ItemShipper> itemShippers = new();
   private string currentUserRole;
+  private string _searchString = string.Empty;
+
+  // Quick filter function
+  private Func<Order, bool> _quickFilter => x =>
+  {
+    if (string.IsNullOrWhiteSpace(_searchString))
+      return true;
+
+    var searchString = _searchString.Trim().ToLower();
+    return x.Id.ToString().Contains(searchString) ||
+  x.TotalPrice.ToString().Contains(searchString) ||
+  x.Status.ToLower().Contains(searchString) ||
+  x.ShippingAddress.ToLower().Contains(searchString);
+  };
 
   protected override async Task OnInitializedAsync()
   {

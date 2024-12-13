@@ -12,49 +12,64 @@
 <PageTitle>Shipper Dashboard</PageTitle>
 
 <MudContainer MaxWidth="MaxWidth.ExtraLarge">
-  <MudTable Dense Items="@assignedOrders" Hover="true" Striped="true">
-    <HeaderContent>
-      <MudTh>Order ID</MudTh>
-      <MudTh>Total Price</MudTh>
-      <MudTh>Status</MudTh>
-      <MudTh>Information</MudTh>
-      <MudTh>Assigned At</MudTh>
-      <MudTh>Actions</MudTh>
-    </HeaderContent>
-    <RowTemplate Context="order">
-      <MudTd>@order.Id</MudTd>
-      <MudTd>@order.TotalPrice.ToString("C")</MudTd>
-      <MudTd>
-        <MudChip Size="Size.Small" T="string" Color="@GetStatusColor(order.Status)">
-          <MudText>@order.Status</MudText>
-        </MudChip>
-      </MudTd>
-      <MudTd>@order.ShippingAddress</MudTd>
-      <MudTd>@order.AssignedAt.ToLocalTime().ToString("g")</MudTd>
-      <MudTd>
-        <MudGrid GutterSize="GutterSize.Small" Justify="Justify.Center">
-          <MudItem>
-            <MudButton FullWidth="true" Size="Size.Small" Variant="Variant.Filled" Color="Color.Info"
-              OnClick="() => UpdateOrderStatus(order.Id, OrderStatus.OnDelivery)">
-              Delivering
-            </MudButton>
-          </MudItem>
-          <MudItem>
-            <MudButton FullWidth="true" Size="Size.Small" Variant="Variant.Filled" Color="Color.Success"
-              OnClick="() => UpdateOrderStatus(order.Id, OrderStatus.DeliverySuccessful)">
-              Successful
-            </MudButton>
-          </MudItem>
-          <MudItem>
-            <MudButton FullWidth="true" Size="Size.Small" Variant="Variant.Filled" Color="Color.Error"
-              OnClick="() => ConfirmCancelOrder(order.Id)">
-              Cancel
-            </MudButton>
-          </MudItem>
-        </MudGrid>
-      </MudTd>
-    </RowTemplate>
-  </MudTable>
+  <MudDataGrid Items="@assignedOrders" Elevation="4" Dense="true" Hover="true" Striped="true"
+    QuickFilter="@_quickFilter">
+    <ToolBarContent>
+      <MudText Typo="Typo.h6">Assigned Orders</MudText>
+      <MudSpacer />
+      <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start"
+        AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0">
+      </MudTextField>
+    </ToolBarContent>
+    <Columns>
+      <PropertyColumn Property="x => x.Id" Title="Order ID" />
+      <PropertyColumn Property="x => x.TotalPrice" Title="Total Price">
+        <CellTemplate>
+          @context.Item.TotalPrice.ToString("C")
+        </CellTemplate>
+      </PropertyColumn>
+      <PropertyColumn Property="x => x.Status" Title="Status">
+        <CellTemplate>
+          <MudChip Size="Size.Small" Color="@GetStatusColor(context.Item.Status)">
+            @context.Item.Status
+          </MudChip>
+        </CellTemplate>
+      </PropertyColumn>
+      <PropertyColumn Property="x => x.ShippingAddress" Title="Information" />
+      <PropertyColumn Property="x => x.AssignedAt" Title="Assigned At">
+        <CellTemplate>
+          @context.Item.AssignedAt.ToLocalTime().ToString("g")
+        </CellTemplate>
+      </PropertyColumn>
+      <TemplateColumn Title="" Sortable="false">
+        <CellTemplate>
+          <MudGrid GutterSize="GutterSize.Small" Justify="Justify.Center">
+            <MudItem>
+              <MudButton FullWidth="true" Size="Size.Small" Variant="Variant.Filled" Color="Color.Info"
+                OnClick="() => UpdateOrderStatus(context.Item.Id, OrderStatus.OnDelivery)">
+                Delivering
+              </MudButton>
+            </MudItem>
+            <MudItem>
+              <MudButton FullWidth="true" Size="Size.Small" Variant="Variant.Filled" Color="Color.Success"
+                OnClick="() => UpdateOrderStatus(context.Item.Id, OrderStatus.DeliverySuccessful)">
+                Successful
+              </MudButton>
+            </MudItem>
+            <MudItem>
+              <MudButton FullWidth="true" Size="Size.Small" Variant="Variant.Filled" Color="Color.Error"
+                OnClick="() => ConfirmCancelOrder(context.Item.Id)">
+                Cancel
+              </MudButton>
+            </MudItem>
+          </MudGrid>
+        </CellTemplate>
+      </TemplateColumn>
+    </Columns>
+    <PagerContent>
+      <MudDataGridPager T="OrderViewModel" />
+    </PagerContent>
+  </MudDataGrid>
 </MudContainer>
 
 @code {
@@ -67,6 +82,20 @@
 
   private List<OrderViewModel> assignedOrders = new();
   private string currentUserId = string.Empty;
+  private string _searchString = string.Empty;
+
+  // Quick filter function
+  private Func<OrderViewModel, bool> _quickFilter => x =>
+  {
+    if (string.IsNullOrWhiteSpace(_searchString))
+      return true;
+
+    var searchString = _searchString.Trim().ToLower();
+    return x.Id.ToString().Contains(searchString) ||
+  x.TotalPrice.ToString().Contains(searchString) ||
+  x.Status.ToLower().Contains(searchString) ||
+  x.ShippingAddress.ToLower().Contains(searchString);
+  };
 
   protected override async Task OnInitializedAsync()
   {
@@ -157,6 +186,7 @@
       Snackbar.Add($"{ex.Message}. Please refresh the page and try again.", Severity.Error);
     }
   }
+
   private Color GetStatusColor(string status) => status switch
   {
     "Cancelled" => Color.Error,
