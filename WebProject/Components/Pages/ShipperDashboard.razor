@@ -7,6 +7,7 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject ISnackbar Snackbar
 @inject ShippingController ShippingController
+@inject IDialogService DialogService
 
 <PageTitle>Shipper Dashboard</PageTitle>
 
@@ -27,13 +28,30 @@
       <MudTd>@order.ShippingAddress</MudTd>
       <MudTd>@order.AssignedAt.ToLocalTime().ToString("g")</MudTd>
       <MudTd>
-        <!-- Add actions if needed -->
+        <MudButton Variant="Variant.Filled" Color="Color.Info"
+          OnClick="() => UpdateOrderStatus(order.Id, OrderStatus.OnDelivery)">
+          On Delivery
+        </MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Success"
+          OnClick="() => UpdateOrderStatus(order.Id, OrderStatus.DeliverySuccessful)">
+          Delivery Successful
+        </MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="() => ConfirmCancelOrder(order.Id)">
+          Cancel Order
+        </MudButton>
       </MudTd>
     </RowTemplate>
   </MudTable>
 </MudContainer>
 
 @code {
+  public enum OrderStatus
+  {
+    OnDelivery,
+    DeliverySuccessful,
+    Cancelled
+  }
+
   private List<OrderViewModel> assignedOrders = new();
   private string currentUserId = string.Empty;
 
@@ -62,6 +80,69 @@
     .ToListAsync();
 
     StateHasChanged();
+  }
+
+  private async Task UpdateOrderStatus(int orderId, OrderStatus newStatus)
+  {
+    string statusString = newStatus switch
+    {
+      OrderStatus.OnDelivery => "On Delivery",
+      OrderStatus.DeliverySuccessful => "Delivery Successful",
+      OrderStatus.Cancelled => "Cancelled",
+      _ => newStatus.ToString()
+    };
+
+    var parameters = new DialogParameters
+      {
+        ["Message"] = $"Are you sure you want to set the order status to '{statusString}'?"
+      };
+    var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+    var dialog = DialogService.Show<ConfirmationDialog>("Confirm Status Update", parameters, options);
+    var result = await dialog.Result;
+
+    if (!result.Canceled && result.Data is bool confirmed && confirmed)
+    {
+      try
+      {
+        await ShippingController.UpdateOrderStatus(orderId, statusString);
+        Snackbar.Add("Order status updated successfully", Severity.Success);
+        await LoadAssignedOrders();
+      }
+      catch (InvalidOperationException ex)
+      {
+        Snackbar.Add($"{ex.Message}. Please refresh the page and try again.", Severity.Error);
+      }
+    }
+  }
+
+  private async Task ConfirmCancelOrder(int orderId)
+  {
+    var parameters = new DialogParameters
+      {
+        ["Message"] = "Are you sure you want to cancel this order?"
+      };
+    var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+    var dialog = DialogService.Show<ConfirmationDialog>("Cancel Order", parameters, options);
+    var result = await dialog.Result;
+
+    if (!result.Canceled && result.Data is bool confirmed && confirmed)
+    {
+      await CancelOrder(orderId);
+    }
+  }
+
+  private async Task CancelOrder(int orderId)
+  {
+    try
+    {
+      await ShippingController.CancelOrder(orderId);
+      Snackbar.Add("Order cancelled successfully", Severity.Success);
+      await LoadAssignedOrders();
+    }
+    catch (InvalidOperationException ex)
+    {
+      Snackbar.Add($"{ex.Message}. Please refresh the page and try again.", Severity.Error);
+    }
   }
 
   private class OrderViewModel

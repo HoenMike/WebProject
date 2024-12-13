@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor;
 using WebProject.Components.Dialogs;
@@ -34,7 +33,6 @@ namespace WebProject.Controllers
       {
         var userId = await _cartController.GetUserId();
 
-        // Use a pessimistic locking approach
         var order = await _dbContext.Orders
             .Where(o => o.Id == orderId)
             .Lock()
@@ -45,7 +43,6 @@ namespace WebProject.Controllers
           throw new InvalidOperationException("Order not found.");
         }
 
-        // Check if already assigned
         var existingItemShipper = await _dbContext.ItemShippers
             .FirstOrDefaultAsync(itemShipper => itemShipper.OrderId == orderId);
 
@@ -62,8 +59,6 @@ namespace WebProject.Controllers
         };
 
         _dbContext.ItemShippers.Add(itemShipper);
-
-        // Update order status
         order.Status = "Shipper Assigned";
 
         await _dbContext.SaveChangesAsync();
@@ -107,7 +102,6 @@ namespace WebProject.Controllers
       using var transaction = await _dbContext.Database.BeginTransactionAsync();
       try
       {
-        // Use a pessimistic locking approach
         var order = await _dbContext.Orders
             .Where(o => o.Id == orderId)
             .Lock()
@@ -118,7 +112,6 @@ namespace WebProject.Controllers
           throw new InvalidOperationException("Order not found.");
         }
 
-        // Find and remove the ItemShipper entry
         var itemShipper = await _dbContext.ItemShippers
             .FirstOrDefaultAsync(itemShipper => itemShipper.OrderId == orderId);
 
@@ -127,10 +120,7 @@ namespace WebProject.Controllers
           throw new InvalidOperationException("Order is not assigned to a shipper.");
         }
 
-        // Remove the ItemShipper entry
         _dbContext.ItemShippers.Remove(itemShipper);
-
-        // Update the order status to Cancelled
         order.Status = "Cancelled";
 
         await _dbContext.SaveChangesAsync();
@@ -151,6 +141,44 @@ namespace WebProject.Controllers
       catch (Exception ex)
       {
         _logger.LogError(ex, "Unexpected error while cancelling order");
+        await transaction.RollbackAsync();
+        throw;
+      }
+    }
+
+    public async Task UpdateOrderStatus(int orderId, string newStatus)
+    {
+      using var transaction = await _dbContext.Database.BeginTransactionAsync();
+      try
+      {
+        var order = await _dbContext.Orders
+            .Where(o => o.Id == orderId)
+            .FirstOrDefaultAsync();
+
+        if (order == null)
+        {
+          throw new InvalidOperationException("Order not found.");
+        }
+
+        order.Status = newStatus;
+        await _dbContext.SaveChangesAsync();
+        await transaction.CommitAsync();
+      }
+      catch (InvalidOperationException ex)
+      {
+        _logger.LogError(ex, "Invalid operation error while updating order status");
+        await transaction.RollbackAsync();
+        throw;
+      }
+      catch (DbUpdateConcurrencyException ex)
+      {
+        _logger.LogError(ex, "Concurrency error while updating order status");
+        await transaction.RollbackAsync();
+        throw;
+      }
+      catch (Exception ex)
+      {
+        _logger.LogError(ex, "Unexpected error while updating order status");
         await transaction.RollbackAsync();
         throw;
       }
