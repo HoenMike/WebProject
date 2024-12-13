@@ -12,32 +12,37 @@
 <PageTitle>Shipper Dashboard</PageTitle>
 
 <MudContainer>
-  <MudTable Items="@assignedOrders" Hover="true" Striped="true">
+  <MudTable Dense Items="@assignedOrders" Hover="true" Striped="true">
     <HeaderContent>
       <MudTh>Order ID</MudTh>
       <MudTh>Total Price</MudTh>
       <MudTh>Status</MudTh>
-      <MudTh>Address</MudTh>
+      <MudTh>Information</MudTh>
       <MudTh>Assigned At</MudTh>
       <MudTh>Actions</MudTh>
     </HeaderContent>
     <RowTemplate Context="order">
       <MudTd>@order.Id</MudTd>
       <MudTd>@order.TotalPrice.ToString("C")</MudTd>
-      <MudTd>@order.Status</MudTd>
+      <MudTd>
+        <MudChip Size="Size.Small" T="string" Color="@GetStatusColor(order.Status)">
+          <MudText>@order.Status</MudText>
+        </MudChip>
+      </MudTd>
       <MudTd>@order.ShippingAddress</MudTd>
       <MudTd>@order.AssignedAt.ToLocalTime().ToString("g")</MudTd>
       <MudTd>
-        <MudButton Variant="Variant.Filled" Color="Color.Info"
+        <MudButton Size="Size.Small" Variant="Variant.Filled" Color="Color.Info"
           OnClick="() => UpdateOrderStatus(order.Id, OrderStatus.OnDelivery)">
-          On Delivery
+          Delivering
         </MudButton>
-        <MudButton Variant="Variant.Filled" Color="Color.Success"
+        <MudButton Size="Size.Small" Variant="Variant.Filled" Color="Color.Success"
           OnClick="() => UpdateOrderStatus(order.Id, OrderStatus.DeliverySuccessful)">
-          Delivery Successful
+          Successful
         </MudButton>
-        <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="() => ConfirmCancelOrder(order.Id)">
-          Cancel Order
+        <MudButton Size="Size.Small" Variant="Variant.Filled" Color="Color.Error"
+          OnClick="() => ConfirmCancelOrder(order.Id)">
+          Cancel
         </MudButton>
       </MudTd>
     </RowTemplate>
@@ -144,6 +149,15 @@
       Snackbar.Add($"{ex.Message}. Please refresh the page and try again.", Severity.Error);
     }
   }
+  private Color GetStatusColor(string status) => status switch
+  {
+    "Cancelled" => Color.Error,
+    "Pending" => Color.Default,
+    "Success" => Color.Success,
+    "On Delivery" => Color.Info,
+    "Delivery Successful" => Color.Success,
+    _ => Color.Warning
+  };
 
   private class OrderViewModel
   {

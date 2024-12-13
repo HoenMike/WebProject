@@ -26,7 +26,11 @@
     <RowTemplate Context="order">
       <MudTd>@order.Id</MudTd>
       <MudTd>@order.TotalPrice.ToString("C")</MudTd>
-      <MudTd>@order.Status</MudTd>
+      <MudTd>
+        <MudChip Size="Size.Small" T="string" Color="@GetStatusColor(order.Status)">
+          <MudText>@order.Status</MudText>
+        </MudChip>
+      </MudTd>
       <MudTd>@order.ShippingAddress</MudTd>
       <MudTd>@order.CreatedAt.ToString("g")</MudTd>
       <MudTd>
@@ -48,10 +52,14 @@
             @if (shipperName != null)
             {
               <MudStack Row="true" AlignItems="AlignItems.Center">
-                <MudText>Assigned: @shipperName</MudText>
-                <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="() => CancelOrder(order.Id)">
-                  Cancel Order
-                </MudButton>
+                <MudText>Assigned Shipper: @shipperName</MudText>
+                @if (order.Status != "Delivery Successful")
+                {
+                  <MudButton Size="Size.Small" Variant="Variant.Filled" Color="Color.Error"
+                    OnClick="() => CancelOrder(order.Id)">
+                    Cancel Order
+                  </MudButton>
+                }
               </MudStack>
             }
             else
@@ -138,4 +146,14 @@
       Snackbar.Add($"{ex.Message}. Please refresh the page and try again.", Severity.Error);
     }
   }
+
+  private Color GetStatusColor(string status) => status switch
+  {
+    "Cancelled" => Color.Error,
+    "Pending" => Color.Default,
+    "Success" => Color.Success,
+    "On Delivery" => Color.Info,
+    "Delivery Successful" => Color.Success,
+    _ => Color.Warning
+  };
 }
