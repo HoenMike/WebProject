@@ -1,0 +1,75 @@
+@page "/shipperdashboard"
+@using WebProject.Models
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.EntityFrameworkCore
+@using System.Security.Claims
+@inject ApplicationDbContext DbContext
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject ISnackbar Snackbar
+@inject ShippingController ShippingController
+
+<PageTitle>Shipper Dashboard</PageTitle>
+
+<MudContainer>
+  <MudTable Items="@assignedOrders" Hover="true" Striped="true">
+    <HeaderContent>
+      <MudTh>Order ID</MudTh>
+      <MudTh>Total Price</MudTh>
+      <MudTh>Status</MudTh>
+      <MudTh>Address</MudTh>
+      <MudTh>Assigned At</MudTh>
+      <MudTh>Actions</MudTh>
+    </HeaderContent>
+    <RowTemplate Context="order">
+      <MudTd>@order.Id</MudTd>
+      <MudTd>@order.TotalPrice.ToString("C")</MudTd>
+      <MudTd>@order.Status</MudTd>
+      <MudTd>@order.ShippingAddress</MudTd>
+      <MudTd>@order.AssignedAt.ToLocalTime().ToString("g")</MudTd>
+      <MudTd>
+        <!-- Add actions if needed -->
+      </MudTd>
+    </RowTemplate>
+  </MudTable>
+</MudContainer>
+
+@code {
+  private List<OrderViewModel> assignedOrders = new();
+  private string currentUserId = string.Empty;
+
+  protected override async Task OnInitializedAsync()
+  {
+    var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+    var user = authState.User;
+    currentUserId = user.FindFirstValue(ClaimTypes.NameIdentifier);
+
+    await LoadAssignedOrders();
+  }
+
+  private async Task LoadAssignedOrders()
+  {
+    assignedOrders = await DbContext.ItemShippers
+    .Where(itemShipper => itemShipper.ShipperId == currentUserId)
+    .Include(itemShipper => itemShipper.Order)
+    .Select(itemShipper => new OrderViewModel
+      {
+        Id = itemShipper.Order.Id,
+        TotalPrice = itemShipper.Order.TotalPrice,
+        Status = itemShipper.Order.Status,
+        ShippingAddress = itemShipper.Order.ShippingAddress,
+        AssignedAt = itemShipper.AssignedAt
+      })
+    .ToListAsync();
+
+    StateHasChanged();
+  }
+
+  private class OrderViewModel
+  {
+    public int Id { get; set; }
+    public decimal TotalPrice { get; set; }
+    public string Status { get; set; }
+    public string ShippingAddress { get; set; }
+    public DateTime AssignedAt { get; set; }
+  }
+}

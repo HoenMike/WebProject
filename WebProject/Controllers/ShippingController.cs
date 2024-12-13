@@ -64,7 +64,7 @@ namespace WebProject.Controllers
         _dbContext.ItemShippers.Add(itemShipper);
 
         // Update order status
-        order.Status = "On Delivery";
+        order.Status = "Shipper Assigned";
 
         await _dbContext.SaveChangesAsync();
         await transaction.CommitAsync();

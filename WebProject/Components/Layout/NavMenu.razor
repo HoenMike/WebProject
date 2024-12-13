@@ -98,15 +98,18 @@
                 <MudNavLink Href="news_management" Icon="@Icons.Material.Filled.EditNote">
                     News Management
                 </MudNavLink>
-                <MudNavLink Href="/promote_management" Icon="@Icons.Material.Filled.Campaign">
+                <MudNavLink Href="promote_management" Icon="@Icons.Material.Filled.Campaign">
                     Promotes Manage
                 </MudNavLink>
             </AuthorizeView>
 
             <MudDivider Class="my-2" />
-            <MudNavLink Href="/itemorders" Icon="@Icons.Material.Filled.Campaign">
-                    Show Orders
-                </MudNavLink>
+            <MudNavLink Href="itemorders" Icon="@Icons.Material.Filled.Campaign">
+                Show Orders
+            </MudNavLink>
+            <MudNavLink Href="shipperdashboard" Icon="@Icons.Material.Filled.Campaign">
+                Shipper Dashboard
+            </MudNavLink>
             <AuthorizeView>
                 <MudNavLink Href="assign-roles" Icon="@Icons.Material.Filled.Lock">
                     Role Assign
@@ -135,7 +138,7 @@
             <AuthorizeView>
                 <Authorized>
                     <MudNavLink Href="Account/Manage/ChangePassword" Icon="@Icons.Material.Filled.Person">
-            @context.User.Identity?.Name
+                        @context.User.Identity?.Name
                     </MudNavLink>
                 </Authorized>
                 <NotAuthorized>
@@ -152,31 +155,31 @@
 </div>
 
 @code {
-  private string? currentUrl;
-  private bool isMenuOpen = false;
+    private string? currentUrl;
+    private bool isMenuOpen = false;
 
-  protected override void OnInitialized()
-  {
-    currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
-    NavigationManager.LocationChanged += OnLocationChanged;
-  }
+    protected override void OnInitialized()
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        NavigationManager.LocationChanged += OnLocationChanged;
+    }
 
-  private void ToggleMenu()
-  {
-    isMenuOpen = !isMenuOpen;
-    StateHasChanged();
-  }
+    private void ToggleMenu()
+    {
+        isMenuOpen = !isMenuOpen;
+        StateHasChanged();
+    }
 
-  private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
-  {
-    currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
-    // Close menu when navigating on mobile
-    isMenuOpen = false;
-    StateHasChanged();
-  }
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
+        // Close menu when navigating on mobile
+        isMenuOpen = false;
+        StateHasChanged();
+    }
 
-  public void Dispose()
-  {
-    NavigationManager.LocationChanged -= OnLocationChanged;
-  }
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+    }
 }
