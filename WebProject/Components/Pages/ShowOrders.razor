@@ -13,15 +13,15 @@
 
 <PageTitle>Item Orders</PageTitle>
 
-<MudContainer>
-  <MudTable Items="@orders" Hover="true" Striped="true">
+<MudContainer MaxWidth="MaxWidth.ExtraLarge">
+  <MudTable Dense Items="@orders" Hover="true" Striped="true">
     <HeaderContent>
       <MudTh>Order ID</MudTh>
       <MudTh>Total Price</MudTh>
       <MudTh>Status</MudTh>
       <MudTh>Address</MudTh>
       <MudTh>Created At</MudTh>
-      <MudTh>Actions</MudTh>
+      <MudTh></MudTh>
     </HeaderContent>
     <RowTemplate Context="order">
       <MudTd>@order.Id</MudTd>
@@ -36,8 +36,8 @@
       <MudTd>
         <AuthorizeView Roles="Shipper">
           <Authorized>
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => AssignOrderToShipper(order.Id)">
-              Assign to Me
+            <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="() => AssignOrderToShipper(order.Id)">
+              Accept Order
             </MudButton>
           </Authorized>
         </AuthorizeView>
@@ -57,7 +57,7 @@
                 {
                   <MudButton Size="Size.Small" Variant="Variant.Filled" Color="Color.Error"
                     OnClick="() => CancelOrder(order.Id)">
-                    Cancel Order
+                    Cancel
                   </MudButton>
                 }
               </MudStack>

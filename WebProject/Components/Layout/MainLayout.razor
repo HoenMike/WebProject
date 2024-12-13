@@ -5,6 +5,72 @@
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
+<style>
+    html,
+    body {
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+        background-color: #ffe6ec;
+    }
+
+    .page {
+        min-height: 100vh;
+        height: 100vh;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        background-color: #ffe6ec;
+        overflow-y: auto;
+        overflow-x: auto;
+    }
+
+    main {
+        flex: 1 0 auto;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .page-body {
+        flex-grow: 1;
+    }
+
+    .footer {
+        padding: 10px 0;
+        text-align: center;
+        bottom: 0;
+        width: 100%;
+    }
+
+    .sidebar {
+        background-color: white;
+    }
+
+    .top-row {
+        background-color: white;
+        border-bottom: 1px solid pink;
+        height: 3.5rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .top-row ::deep a,
+    .top-row ::deep .btn-link {
+        white-space: nowrap;
+        margin-left: 1.5rem;
+        text-decoration: none;
+    }
+
+    .top-row ::deep a:hover,
+    .top-row ::deep .btn-link:hover {
+        text-decoration: underline;
+    }
+
+    .top-row ::deep a:first-child {
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+</style>
 
 <div class="page">
     @if (!isLoginPage && !isRegisterPage)
@@ -18,6 +84,11 @@
         <article class="page-body">
             @Body
         </article>
+        <footer class="footer">
+            <div class="footer-content">
+                © 2023 Your Company. All rights reserved.
+            </div>
+        </footer>
     </main>
 </div>
 

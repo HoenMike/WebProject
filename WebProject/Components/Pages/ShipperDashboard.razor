@@ -11,7 +11,7 @@
 
 <PageTitle>Shipper Dashboard</PageTitle>
 
-<MudContainer>
+<MudContainer MaxWidth="MaxWidth.ExtraLarge">
   <MudTable Dense Items="@assignedOrders" Hover="true" Striped="true">
     <HeaderContent>
       <MudTh>Order ID</MudTh>
@@ -32,18 +32,26 @@
       <MudTd>@order.ShippingAddress</MudTd>
       <MudTd>@order.AssignedAt.ToLocalTime().ToString("g")</MudTd>
       <MudTd>
-        <MudButton Size="Size.Small" Variant="Variant.Filled" Color="Color.Info"
-          OnClick="() => UpdateOrderStatus(order.Id, OrderStatus.OnDelivery)">
-          Delivering
-        </MudButton>
-        <MudButton Size="Size.Small" Variant="Variant.Filled" Color="Color.Success"
-          OnClick="() => UpdateOrderStatus(order.Id, OrderStatus.DeliverySuccessful)">
-          Successful
-        </MudButton>
-        <MudButton Size="Size.Small" Variant="Variant.Filled" Color="Color.Error"
-          OnClick="() => ConfirmCancelOrder(order.Id)">
-          Cancel
-        </MudButton>
+        <MudGrid GutterSize="GutterSize.Small" Justify="Justify.Center">
+          <MudItem>
+            <MudButton FullWidth="true" Size="Size.Small" Variant="Variant.Filled" Color="Color.Info"
+              OnClick="() => UpdateOrderStatus(order.Id, OrderStatus.OnDelivery)">
+              Delivering
+            </MudButton>
+          </MudItem>
+          <MudItem>
+            <MudButton FullWidth="true" Size="Size.Small" Variant="Variant.Filled" Color="Color.Success"
+              OnClick="() => UpdateOrderStatus(order.Id, OrderStatus.DeliverySuccessful)">
+              Successful
+            </MudButton>
+          </MudItem>
+          <MudItem>
+            <MudButton FullWidth="true" Size="Size.Small" Variant="Variant.Filled" Color="Color.Error"
+              OnClick="() => ConfirmCancelOrder(order.Id)">
+              Cancel
+            </MudButton>
+          </MudItem>
+        </MudGrid>
       </MudTd>
     </RowTemplate>
   </MudTable>
