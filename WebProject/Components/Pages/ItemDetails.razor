@@ -113,170 +113,170 @@
   <div class="item-details-container">
     @if (item != null)
     {
-      <MudGrid>
-        <MudItem xs="12">
-          <MudGrid>
-            <MudItem xs="12" md="4">
+        <MudGrid>
+          <MudItem xs="12">
+            <MudGrid>
+              <MudItem xs="12" md="4">
               @* <MudImage Src="@item.ThumbnailUrl" Alt="@item.Name" Style="width: 100%; border-radius: 8px;" /> *@
-               <div class="image-container" style="position: relative">
-                        <MudImage Src="@item.ThumbnailUrl" Alt="@item.Name" 
-                            Style="width: 100%; border-radius: 8px;z-index: 1;"/>  
+                 <div class="image-container" style="position: relative">
+                          <MudImage Src="@item.ThumbnailUrl" Alt="@item.Name" 
+                              Style="width: 100%; border-radius: 8px;z-index: 1;"/>  
 
-                        <MudButton 
-                                Style="z-index: 2; position: absolute; top: 0px; right: 0px; background-color: #ffffff; border-radius: 40px; height: 65px;width:65px ;align-items: center;"  
-                                 OnClick="@(() => ToggleWishlist(item))">
-                                <MudIcon Icon="@Icons.Material.Filled.Favorite" 
-                                       Color="@(IsInWishlist(item.Id) ? Color.Error : Color.Default)"
-                                       Size="Size.Medium"/>
-                        </MudButton>
-                  </div>  
-            </MudItem>
+                          <MudButton 
+                                  Style="z-index: 2; position: absolute; top: 0px; right: 0px; background-color: #ffffff; border-radius: 40px; height: 65px;width:65px ;align-items: center;"  
+                                   OnClick="@(() => ToggleWishlist(item))">
+                                  <MudIcon Icon="@Icons.Material.Filled.Favorite" 
+                                         Color="@(IsInWishlist(item.Id) ? Color.Error : Color.Default)"
+                                         Size="Size.Medium"/>
+                          </MudButton>
+                    </div>  
+              </MudItem>
 
-           
-            <MudItem xs="12" md="8">
-              <MudText Typo="Typo.h4" class="item-name">@item.Name</MudText>
-              <MudGrid>
-                <MudItem xs="12" md="12" Class="d-flex align-center flex-wrap" Style="gap: 20px;">
-                  <MudItem style="display: flex; align-items: center; gap: 8px;">
-                    <MudText Typo="Typo.body1">@averageRating.ToString("0")</MudText>
-                    <MudRating SelectedValue="@averageRating" ReadOnly="true" />
+
+              <MudItem xs="12" md="8">
+                <MudText Typo="Typo.h4" class="item-name">@item.Name</MudText>
+                <MudGrid>
+                  <MudItem xs="12" md="12" Class="d-flex align-center flex-wrap" Style="gap: 20px;">
+                    <MudItem style="display: flex; align-items: center; gap: 8px;">
+                      <MudText Typo="Typo.body1">@averageRating.ToString("0")</MudText>
+                      <MudRating SelectedValue="@averageRating" ReadOnly="true" />
+                    </MudItem>
+
+                    <MudItem style="display: flex; align-items: center;">
+                      <MudText Typo="Typo.body1">@reviews.Count Evaluate</MudText>
+                    </MudItem>
+                  </MudItem>
+                </MudGrid>
+
+                <MudText Typo="Typo.h3" class="item-price">@item.Price.ToString("C")</MudText>
+                <MudText Typo="Typo.body1" Class="mb-4">@item.Description</MudText>
+                <MudText Typo="Typo.body2" Class="mb-4">Stock: @item.StockQuantity</MudText>
+                <MudGrid>
+                  <!-- Quantity Control -->
+                  <MudItem xs="12" sm="12" md="12" lg="4" Class="d-flex align-center flex-nowrap" Style="gap: 4px;">
+                    <MudItem>
+                      <MudIconButton Icon="@Icons.Material.Filled.Remove"
+                                      Class="quantity-btn"
+                                      OnClick="DecreaseQuantity" />
+                    </MudItem>
+                    <MudItem>
+                      <MudNumericField HideSpinButtons="true" @bind-Value="buyQuantity" Min="1" Max="@item.StockQuantity" Variant="Variant.Outlined" 
+                      Class="mud-input-root" 
+                       Style="width: 60px; height: 50px;" />
+                    </MudItem>
+                    <MudItem>
+                      <MudIconButton Icon="@Icons.Material.Filled.Add"
+                                      Class="quantity-btn"
+                                      OnClick="IncreaseQuantity" />
+                    </MudItem>
                   </MudItem>
 
-                  <MudItem style="display: flex; align-items: center;">
-                    <MudText Typo="Typo.body1">@reviews.Count Evaluate</MudText>
-                  </MudItem>
-                </MudItem>
-              </MudGrid>
-
-              <MudText Typo="Typo.h3" class="item-price">@item.Price.ToString("C")</MudText>
-              <MudText Typo="Typo.body1" Class="mb-4">@item.Description</MudText>
-              <MudText Typo="Typo.body2" Class="mb-4">Stock: @item.StockQuantity</MudText>
-              <MudGrid>
-                <!-- Quantity Control -->
-                <MudItem xs="12" sm="12" md="12" lg="4" Class="d-flex align-center flex-nowrap" Style="gap: 4px;">
-                  <MudItem>
-                    <MudIconButton Icon="@Icons.Material.Filled.Remove"
-                                    Class="quantity-btn"
-                                    OnClick="DecreaseQuantity" />
-                  </MudItem>
-                  <MudItem>
-                    <MudNumericField HideSpinButtons="true" @bind-Value="buyQuantity" Min="1" Max="@item.StockQuantity" Variant="Variant.Outlined" 
-                    Class="mud-input-root" 
-                     Style="width: 60px; height: 50px;" />
-                  </MudItem>
-                  <MudItem>
-                    <MudIconButton Icon="@Icons.Material.Filled.Add"
-                                    Class="quantity-btn"
-                                    OnClick="IncreaseQuantity" />
-                  </MudItem>
-                </MudItem>
-
-                <!-- Action Buttons -->
-                <MudItem xs="12" sm="12" md="12" lg="8" Class="d-flex justify-start" Style="gap: 12px;">
-                  <MudItem>
-                    <MudButton Class="add-to-cart-btn" StartIcon="@Icons.Material.Outlined.ShoppingCart" OnClick="AddToCart" Style="height: 50px;flex: 1;">Add to cart</MudButton>
-                  </MudItem>
-                  <MudItem>
-                    <MudButton Class="buy-now-btn" OnClick="BuyNow" Style="height: 50px;flex: 1;">Buy
-                      Now
-                    </MudButton>
+                  <!-- Action Buttons -->
+                  <MudItem xs="12" sm="12" md="12" lg="8" Class="d-flex justify-start" Style="gap: 12px;">
+                    <MudItem>
+                      <MudButton Class="add-to-cart-btn" StartIcon="@Icons.Material.Outlined.ShoppingCart" OnClick="AddToCart" Style="height: 50px;flex: 1;">Add to cart</MudButton>
+                    </MudItem>
+                    <MudItem>
+                      <MudButton Class="buy-now-btn" OnClick="BuyNow" Style="height: 50px;flex: 1;">Buy
+                        Now
+                      </MudButton>
                     @* <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="AddToWishlist">
                       Add to Wishlist
                     </MudButton> *@
-                  </MudItem>
-                </MudItem>
-              </MudGrid>
-
-            </MudItem>
-          </MudGrid>
-        </MudItem>
-
-        <MudItem xs="12" Outlined="true">
-
-          <!-- Review Section -->
-          <MudItem xs="12">
-            <MudPaper Elevation="4" Class="p-4 mt-2">
-              <MudText Typo="Typo.h6">Add a Review</MudText>
-              <MudForm @ref="reviewForm" Model="newReview" Validated="OnReviewValidated">
-                <MudRating @bind-SelectedValue="newReview.Rating" MaxValue="5" Label="Rating" Required="true" />
-                <MudTextField @bind-Value="newReview.Comment" Label="Comment" Required="true" Lines="2" />
-                <MudGrid>
-                  <MudItem xs="12" style="padding-top: 30px;" Class="d-flex justify-end">
-                    <MudButton Size="Size.Medium" Variant="Variant.Filled" style="background-color:#FF66A1;color:#ffffff ;" OnClick="SubmitReview">Submit</MudButton>
+                    </MudItem>
                   </MudItem>
                 </MudGrid>
-              </MudForm>
-            </MudPaper>
 
-            <div class="rating-container mt-4">
-              <MudGrid>
-                <MudItem xs="12" sm="12" md="5" Class="average-rating" style="text-align: center;">
-                  <MudText Typo="Typo.h4" Style="color: #FF66A1;font-weight: bold;">@averageRating.ToString("0")/5</MudText>
-                  <MudRating SelectedValue="@averageRating" MaxValue="5" ReadOnly="true" Size="Size.Medium" />
-                </MudItem>
-
-                <MudItem xs="12" sm="12" md="7" style="display: flex; flex-wrap: wrap; gap: 8px;">
-                  <MudChip T="string" Variant="selectedRatings.Count == 0 ? Variant.Filled : Variant.Outlined" Color="Color.Secondary" OnClick="() => { selectedRatings.Clear(); ApplyFilters(); }">
-                    All
-                  </MudChip>
-                  <MudChip T="int" Variant="selectedRatings.Contains(5) ? Variant.Filled : Variant.Outlined" Color="Color.Secondary" OnClick="() => ToggleRatingFilter(5)">
-                    5
-                    <MudRating SelectedValue="1" ReadOnly="true" MaxValue="1" Size="Size.Small" />
-                  </MudChip>
-                  <MudChip T="int" Variant="selectedRatings.Contains(4) ? Variant.Filled : Variant.Outlined" Color="Color.Secondary" OnClick="() => ToggleRatingFilter(4)">
-                    4
-                    <MudRating SelectedValue="1" ReadOnly="true" MaxValue="1" Size="Size.Small" />
-                  </MudChip>
-                  <MudChip T="int" Variant="selectedRatings.Contains(3) ? Variant.Filled : Variant.Outlined" Color="Color.Secondary" OnClick="() => ToggleRatingFilter(3)">
-                    3
-                    <MudRating SelectedValue="1" ReadOnly="true" MaxValue="1" Size="Size.Small" />
-                  </MudChip>
-                  <MudChip T="int" Variant="selectedRatings.Contains(2) ? Variant.Filled : Variant.Outlined" Color="Color.Secondary" OnClick="() => ToggleRatingFilter(2)">
-                    2
-                    <MudRating SelectedValue="1" ReadOnly="true" MaxValue="1" Size="Size.Small" />
-                  </MudChip>
-                  <MudChip T="int" Variant="selectedRatings.Contains(1) ? Variant.Filled : Variant.Outlined" Color="Color.Secondary" OnClick="() => ToggleRatingFilter(1)">
-                    1
-                    <MudRating SelectedValue="1" ReadOnly="true" MaxValue="1" Size="Size.Small" />
-                  </MudChip>
-                </MudItem>
-              </MudGrid>
-            </div>
+              </MudItem>
+            </MudGrid>
           </MudItem>
 
+          <MudItem xs="12" Outlined="true">
+
+            <!-- Review Section -->
+            <MudItem xs="12">
+              <MudPaper Elevation="4" Class="p-4 mt-2">
+                <MudText Typo="Typo.h6">Add a Review</MudText>
+                <MudForm @ref="reviewForm" Model="newReview" Validated="OnReviewValidated">
+                  <MudRating @bind-SelectedValue="newReview.Rating" MaxValue="5" Label="Rating" Required="true" />
+                  <MudTextField @bind-Value="newReview.Comment" Label="Comment" Required="true" Lines="2" />
+                  <MudGrid>
+                    <MudItem xs="12" style="padding-top: 30px;" Class="d-flex justify-end">
+                      <MudButton Size="Size.Medium" Variant="Variant.Filled" style="background-color:#FF66A1;color:#ffffff ;" OnClick="SubmitReview">Submit</MudButton>
+                    </MudItem>
+                  </MudGrid>
+                </MudForm>
+              </MudPaper>
+
+              <div class="rating-container mt-4">
+                <MudGrid>
+                  <MudItem xs="12" sm="12" md="5" Class="average-rating" style="text-align: center;">
+                    <MudText Typo="Typo.h4" Style="color: #FF66A1;font-weight: bold;">@averageRating.ToString("0")/5</MudText>
+                    <MudRating SelectedValue="@averageRating" MaxValue="5" ReadOnly="true" Size="Size.Medium" />
+                  </MudItem>
+
+                  <MudItem xs="12" sm="12" md="7" style="display: flex; flex-wrap: wrap; gap: 8px;">
+                    <MudChip T="string" Variant="selectedRatings.Count == 0 ? Variant.Filled : Variant.Outlined" Color="Color.Secondary" OnClick="() => { selectedRatings.Clear(); ApplyFilters(); }">
+                      All
+                    </MudChip>
+                    <MudChip T="int" Variant="selectedRatings.Contains(5) ? Variant.Filled : Variant.Outlined" Color="Color.Secondary" OnClick="() => ToggleRatingFilter(5)">
+                      5
+                      <MudRating SelectedValue="1" ReadOnly="true" MaxValue="1" Size="Size.Small" />
+                    </MudChip>
+                    <MudChip T="int" Variant="selectedRatings.Contains(4) ? Variant.Filled : Variant.Outlined" Color="Color.Secondary" OnClick="() => ToggleRatingFilter(4)">
+                      4
+                      <MudRating SelectedValue="1" ReadOnly="true" MaxValue="1" Size="Size.Small" />
+                    </MudChip>
+                    <MudChip T="int" Variant="selectedRatings.Contains(3) ? Variant.Filled : Variant.Outlined" Color="Color.Secondary" OnClick="() => ToggleRatingFilter(3)">
+                      3
+                      <MudRating SelectedValue="1" ReadOnly="true" MaxValue="1" Size="Size.Small" />
+                    </MudChip>
+                    <MudChip T="int" Variant="selectedRatings.Contains(2) ? Variant.Filled : Variant.Outlined" Color="Color.Secondary" OnClick="() => ToggleRatingFilter(2)">
+                      2
+                      <MudRating SelectedValue="1" ReadOnly="true" MaxValue="1" Size="Size.Small" />
+                    </MudChip>
+                    <MudChip T="int" Variant="selectedRatings.Contains(1) ? Variant.Filled : Variant.Outlined" Color="Color.Secondary" OnClick="() => ToggleRatingFilter(1)">
+                      1
+                      <MudRating SelectedValue="1" ReadOnly="true" MaxValue="1" Size="Size.Small" />
+                    </MudChip>
+                  </MudItem>
+                </MudGrid>
+              </div>
+            </MudItem>
 
 
-          <MudText Typo="Typo.h5" Class="mt-4">Reviews</MudText>
+
+            <MudText Typo="Typo.h5" Class="mt-4">Reviews</MudText>
           @foreach (var review in filteredReviews)
           {
-            <div class="feedback-container mt-4">
-              <MudGrid style="margin-bottom: 10px;">
-                <MudItem xs="12" md="12" Class="d-flex flex-wrap" Style="gap: 10px;">
-                  <!-- Content Section -->
-                  <MudItem>
-                    <!-- Reviewer Name -->
-                    <MudText Typo="Typo.h6">@(review.User?.UserName ?? "Anonymous")</MudText>
+                <div class="feedback-container mt-4">
+                  <MudGrid style="margin-bottom: 10px;">
+                    <MudItem xs="12" md="12" Class="d-flex flex-wrap" Style="gap: 10px;">
+                      <!-- Content Section -->
+                      <MudItem>
+                        <!-- Reviewer Name -->
+                        <MudText Typo="Typo.h6">@(review.User?.UserName ?? "Anonymous")</MudText>
 
-                    <!-- Rating -->
-                    <MudRating MaxValue="5" SelectedValue="@review.Rating" ReadOnly="true" Size="Size.Small" style="padding-right:10px" />
+                        <!-- Rating -->
+                        <MudRating MaxValue="5" SelectedValue="@review.Rating" ReadOnly="true" Size="Size.Small" style="padding-right:10px" />
 
-                    <!-- Date -->
-                    <MudText Typo="Typo.caption" Style="font-style: italic;">@review.CreatedAt.ToString("dd/MM/yyyy")</MudText>
-                  </MudItem>
-                </MudItem>
-              </MudGrid>
+                        <!-- Date -->
+                        <MudText Typo="Typo.caption" Style="font-style: italic;">@review.CreatedAt.ToString("dd/MM/yyyy")</MudText>
+                      </MudItem>
+                    </MudItem>
+                  </MudGrid>
 
-              <MudText Typo="Typo.body1" style="margin-bottom: 10px;word-break: break-word">
+                  <MudText Typo="Typo.body1" style="margin-bottom: 10px;word-break: break-word">
                 @review.Comment
-              </MudText>
-            </div>
+                  </MudText>
+                </div>
           }
-        </MudItem>
-      </MudGrid>
+          </MudItem>
+        </MudGrid>
     }
     else
     {
-      <MudText Typo="Typo.body1">Item not found</MudText>
+        <MudText Typo="Typo.body1">Item not found</MudText>
     }
   </div>
 </MudContainer>
@@ -304,6 +304,21 @@
       reviews = await ReviewController.GetReviewsByItemIdAsync(Id);
       filteredReviews = new List<Review>(reviews);
       CalculateAverageRating();
+    }
+    await LoadWishlist();
+  }
+
+  private async Task LoadWishlist()
+  {
+    try
+    {
+      var wishlist = await WishlistController.GetWishlistAsync();
+      wishlistItems = new HashSet<int>(wishlist.Select(w => w.ItemId));
+      StateHasChanged();
+    }
+    catch (Exception ex)
+    {
+      Snackbar.Add($"Error loading wishlist: {ex.Message}", Severity.Error);
     }
   }
 
@@ -427,20 +442,20 @@
   } *@
   private async Task AddToWishlist(Item item)
   {
-      if (item != null)
+    if (item != null)
+    {
+      try
       {
-          try
-          {
-              await WishlistController.AddToWishlistAsync(item.Id);
-              wishlistItems.Add(item.Id);
-              Snackbar.Add("Item added to wishlist", Severity.Success);
-              StateHasChanged();
-          }
-          catch (Exception ex)
-          {
-              Snackbar.Add($"Error adding to wishlist: {ex.Message}", Severity.Error);
-          }
+        await WishlistController.AddToWishlistAsync(item.Id);
+        wishlistItems.Add(item.Id);
+        Snackbar.Add("Item added to wishlist", Severity.Success);
+        StateHasChanged();
       }
+      catch (Exception ex)
+      {
+        Snackbar.Add($"Error adding to wishlist: {ex.Message}", Severity.Error);
+      }
+    }
   }
   private void OnReviewValidated()
   {
@@ -449,34 +464,34 @@
 
   private bool IsInWishlist(int itemId)
   {
-      return wishlistItems.Contains(itemId);
+    return wishlistItems.Contains(itemId);
   }
   private async Task ToggleWishlist(Item item)
   {
-      if (item != null)
+    if (item != null)
+    {
+      try
       {
-          try
-          {
-              if (IsInWishlist(item.Id))
-              {
-                  // Remove from wishlist
-                  await WishlistController.RemoveFromWishlistAsync(item.Id);
-                  wishlistItems.Remove(item.Id);
-                  Snackbar.Add("Item removed from wishlist", Severity.Success);
-              }
-              else
-              {
-                  // Add to wishlist
-                  await WishlistController.AddToWishlistAsync(item.Id);
-                  wishlistItems.Add(item.Id);
-                  Snackbar.Add("Item added to wishlist", Severity.Success);
-              }
-              StateHasChanged();
-          }
-          catch (Exception ex)
-          {
-              Snackbar.Add($"Error updating wishlist: {ex.Message}", Severity.Error);
-          }
+        if (IsInWishlist(item.Id))
+        {
+          // Remove from wishlist
+          await WishlistController.RemoveFromWishlistAsync(item.Id);
+          wishlistItems.Remove(item.Id);
+          Snackbar.Add("Item removed from wishlist", Severity.Success);
+        }
+        else
+        {
+          // Add to wishlist
+          await WishlistController.AddToWishlistAsync(item.Id);
+          wishlistItems.Add(item.Id);
+          Snackbar.Add("Item added to wishlist", Severity.Success);
+        }
+        StateHasChanged();
       }
+      catch (Exception ex)
+      {
+        Snackbar.Add($"Error updating wishlist: {ex.Message}", Severity.Error);
+      }
+    }
   }
 }
