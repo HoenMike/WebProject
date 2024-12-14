@@ -20,39 +20,43 @@
 
 <PageTitle>Shipping Information</PageTitle>
 
-<MudContainer MaxWidth="MaxWidth.Small">
+<MudContainer MaxWidth="MaxWidth.Small" Class="pa-4">
   <MudCard Class="pa-4 mb-4 mt-4">
-    <MudText Typo="Typo.h3">Shipping Information</MudText>
-    @if (isLoading)
-    {
-      <MudProgressLinear Indeterminate="true" Color="Color.Primary" Style="margin-bottom: 20px;" />
-    }
-    else
-    {
-      @if (!string.IsNullOrEmpty(ShippingStatusMessage))
+    <MudCardContent>
+      <h3 style="text-align: center;" Class="mb-4">Shipping Information</h3>
+      @if (isLoading)
       {
-        <MudAlert Severity="@(ShippingStatusMessageType == "alert-success" ? Severity.Success : Severity.Error)">
-          @ShippingStatusMessage
-        </MudAlert>
+        <MudProgressLinear Indeterminate="true" Color="Color.Primary" Class="mb-3" />
       }
-      <MudGrid>
-        <MudItem xs="12">
-          <EditForm Model="ShippingInput" OnValidSubmit="OnValidSubmitShippingAsync">
-            <DataAnnotationsValidator />
-            <MudTextField @bind-Value="ShippingInput.ReceiverName" Label="Receiver Name" Required="true"
-              RequiredError="Receiver Name is required" />
-            <MudTextField @bind-Value="ShippingInput.Address" Label="Address" Required="true"
-              RequiredError="Address is required" />
-            <MudTextField @bind-Value="ShippingInput.PhoneNumber" Label="Phone Number" Required="true"
-              RequiredError="Phone Number is required" />
+      else
+      {
+        @if (!string.IsNullOrEmpty(ShippingStatusMessage))
+        {
+          <MudAlert Severity="@(ShippingStatusMessageType == "alert-success" ? Severity.Success : Severity.Error)"
+            Elevation="1" Class="mb-3">
+            @ShippingStatusMessage
+          </MudAlert>
+        }
+        <EditForm Model="ShippingInput" OnValidSubmit="OnValidSubmitPaymentAsync">
+          <DataAnnotationsValidator />
+          <MudStack Spacing="0">
 
-            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">
+            <MudTextField @bind-Value="ShippingInput.ReceiverName" Label="Receiver Name" Required="true"
+              RequiredError="Receiver Name is required" Variant="Variant.Outlined" Class="mb-3" />
+            <MudTextField @bind-Value="ShippingInput.Address" Label="Address" Required="true"
+              RequiredError="Address is required" Variant="Variant.Outlined" Class="mb-3" />
+            <MudTextField @bind-Value="ShippingInput.PhoneNumber" Label="Phone Number" Required="true"
+              RequiredError="Phone Number is required" Variant="Variant.Outlined" Class="mb-3" />
+          </MudStack>
+          <MudCardActions Class="d-flex justify-end mt-4">
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled"
+              style="background-color: #ff66a1;color:white">
               Save Shipping Information
             </MudButton>
-          </EditForm>
-        </MudItem>
-      </MudGrid>
-    }
+          </MudCardActions>
+        </EditForm>
+      }
+    </MudCardContent>
   </MudCard>
 </MudContainer>
 

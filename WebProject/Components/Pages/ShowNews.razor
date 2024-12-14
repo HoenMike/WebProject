@@ -11,7 +11,7 @@
 <PageTitle>News</PageTitle>
 <MudContainer>
 
-  <MudPaper Class="pa-4 mb-4">
+  <MudPaper Elevation="2" Class="pa-4 mb-6" style="position: sticky;top:0;z-index: 10;">
     <MudTextField Variant="Variant.Outlined" @bind-Value="searchTerm" Label="Search News"
       AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" Immediate="true" Clearable="true"
       OnClearButtonClick="ClearSearch" OnKeyUp="FilterNews" />
@@ -25,18 +25,27 @@
   {
     @foreach (var news in displayedNews)
     {
-      <MudCard Class="mb-2" Elevation="3">
-        <MudExpansionPanel Style="margin: 10px; word-break: break-word">
+      <MudCard Class="mb-6" Elevation="1" style="border-radius: 6px;">
+        <MudExpansionPanel Style="margin: 10px 4px; word-break: break-word">
           <TitleContent>
-            <MudText Typo="Typo.h6" GutterBottom="true">@news.Title</MudText>
-            <MudText Typo="Typo.caption" Style="font-style: italic; margin-bottom: 4px; display: block">Created By:
-              @news.CreatedBy - @news.CreatedAt</MudText>
-            @if (news.UpdatedAt.HasValue)
-            {
-              <MudText Typo="Typo.caption" Style="font-style: italic;">Latest Update: @news.UpdatedAt.Value.ToString("g")
-              </MudText>
-            }
-
+            <MudGrid>
+              <MudItem xs="4">
+                @if (!string.IsNullOrEmpty(news.ImageUrl))
+                {
+                  <MudImage Src="@news.ImageUrl" Alt="News Image" Style="width: 100%; height: auto;" />
+                }
+              </MudItem>
+              <MudItem xs="8">
+                <MudText Typo="Typo.h5" style="color: #c92e69;" GutterBottom="true"><b>@news.Title</b></MudText>
+                <MudText Typo="Typo.caption" Style="font-style: italic; margin-bottom: 4px; display: block">Created By:
+                  @news.CreatedBy - @news.CreatedAt</MudText>
+                @if (news.UpdatedAt.HasValue)
+                {
+                  <MudText Typo="Typo.caption" Style="font-style: italic;">Latest Update: @news.UpdatedAt.Value.ToString("g")
+                  </MudText>
+                }
+              </MudItem>
+            </MudGrid>
           </TitleContent>
           <ChildContent>
             <MudText Typo="Typo.body1">@news.Content</MudText>

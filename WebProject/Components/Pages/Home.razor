@@ -9,8 +9,9 @@
 @inject NavigationManager NavigationManager
 @inject NavigationManager Navigation
 @inject WishlistController WishlistController
+@using Microsoft.AspNetCore.Components.Authorization
+@inject IJSRuntime JSRuntime
 @using MudBlazor
-
 
 @rendermode InteractiveServer
 <style>
@@ -71,18 +72,16 @@
     background-color: #bcbcbc;
   }
 </style>
+
 <PageTitle>Home</PageTitle>
 <MudContainer>
-  <MudPaper Elevation="3" Class="pa-4">
+  <MudPaper Elevation="2" Class="pa-4" style="position: sticky;top:0;z-index: 10;">
     <MudGrid>
       <MudItem xs="12">
-        <MudTextField Variant="Variant.Outlined" @bind-Value="searchTerm" Label="Search Items"
-          AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" Immediate="true" Clearable="true"
-          OnClearButtonClick="ClearSearch" OnKeyUp="FilterItems" />
+        <MudTextField Variant="Variant.Outlined" @bind-Value="searchTerm" Label="Search Items" AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" Immediate="true" Clearable="true" OnClearButtonClick="ClearSearch" OnKeyUp="FilterItems" />
       </MudItem>
     </MudGrid>
   </MudPaper>
-
 
   <div style="height: 500px; display: flex; justify-content: center; align-items: center;">
     <MudPaper Elevation="3" Class="promotion-container pa-0">
@@ -96,20 +95,17 @@
       }
       else
       {
-        <MudCarousel TData="Promote" ShowBullets="true" AutoCycle="true " AutoCycleTime="TimeSpan.FromMilliseconds(3000)"
-          Class="my-4" Style="height: 400px; width: 700px; border-radius: 8px;">
+        <MudCarousel TData="Promote" ShowBullets="true" AutoCycle="true " AutoCycleTime="TimeSpan.FromMilliseconds(3000)" Class="my-4" Style="height: 400px; width: 700px; border-radius: 8px;">
           @foreach (var promote in activePromotes)
           {
             <MudCarouselItem>
-              <MudImage Src="@promote.ImageUrl" Alt="Promotion Image" ObjectFit="ObjectFit.Contain" Class="rounded-lg"
-                Style="width: 100%; height: 100%;" />
+              <MudImage Src="@promote.ImageUrl" Alt="Promotion Image" ObjectFit="ObjectFit.Contain" Class="rounded-lg" Style="width: 100%; height: 100%;" />
             </MudCarouselItem>
           }
         </MudCarousel>
       }
     </MudPaper>
   </div>
-
 
   <h4 style="color: rgb(0, 0, 0)">New Arrivals</h4>
   @if (isLoading)
@@ -122,16 +118,11 @@
       @foreach (var item in displayedItems)
       {
         <MudItem Style="width:300px">
-          <MudCard Style="word-break: break-word; border-radius:12px;">
+          <MudCard Style="word-break: break-word; border-radius:10px;">
             <div class="image-container" style="position: relative">
-              <MudImage Src="@item.ThumbnailUrl" Alt="@item.Name"
-                Style="width: 150px; height: 260px; min-height: 260px; width: 100%; cursor: pointer; padding:20px; padding-bottom:0px;z-index: 1;"
-                @onclick="@(() => NavigateToItemDetails(item.Id))" />
-              <MudButton Class="wishlist-button"
-                Style="z-index: 2; position: absolute; top: 0px; right: 0px; background-color: #ffffff; border-radius: 40px; height: 65px; align-items: center;"
-                OnClick="@(() => ToggleWishlist(item))">
-                <MudIcon Icon="@Icons.Material.Filled.Favorite"
-                  Color="@(IsInWishlist(item.Id) ? Color.Error : Color.Default)" FontSize="50px" />
+              <MudImage Src="@item.ThumbnailUrl" Alt="@item.Name" Style="width: 150px; height: 260px; min-height: 260px; width: 100%; cursor: pointer; padding:20px; padding-bottom:0px;z-index: 1;" @onclick="@(() => NavigateToItemDetails(item.Id))" />
+              <MudButton Class="wishlist-button" Style="z-index: 2; position: absolute; top: 0px; right: 0px; background-color: #ffffff; border-radius: 40px; height: 65px; align-items: center;" OnClick="@(() => ToggleWishlist(item))">
+                <MudIcon Icon="@Icons.Material.Filled.Favorite" Color="@(IsInWishlist(item.Id) ? Color.Error : Color.Default)" FontSize="50px" />
               </MudButton>
             </div>
             <MudCardContent>
@@ -147,35 +138,31 @@
             <MudCardActions>
               <MudGrid Style="margin-left:4px; margin-right: 4px; margin-bottom: 10px;">
                 <MudItem xs="2" Class="d-flex justify-center" Style="width:100%">
-                  <MudIconButton Icon="@Icons.Material.Filled.Remove" Class="quantity-btn"
-                    OnClick="@(() => DecreaseQuantity(item.Id))" />
+                  <MudIconButton Icon="@Icons.Material.Filled.Remove" Class="quantity-btn" OnClick="@(() => DecreaseQuantity(item.Id))" />
                 </MudItem>
                 <MudItem xs="3" Class="d-flex justify-center">
-                  <MudNumericField HideSpinButtons="true" Value="@GetItemQuantity(item.Id)"
-                    ValueChanged="@((int value) => SetItemQuantity(item.Id, value))" Min="1" Max="@item.StockQuantity"
-                    Variant="Variant.Outlined" Class="mud-input-root" Style="width:50px;height:50px" />
+                  <MudNumericField HideSpinButtons="true" Value="@GetItemQuantity(item.Id)" ValueChanged="@((int value) => SetItemQuantity(item.Id, value))" Min="1" Max="@item.StockQuantity" Variant="Variant.Outlined" Class="mud-input-root" Style="width:50px;height:50px" />
                 </MudItem>
                 <MudItem xs="3" Class="d-flex justify-center" Style="width:100%">
-                  <MudIconButton Icon="@Icons.Material.Filled.Add" Class="quantity-btn"
-                    OnClick="@(() => IncreaseQuantity(item.Id))" />
+                  <MudIconButton Icon="@Icons.Material.Filled.Add" Class="quantity-btn" OnClick="@(() => IncreaseQuantity(item.Id))" />
                 </MudItem>
                 <MudItem xs="4" Class="d-flex justify-center">
-                  <MudIconButton Icon="@Icons.Material.Outlined.ShoppingCart" Class="add-to-cart-btn"
-                    OnClick="@(() => AddToCart(item))" Size="Size.Medium" />
+                  <MudIconButton Icon="@Icons.Material.Outlined.ShoppingCart" Class="add-to-cart-btn" OnClick="@(() => AddToCart(item))" Size="Size.Medium" />
                 </MudItem>
               </MudGrid>
             </MudCardActions>
           </MudCard>
         </MudItem>
-
       }
     </MudGrid>
+    <div style="display: flex; justify-content: center; margin-top: 20px;">
+      <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="NavigateToItemBrowse">
+        Browse All Items
+      </MudButton>
+    </div>
   }
 
-
-  <br>
-  <br>
-  <h3>Latest News</h3>
+  <h4 style="color: rgb(0, 0, 0); margin-top:30px;">Lasted News</h4>
   @if (isNewsLoading)
   {
     <MudProgressLinear Indeterminate="true" Color="Color.Primary" Style="margin-bottom: 20px;" />
@@ -185,10 +172,10 @@
     <MudGrid>
       @foreach (var news in displayedNews)
       {
-        <MudItem xs="6">
-          <MudExpansionPanel Style="margin: 10px; word-break: break-word">
+        <MudItem xs="12" sm="12" md="6">
+          <MudExpansionPanel Style="border-radius: 6px; word-break: break-word">
             <TitleContent>
-              <MudText Typo="Typo.h6" GutterBottom="true">@news.Title</MudText>
+              <MudText Typo="Typo.h6" GutterBottom="true" style="color: #c92e69;">@news.Title</MudText>
               <MudText Typo="Typo.caption" Style="font-style: italic; margin-bottom: 4px; display: block">Created By:
                 @news.CreatedBy - @news.CreatedAt</MudText>
               @if (news.UpdatedAt.HasValue)
@@ -199,6 +186,10 @@
             </TitleContent>
             <ChildContent>
               <MudText Typo="Typo.body1">@news.Content</MudText>
+              @if (!string.IsNullOrEmpty(news.ImageUrl))
+              {
+                <MudImage Src="@news.ImageUrl" Alt="News Image" Style="width: 100%; height: 300px;border-radius: 4px;margin-top: 10px;" />
+              }
             </ChildContent>
           </MudExpansionPanel>
         </MudItem>
@@ -206,7 +197,6 @@
     </MudGrid>
   }
 </MudContainer>
-
 
 @code {
   private List<Item> items = new();
@@ -220,6 +210,8 @@
   private bool isNewsLoading = true;
   private Dictionary<int, int> itemQuantities = new();
   private HashSet<int> wishlistItems = new();
+
+  [Inject] AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
 
   private int GetItemQuantity(int itemId)
   {
@@ -243,30 +235,36 @@
     }
   }
 
-
   protected override async Task OnAfterRenderAsync(bool firstRender)
   {
     if (firstRender)
     {
+      JSRuntime.InvokeVoidAsync("scrollToTop");
       await LoadItems();
       await LoadActivePromotes();
       await LoadNews();
-      await LoadWishlist();
+      if (await IsUserLoggedIn())
+      {
+        await LoadWishlist();
+      }
     }
   }
-
 
   private void NavigateToItemDetails(int itemId)
   {
     NavigationManager.NavigateTo($"/item-details/{itemId}");
   }
 
+  private void NavigateToItemBrowse()
+  {
+    NavigationManager.NavigateTo("/itembrowse");
+  }
 
   private async Task LoadItems()
   {
     try
     {
-      items = await DbContext.Items.OrderByDescending(item => item.Id).Take(8).ToListAsync();
+      items = await DbContext.Items.OrderByDescending(item => item.Id).Take(6).ToListAsync();
       displayedItems = items;
     }
     catch (Exception ex)
@@ -279,7 +277,6 @@
       StateHasChanged();
     }
   }
-
 
   private async Task LoadActivePromotes()
   {
@@ -307,9 +304,8 @@
   {
     try
     {
-      // Lấy danh sách yêu thích từ cơ sở dữ liệu
       var wishlist = await WishlistController.GetWishlistAsync();
-      wishlistItems = new HashSet<int>(wishlist.Select(w => w.ItemId)); // Lưu ID vào danh sách
+      wishlistItems = new HashSet<int>(wishlist.Select(w => w.ItemId));
       StateHasChanged();
     }
     catch (Exception ex)
@@ -317,6 +313,7 @@
       Snackbar.Add($"Error loading wishlist: {ex.Message}", Severity.Error);
     }
   }
+
   private void FilterItems()
   {
     if (string.IsNullOrEmpty(searchTerm))
@@ -331,15 +328,12 @@
     }
   }
 
-
   private void ClearSearch()
   {
     searchTerm = string.Empty;
     displayedItems = items;
     StateHasChanged();
   }
-
-
 
   private void IncreaseQuantity(int itemId)
   {
@@ -351,11 +345,6 @@
     }
   }
 
-
-
-
-
-
   private void DecreaseQuantity(int itemId)
   {
     if (GetItemQuantity(itemId) > 1)
@@ -365,17 +354,14 @@
     }
   }
 
-
-
   private async Task AddToCart(Item item)
   {
-    if (!IsUserLoggedIn())
+    if (!await IsUserLoggedIn())
     {
       var parameters = new DialogParameters { ["ContentText"] = "You need to login to add items to the cart." };
       var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
       var dialog = DialogService.Show<LoginDialog>("Login Required", parameters, options);
       var result = await dialog.Result;
-
 
       if (result != null && !result.Canceled)
       {
@@ -383,7 +369,6 @@
       }
       return;
     }
-
 
     try
     {
@@ -395,7 +380,6 @@
       Snackbar.Add(ex.Message, Severity.Error);
     }
   }
-
 
   private async Task AddToWishlist(Item item)
   {
@@ -415,8 +399,6 @@
     }
   }
 
-
-
   private bool IsInWishlist(int itemId)
   {
     return wishlistItems.Contains(itemId);
@@ -430,14 +412,12 @@
       {
         if (IsInWishlist(item.Id))
         {
-          // Remove from wishlist
           await WishlistController.RemoveFromWishlistAsync(item.Id);
           wishlistItems.Remove(item.Id);
           Snackbar.Add("Item removed from wishlist", Severity.Success);
         }
         else
         {
-          // Add to wishlist
           await WishlistController.AddToWishlistAsync(item.Id);
           wishlistItems.Add(item.Id);
           Snackbar.Add("Item added to wishlist", Severity.Success);
@@ -451,12 +431,12 @@
     }
   }
 
-
-  private bool IsUserLoggedIn()
+  private async Task<bool> IsUserLoggedIn()
   {
-    return true;
-  }
+    var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
 
+    return authState.User.Identity?.IsAuthenticated ?? false;
+  }
 
   private async Task LoadNews()
   {

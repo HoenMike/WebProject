@@ -7,6 +7,7 @@
 @inject NavigationManager Navigation
 @inject IDialogService DialogService
 @using MudBlazor
+@inject IJSRuntime JSRuntime
 <style>
   .item-details-container {
     display: flex;
@@ -14,8 +15,6 @@
     border-radius: 10px;
     padding: 30px;
     margin-top: 20px;
-    margin-left: 24px;
-    margin-right: 24px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   }
 
@@ -98,16 +97,17 @@
   }
 
   .feedback-container {
-    border: 1px solid #414141;
+    border: 1px solid #c4c4c4;
     border-radius: 8px;
     padding: 20px;
 
   }
+
   .mud-input-root input {
-    text-align: center; 
-    width: 60px; 
+    text-align: center;
+    width: 60px;
     height: 50px;
-}
+  }
 </style>
 <MudContainer>
   <div class="item-details-container">
@@ -118,21 +118,16 @@
           <MudGrid>
             <MudItem xs="12" md="4">
               @* <MudImage Src="@item.ThumbnailUrl" Alt="@item.Name" Style="width: 100%; border-radius: 8px;" /> *@
-               <div class="image-container" style="position: relative">
-                        <MudImage Src="@item.ThumbnailUrl" Alt="@item.Name" 
-                            Style="width: 100%; border-radius: 8px;z-index: 1;"/>  
+              <div class="image-container" style="position: relative">
+                <MudImage Src="@item.ThumbnailUrl" Alt="@item.Name" Style="width: 100%; border-radius: 8px;z-index: 1;" />
 
-                        <MudButton 
-                                Style="z-index: 2; position: absolute; top: 0px; right: 0px; background-color: #ffffff; border-radius: 40px; height: 65px;width:65px ;align-items: center;"  
-                                 OnClick="@(() => ToggleWishlist(item))">
-                                <MudIcon Icon="@Icons.Material.Filled.Favorite" 
-                                       Color="@(IsInWishlist(item.Id) ? Color.Error : Color.Default)"
-                                       Size="Size.Medium"/>
-                        </MudButton>
-                  </div>  
+                <MudButton Style="z-index: 2; position: absolute; top: 0px; right: 0px; background-color: #ffffff; border-radius: 40px; height: 65px;width:65px ;align-items: center;" OnClick="@(() => ToggleWishlist(item))">
+                  <MudIcon Icon="@Icons.Material.Filled.Favorite" Color="@(IsInWishlist(item.Id) ? Color.Error : Color.Default)" Size="Size.Medium" />
+                </MudButton>
+              </div>
             </MudItem>
 
-           
+
             <MudItem xs="12" md="8">
               <MudText Typo="Typo.h4" class="item-name">@item.Name</MudText>
               <MudGrid>
@@ -155,19 +150,13 @@
                 <!-- Quantity Control -->
                 <MudItem xs="12" sm="12" md="12" lg="4" Class="d-flex align-center flex-nowrap" Style="gap: 4px;">
                   <MudItem>
-                    <MudIconButton Icon="@Icons.Material.Filled.Remove"
-                                    Class="quantity-btn"
-                                    OnClick="DecreaseQuantity" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Remove" Class="quantity-btn" OnClick="DecreaseQuantity" />
                   </MudItem>
                   <MudItem>
-                    <MudNumericField HideSpinButtons="true" @bind-Value="buyQuantity" Min="1" Max="@item.StockQuantity" Variant="Variant.Outlined" 
-                    Class="mud-input-root" 
-                     Style="width: 60px; height: 50px;" />
+                    <MudNumericField HideSpinButtons="true" @bind-Value="buyQuantity" Min="1" Max="@item.StockQuantity" Variant="Variant.Outlined" Class="mud-input-root" Style="width: 60px; height: 50px;" />
                   </MudItem>
                   <MudItem>
-                    <MudIconButton Icon="@Icons.Material.Filled.Add"
-                                    Class="quantity-btn"
-                                    OnClick="IncreaseQuantity" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Add" Class="quantity-btn" OnClick="IncreaseQuantity" />
                   </MudItem>
                 </MudItem>
 
@@ -195,7 +184,7 @@
 
           <!-- Review Section -->
           <MudItem xs="12">
-            <MudPaper Elevation="4" Class="p-4 mt-2">
+            <MudPaper Outlined="true" Class="p-4 mt-2">
               <MudText Typo="Typo.h6">Add a Review</MudText>
               <MudForm @ref="reviewForm" Model="newReview" Validated="OnReviewValidated">
                 <MudRating @bind-SelectedValue="newReview.Rating" MaxValue="5" Label="Rating" Required="true" />
@@ -246,7 +235,7 @@
 
 
 
-          <MudText Typo="Typo.h5" Class="mt-4">Reviews</MudText>
+          <MudText Typo="Typo.h5" Class="mt-4" style="color: black;">Reviews</MudText>
           @foreach (var review in filteredReviews)
           {
             <div class="feedback-container mt-4">
@@ -285,6 +274,8 @@
   [Parameter]
   public int Id { get; set; }
 
+  [Inject] AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
+
   private Item? item;
   private int buyQuantity = 1;
 
@@ -298,12 +289,31 @@
 
   protected override async Task OnInitializedAsync()
   {
+    JSRuntime.InvokeVoidAsync("scrollToTop");
     item = await ItemController.GetItemAsync(Id);
     if (item != null)
     {
       reviews = await ReviewController.GetReviewsByItemIdAsync(Id);
       filteredReviews = new List<Review>(reviews);
       CalculateAverageRating();
+    }
+    if (await IsUserLoggedIn())
+    {
+      await LoadWishlist();
+    }
+  }
+
+  private async Task LoadWishlist()
+  {
+    try
+    {
+      var wishlist = await WishlistController.GetWishlistAsync();
+      wishlistItems = new HashSet<int>(wishlist.Select(w => w.ItemId));
+      StateHasChanged();
+    }
+    catch (Exception ex)
+    {
+      Snackbar.Add($"Error loading wishlist: {ex.Message}", Severity.Error);
     }
   }
 
@@ -362,7 +372,7 @@
 
   private async Task AddToCart()
   {
-    if (!IsUserLoggedIn())
+    if (!await IsUserLoggedIn())
     {
       var parameters = new DialogParameters { ["ContentText"] = "You need to login to add items to the cart." };
       var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
@@ -395,10 +405,6 @@
     // Implement buy now functionality
   }
 
-  private bool IsUserLoggedIn()
-  {
-    return true;
-  }
 
   private async Task SubmitReview()
   {
@@ -425,22 +431,30 @@
       Snackbar.Add("Item added to wishlist", Severity.Success);
     }
   } *@
+
+  private async Task<bool> IsUserLoggedIn()
+  {
+    var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+    return authState.User.Identity?.IsAuthenticated ?? false;
+  }
+
   private async Task AddToWishlist(Item item)
   {
-      if (item != null)
+    if (item != null)
+    {
+      try
       {
-          try
-          {
-              await WishlistController.AddToWishlistAsync(item.Id);
-              wishlistItems.Add(item.Id);
-              Snackbar.Add("Item added to wishlist", Severity.Success);
-              StateHasChanged();
-          }
-          catch (Exception ex)
-          {
-              Snackbar.Add($"Error adding to wishlist: {ex.Message}", Severity.Error);
-          }
+        await WishlistController.AddToWishlistAsync(item.Id);
+        wishlistItems.Add(item.Id);
+        Snackbar.Add("Item added to wishlist", Severity.Success);
+        StateHasChanged();
       }
+      catch (Exception ex)
+      {
+        Snackbar.Add($"Error adding to wishlist: {ex.Message}", Severity.Error);
+      }
+    }
   }
   private void OnReviewValidated()
   {
@@ -449,34 +463,34 @@
 
   private bool IsInWishlist(int itemId)
   {
-      return wishlistItems.Contains(itemId);
+    return wishlistItems.Contains(itemId);
   }
   private async Task ToggleWishlist(Item item)
   {
-      if (item != null)
+    if (item != null)
+    {
+      try
       {
-          try
-          {
-              if (IsInWishlist(item.Id))
-              {
-                  // Remove from wishlist
-                  await WishlistController.RemoveFromWishlistAsync(item.Id);
-                  wishlistItems.Remove(item.Id);
-                  Snackbar.Add("Item removed from wishlist", Severity.Success);
-              }
-              else
-              {
-                  // Add to wishlist
-                  await WishlistController.AddToWishlistAsync(item.Id);
-                  wishlistItems.Add(item.Id);
-                  Snackbar.Add("Item added to wishlist", Severity.Success);
-              }
-              StateHasChanged();
-          }
-          catch (Exception ex)
-          {
-              Snackbar.Add($"Error updating wishlist: {ex.Message}", Severity.Error);
-          }
+        if (IsInWishlist(item.Id))
+        {
+          // Remove from wishlist
+          await WishlistController.RemoveFromWishlistAsync(item.Id);
+          wishlistItems.Remove(item.Id);
+          Snackbar.Add("Item removed from wishlist", Severity.Success);
+        }
+        else
+        {
+          // Add to wishlist
+          await WishlistController.AddToWishlistAsync(item.Id);
+          wishlistItems.Add(item.Id);
+          Snackbar.Add("Item added to wishlist", Severity.Success);
+        }
+        StateHasChanged();
       }
+      catch (Exception ex)
+      {
+        Snackbar.Add($"Error updating wishlist: {ex.Message}", Severity.Error);
+      }
+    }
   }
 }
