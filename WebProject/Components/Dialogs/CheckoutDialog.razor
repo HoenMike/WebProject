@@ -15,112 +15,107 @@
 @rendermode InteractiveServer
 
 <DialogContent style="margin:24px">
-  
-
   @if (isLoading)
   {
-    <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+          <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
   }
   else
   {
-    <MudGrid>
-      <MudItem xs="12">
-        <MudCard Outlined="true">
-          <MudCardHeader>
-            <CardHeaderContent>
-              <MudText Typo="Typo.h6">Shipping Information</MudText>
-            </CardHeaderContent>
-            <CardHeaderActions>
-              <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Href="/shippinginfo"
-                Title="Edit Shipping Information" />
-            </CardHeaderActions>
-          </MudCardHeader>
-          <MudCardContent>
+          <MudGrid>
+            <MudItem xs="12">
+              <MudCard Outlined="true">
+                <MudCardHeader>
+                  <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Shipping Information</MudText>
+                  </CardHeaderContent>
+                  <CardHeaderActions>
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Href="/shippinginfo" Title="Edit Shipping Information" />
+                  </CardHeaderActions>
+                </MudCardHeader>
+                <MudCardContent>
             @if (missingShippingInfo)
             {
-              <MudAlert Severity="Severity.Warning">
-                Shipping information is missing. Please <MudLink Href="/shippinginfo">add your shipping information
-                </MudLink>.
-              </MudAlert>
+                          <MudAlert Severity="Severity.Warning">
+                            Shipping information is missing. Please <MudLink Href="/shippinginfo">add your shipping information</MudLink>.
+                          </MudAlert>
             }
             else
             {
-              <MudGrid>
-                <MudItem xs="12" sm="6">
-                  <MudText><strong>Receiver Name:</strong> @CheckoutInput.ReceiverName</MudText>
-                </MudItem>
-                <MudItem xs="12" sm="6">
-                  <MudText><strong>Phone Number:</strong> @CheckoutInput.PhoneNumber</MudText>
-                </MudItem>
-                <MudItem xs="12">
-                  <MudText><strong>Address:</strong> @CheckoutInput.Address</MudText>
-                </MudItem>
-              </MudGrid>
+                          <MudGrid>
+                            <MudItem xs="12" sm="6">
+                              <MudText><strong>Receiver Name:</strong> @CheckoutInput.ReceiverName</MudText>
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                              <MudText><strong>Phone Number:</strong> @CheckoutInput.PhoneNumber</MudText>
+                            </MudItem>
+                            <MudItem xs="12">
+                              <MudText><strong>Address:</strong> @CheckoutInput.Address</MudText>
+                            </MudItem>
+                          </MudGrid>
             }
-          </MudCardContent>
-        </MudCard>
-      </MudItem>
+                </MudCardContent>
+              </MudCard>
+            </MudItem>
 
-      <MudItem xs="12">
-        <MudCard Outlined="true">
-          <MudCardHeader>
-            <CardHeaderContent>
-              <MudText Typo="Typo.h6">Payment Method</MudText>
-            </CardHeaderContent>
-            <CardHeaderActions>
-              <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Href="/paymentinfo"
-                Title="Edit Payment Information" />
-            </CardHeaderActions>
-          </MudCardHeader>
-          <MudCardContent>
-            @if (missingPaymentInfo)
-            {
-              <MudAlert Severity="Severity.Warning">
-                Payment information is missing. Please <MudLink Href="/paymentinfo">add your payment information</MudLink>.
-              </MudAlert>
-            }
-            else
-            {
-              <EditForm Model="CheckoutInput" OnValidSubmit="OnValidSubmitAsync">
-                <DataAnnotationsValidator />
-                <MudGrid>
-                  <MudItem xs="12">
-                    <MudSelect T="PaymentMethod" @bind-Value="CheckoutInput.PaymentMethod" Label="Payment Method"
-                      Required="true" RequiredError="Payment Method is required">
-                      <MudSelectItem Value="PaymentMethod.Cash">Cash</MudSelectItem>
-                      <MudSelectItem Value="PaymentMethod.CreditCard">Credit Card</MudSelectItem>
-                    </MudSelect>
-                  </MudItem>
+            <MudItem xs="12">
+              <MudCard Outlined="true">
+                <MudCardHeader>
+                  <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Payment Method</MudText>
+                  </CardHeaderContent>
+                  <CardHeaderActions>
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Href="/paymentinfo" Title="Edit Payment Information" />
+                  </CardHeaderActions>
+                </MudCardHeader>
+                <MudCardContent>
+                  <EditForm Model="CheckoutInput" OnValidSubmit="OnValidSubmitAsync">
+                    <DataAnnotationsValidator />
+                    <MudGrid>
+                      <MudItem xs="12">
+                        <MudSelect T="PaymentMethod" @bind-Value="CheckoutInput.PaymentMethod" Label="Payment Method" Required="true" RequiredError="Payment Method is required">
+                          <MudSelectItem Value="PaymentMethod.Cash">Cash</MudSelectItem>
+                          <MudSelectItem Value="PaymentMethod.CreditCard">Credit Card</MudSelectItem>
+                        </MudSelect>
+                      </MudItem>
 
-                  @if (CheckoutInput.PaymentMethod == PaymentMethod.CreditCard)
+                @if (CheckoutInput.PaymentMethod == PaymentMethod.CreditCard)
+                {
+                  if (missingCardInfo)
                   {
-                    <MudItem xs="12" sm="6">
-                      <MudText><strong>Card Holder:</strong> @CheckoutInput.CardHolderName</MudText>
-                    </MudItem>
-                    <MudItem xs="12" sm="6">
-                      <MudText><strong>Card Number:</strong> @MaskCardNumber(CheckoutInput.CardNumber)</MudText>
-                    </MudItem>
+                                      <MudItem xs="12">
+                                        <MudAlert Severity="Severity.Warning">
+                                          Credit card information is missing. Please <MudLink Href="/paymentinfo">add your credit card information</MudLink>.
+                                        </MudAlert>
+                                      </MudItem>
                   }
                   else
                   {
-                    <MudItem xs="12">
-                      <MudText>Payment will be made in cash</MudText>
-                    </MudItem>
+                                      <MudItem xs="12" sm="6">
+                                        <MudText><strong>Card Holder:</strong> @CheckoutInput.CardHolderName</MudText>
+                                      </MudItem>
+                                      <MudItem xs="12" sm="6">
+                                        <MudText><strong>Card Number:</strong> @MaskCardNumber(CheckoutInput.CardNumber)</MudText>
+                                      </MudItem>
                   }
-                </MudGrid>
-              </EditForm>
-            }
-          </MudCardContent>
-        </MudCard>
-      </MudItem>
+                }
+                else
+                {
+                              <MudItem xs="12">
+                                <MudText>Payment will be made in cash</MudText>
+                              </MudItem>
+                }
+                    </MudGrid>
+                  </EditForm>
+                </MudCardContent>
+              </MudCard>
+            </MudItem>
 
-      <MudItem xs="12">
-        <MudButton ButtonType="ButtonType.Button" Variant="Variant.Filled" class="check-out-btn" style="padding: 12px 0;" FullWidth="true"
-          OnClick="OnValidSubmitAsync">
-          Proceed to Checkout
-        </MudButton>
-      </MudItem>
-    </MudGrid>
+            <MudItem xs="12">
+              <MudButton ButtonType="ButtonType.Button" Variant="Variant.Filled" class="check-out-btn" style="padding: 12px 0;" FullWidth="true" OnClick="OnValidSubmitAsync" Disabled="@(missingShippingInfo || (CheckoutInput.PaymentMethod == PaymentMethod.CreditCard && missingCardInfo))">
+                Proceed to Checkout
+              </MudButton>
+            </MudItem>
+          </MudGrid>
   }
 </DialogContent>
 
@@ -129,7 +124,7 @@
   private CheckoutInputModel CheckoutInput { get; set; } = new();
   private bool isLoading = true;
   private bool missingShippingInfo = false;
-  private bool missingPaymentInfo = false;
+  private bool missingCardInfo = false;
 
   protected override async Task OnInitializedAsync()
   {
@@ -159,9 +154,9 @@
         CheckoutInput.ExpiryDate = paymentInfo.ExpiryDate;
         CheckoutInput.Cvv = paymentInfo.Cvv;
       }
-      else if (CheckoutInput.PaymentMethod == PaymentMethod.CreditCard)
+      else
       {
-        missingPaymentInfo = true;
+        missingCardInfo = true;
       }
     }
     catch (Exception ex)
@@ -187,7 +182,7 @@
         return;
       }
 
-      if (CheckoutInput.PaymentMethod == PaymentMethod.CreditCard && missingPaymentInfo)
+      if (CheckoutInput.PaymentMethod == PaymentMethod.CreditCard && missingCardInfo)
       {
         NavigationManager.NavigateTo("/paymentinfo");
         return;
@@ -205,8 +200,7 @@
 
       if (CheckoutInput.PaymentMethod == PaymentMethod.CreditCard)
       {
-        var existingCard = await DbContext.UserCards.FirstOrDefaultAsync(c => c.UserId == userId && c.CardNumber ==
-        CheckoutInput.CardNumber);
+        var existingCard = await DbContext.UserCards.FirstOrDefaultAsync(c => c.UserId == userId && c.CardNumber == CheckoutInput.CardNumber);
         if (existingCard != null)
         {
           existingCard.CardHolderName = CheckoutInput.CardHolderName ?? string.Empty;

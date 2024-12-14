@@ -59,14 +59,15 @@ builder.Services.Configure<IdentityOptions>(options =>
 // Configure Snackbar
 builder.Services.Configure<SnackbarConfiguration>(config =>
 {
-    config.PositionClass = Defaults.Classes.Position.BottomLeft;
+    config.PositionClass = Defaults.Classes.Position.TopRight;
     config.PreventDuplicates = false;
     config.NewestOnTop = false;
     config.ShowCloseIcon = true;
-    config.VisibleStateDuration = 3000;
+    config.VisibleStateDuration = 1500;
     config.HideTransitionDuration = 500;
     config.ShowTransitionDuration = 500;
     config.ClearAfterNavigation = true;
+    config.MaxDisplayedSnackbars = 3;
 });
 
 var app = builder.Build();
