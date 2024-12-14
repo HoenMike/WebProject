@@ -51,7 +51,7 @@
 </style>
 
 <MudContainer>
-    <MudPaper Elevation="3" Class="pa-4 mb-4">
+    <MudPaper Elevation="2" Class="pa-4 mb-6">
       <MudGrid>
         <MudItem xs="12">
           <MudTextField Variant="Variant.Outlined" @bind-Value="searchTerm" Label="Search Items"
@@ -70,7 +70,7 @@
             @foreach (var item in wishlistItems)
             {
                 <MudItem Style="width:300px">
-                    <MudCard Style="word-break: break-word; border-radius:12px;">
+                    <MudCard Style="word-break: break-word; border-radius:10px;">
                         <div class="image-container" style="position: relative">
                             <MudImage Src="@item.ThumbnailUrl" Alt="@item.Name" 
                                 Style="width: 150px; height: 260px; min-height: 260px; width: 100%; cursor: pointer; padding:20px; padding-bottom:0px;z-index: 1;"
