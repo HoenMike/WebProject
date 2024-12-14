@@ -121,8 +121,11 @@
               <div class="image-container" style="position: relative">
                 <MudImage Src="@item.ThumbnailUrl" Alt="@item.Name" Style="width: 100%; border-radius: 8px;z-index: 1;" />
 
-                <MudButton Style="z-index: 2; position: absolute; top: 0px; right: 0px; background-color: #ffffff; border-radius: 40px; height: 65px;width:65px ;align-items: center;" OnClick="@(() => ToggleWishlist(item))">
-                  <MudIcon Icon="@Icons.Material.Filled.Favorite" Color="@(IsInWishlist(item.Id) ? Color.Error : Color.Default)" Size="Size.Medium" />
+                <MudButton
+                  Style="z-index: 2; position: absolute; top: 0px; right: 0px; background-color: #ffffff; border-radius: 40px; height: 65px;width:65px ;align-items: center;"
+                  OnClick="@(() => ToggleWishlist(item))">
+                  <MudIcon Icon="@Icons.Material.Filled.Favorite"
+                    Color="@(IsInWishlist(item.Id) ? Color.Error : Color.Default)" Size="Size.Medium" />
                 </MudButton>
               </div>
             </MudItem>
@@ -153,7 +156,8 @@
                     <MudIconButton Icon="@Icons.Material.Filled.Remove" Class="quantity-btn" OnClick="DecreaseQuantity" />
                   </MudItem>
                   <MudItem>
-                    <MudNumericField HideSpinButtons="true" @bind-Value="buyQuantity" Min="1" Max="@item.StockQuantity" Variant="Variant.Outlined" Class="mud-input-root" Style="width: 60px; height: 50px;" />
+                    <MudNumericField HideSpinButtons="true" @bind-Value="buyQuantity" Min="1" Max="@item.StockQuantity"
+                      Variant="Variant.Outlined" Class="mud-input-root" Style="width: 60px; height: 50px;" />
                   </MudItem>
                   <MudItem>
                     <MudIconButton Icon="@Icons.Material.Filled.Add" Class="quantity-btn" OnClick="IncreaseQuantity" />
@@ -163,7 +167,8 @@
                 <!-- Action Buttons -->
                 <MudItem xs="12" sm="12" md="12" lg="8" Class="d-flex justify-start" Style="gap: 12px;">
                   <MudItem>
-                    <MudButton Class="add-to-cart-btn" StartIcon="@Icons.Material.Outlined.ShoppingCart" OnClick="AddToCart" Style="height: 50px;flex: 1;">Add to cart</MudButton>
+                    <MudButton Class="add-to-cart-btn" StartIcon="@Icons.Material.Outlined.ShoppingCart"
+                      OnClick="AddToCart" Style="height: 50px;flex: 1;">Add to cart</MudButton>
                   </MudItem>
                   <MudItem>
                     <MudButton Class="buy-now-btn" OnClick="BuyNow" Style="height: 50px;flex: 1;">Buy
@@ -184,47 +189,56 @@
 
           <!-- Review Section -->
           <MudItem xs="12">
-            <MudPaper Outlined="true" Class="p-4 mt-2">
-              <MudText Typo="Typo.h6">Add a Review</MudText>
-              <MudForm @ref="reviewForm" Model="newReview" Validated="OnReviewValidated">
-                <MudRating @bind-SelectedValue="newReview.Rating" MaxValue="5" Label="Rating" Required="true" />
-                <MudTextField @bind-Value="newReview.Comment" Label="Comment" Required="true" Lines="2" />
-                <MudGrid>
-                  <MudItem xs="12" style="padding-top: 30px;" Class="d-flex justify-end">
-                    <MudButton Size="Size.Medium" Variant="Variant.Filled" style="background-color:#FF66A1;color:#ffffff ;" OnClick="SubmitReview">Submit</MudButton>
-                  </MudItem>
-                </MudGrid>
-              </MudForm>
-            </MudPaper>
-
+            <AuthorizeView>
+              <MudPaper Outlined="true" Class="p-4 mt-2">
+                <MudText Typo="Typo.h6">Add a Review</MudText>
+                <MudForm @ref="reviewForm" Model="newReview" Validated="OnReviewValidated">
+                  <MudRating @bind-SelectedValue="newReview.Rating" MaxValue="5" Label="Rating" Required="true" />
+                  <MudTextField @bind-Value="newReview.Comment" Label="Comment" Required="true" Lines="2" />
+                  <MudGrid>
+                    <MudItem xs="12" style="padding-top: 30px;" Class="d-flex justify-end">
+                      <MudButton Size="Size.Medium" Variant="Variant.Filled"
+                        style="background-color:#FF66A1;color:#ffffff ;" OnClick="SubmitReview">Submit</MudButton>
+                    </MudItem>
+                  </MudGrid>
+                </MudForm>
+              </MudPaper>
+            </AuthorizeView>
             <div class="rating-container mt-4">
               <MudGrid>
                 <MudItem xs="12" sm="12" md="5" Class="average-rating" style="text-align: center;">
-                  <MudText Typo="Typo.h4" Style="color: #FF66A1;font-weight: bold;">@averageRating.ToString("0")/5</MudText>
+                  <MudText Typo="Typo.h4" Style="color: #FF66A1;font-weight: bold;">@averageRating.ToString("0")/5
+                  </MudText>
                   <MudRating SelectedValue="@averageRating" MaxValue="5" ReadOnly="true" Size="Size.Medium" />
                 </MudItem>
 
                 <MudItem xs="12" sm="12" md="7" style="display: flex; flex-wrap: wrap; gap: 8px;">
-                  <MudChip T="string" Variant="selectedRatings.Count == 0 ? Variant.Filled : Variant.Outlined" Color="Color.Secondary" OnClick="() => { selectedRatings.Clear(); ApplyFilters(); }">
+                  <MudChip T="string" Variant="selectedRatings.Count == 0 ? Variant.Filled : Variant.Outlined"
+                    Color="Color.Secondary" OnClick="() => { selectedRatings.Clear(); ApplyFilters(); }">
                     All
                   </MudChip>
-                  <MudChip T="int" Variant="selectedRatings.Contains(5) ? Variant.Filled : Variant.Outlined" Color="Color.Secondary" OnClick="() => ToggleRatingFilter(5)">
+                  <MudChip T="int" Variant="selectedRatings.Contains(5) ? Variant.Filled : Variant.Outlined"
+                    Color="Color.Secondary" OnClick="() => ToggleRatingFilter(5)">
                     5
                     <MudRating SelectedValue="1" ReadOnly="true" MaxValue="1" Size="Size.Small" />
                   </MudChip>
-                  <MudChip T="int" Variant="selectedRatings.Contains(4) ? Variant.Filled : Variant.Outlined" Color="Color.Secondary" OnClick="() => ToggleRatingFilter(4)">
+                  <MudChip T="int" Variant="selectedRatings.Contains(4) ? Variant.Filled : Variant.Outlined"
+                    Color="Color.Secondary" OnClick="() => ToggleRatingFilter(4)">
                     4
                     <MudRating SelectedValue="1" ReadOnly="true" MaxValue="1" Size="Size.Small" />
                   </MudChip>
-                  <MudChip T="int" Variant="selectedRatings.Contains(3) ? Variant.Filled : Variant.Outlined" Color="Color.Secondary" OnClick="() => ToggleRatingFilter(3)">
+                  <MudChip T="int" Variant="selectedRatings.Contains(3) ? Variant.Filled : Variant.Outlined"
+                    Color="Color.Secondary" OnClick="() => ToggleRatingFilter(3)">
                     3
                     <MudRating SelectedValue="1" ReadOnly="true" MaxValue="1" Size="Size.Small" />
                   </MudChip>
-                  <MudChip T="int" Variant="selectedRatings.Contains(2) ? Variant.Filled : Variant.Outlined" Color="Color.Secondary" OnClick="() => ToggleRatingFilter(2)">
+                  <MudChip T="int" Variant="selectedRatings.Contains(2) ? Variant.Filled : Variant.Outlined"
+                    Color="Color.Secondary" OnClick="() => ToggleRatingFilter(2)">
                     2
                     <MudRating SelectedValue="1" ReadOnly="true" MaxValue="1" Size="Size.Small" />
                   </MudChip>
-                  <MudChip T="int" Variant="selectedRatings.Contains(1) ? Variant.Filled : Variant.Outlined" Color="Color.Secondary" OnClick="() => ToggleRatingFilter(1)">
+                  <MudChip T="int" Variant="selectedRatings.Contains(1) ? Variant.Filled : Variant.Outlined"
+                    Color="Color.Secondary" OnClick="() => ToggleRatingFilter(1)">
                     1
                     <MudRating SelectedValue="1" ReadOnly="true" MaxValue="1" Size="Size.Small" />
                   </MudChip>
@@ -247,10 +261,12 @@
                     <MudText Typo="Typo.h6">@(review.User?.UserName ?? "Anonymous")</MudText>
 
                     <!-- Rating -->
-                    <MudRating MaxValue="5" SelectedValue="@review.Rating" ReadOnly="true" Size="Size.Small" style="padding-right:10px" />
+                    <MudRating MaxValue="5" SelectedValue="@review.Rating" ReadOnly="true" Size="Size.Small"
+                      style="padding-right:10px" />
 
                     <!-- Date -->
-                    <MudText Typo="Typo.caption" Style="font-style: italic;">@review.CreatedAt.ToString("dd/MM/yyyy")</MudText>
+                    <MudText Typo="Typo.caption" Style="font-style: italic;">@review.CreatedAt.ToString("dd/MM/yyyy")
+                    </MudText>
                   </MudItem>
                 </MudItem>
               </MudGrid>
