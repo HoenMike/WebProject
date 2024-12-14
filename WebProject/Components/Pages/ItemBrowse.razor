@@ -21,115 +21,100 @@
         border-radius: 4px;
         width: 50px;
     }
+
     .add-to-cart-btn:hover {
         background-color: #ff1871;
         color: #ffffff
     }
-    .item-name{
+
+    .item-name {
         text-decoration: none;
         font-weight: bold;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
     }
+
     .item-name:hover {
         color: #ff1871;
     }
+
     .item-price {
         font-weight: bold;
         color: #ff1871;
     }
-    .quantity-btn {
-    background-color: #ededed;
-    border: none;
-    border-radius: 4px;
-    width: 50px;
-    height: 50px;
-  }
-  .mud-input-root input {
-    text-align: center; 
-  }
 
-  .quantity-btn:hover {
-    background-color: #bcbcbc;
-  }
+    .quantity-btn {
+        background-color: #ededed;
+        border: none;
+        border-radius: 4px;
+        width: 50px;
+        height: 50px;
+    }
+
+    .mud-input-root input {
+        text-align: center;
+    }
+
+    .quantity-btn:hover {
+        background-color: #bcbcbc;
+    }
 </style>
 <PageTitle>Browse</PageTitle>
 <MudContainer>
-  <MudPaper Elevation="3" Class="pa-4 mb-4">
-    <MudGrid>
-      <MudItem xs="12">
-        <MudTextField Variant="Variant.Outlined" @bind-Value="searchTerm" Label="Search Items"
-          AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" Immediate="true" Clearable="true"
-          OnClearButtonClick="ClearSearch" OnKeyUp="FilterItems" />
-      </MudItem>
-    </MudGrid>
-  </MudPaper>
+    <MudPaper Elevation="2" Class="pa-4 mb-6" style="position: sticky;top:0;z-index: 10;">
+        <MudGrid>
+            <MudItem xs="12">
+                <MudTextField Variant="Variant.Outlined" @bind-Value="searchTerm" Label="Search Items" AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" Immediate="true" Clearable="true" OnClearButtonClick="ClearSearch" OnKeyUp="FilterItems" />
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
     @if (isLoading)
     {
-          <MudProgressLinear Indeterminate="true" Color="Color.Primary" Style="margin-bottom: 20px;" />
+        <MudProgressLinear Indeterminate="true" Color="Color.Primary" Style="margin-bottom: 20px;" />
     }
     else
     {
-          <MudGrid>
+        <MudGrid>
             @foreach (var item in displayedItems)
             {
-                    <MudItem Style="width:300px">
-                        <MudCard Style="word-break: break-word; border-radius:12px;">
-                            <div class="image-container" style="position: relative">
-                                <MudImage Src="@item.ThumbnailUrl" Alt="@item.Name" 
-                                    Style="width: 150px; height: 260px; min-height: 260px; width: 100%; cursor: pointer; padding:20px; padding-bottom:0px;z-index: 1;"
-                                    @onclick="@(() => NavigateToItemDetails(item.Id))" />  
+                <MudItem Style="width:300px">
+                    <MudCard Style="word-break: break-word; border-radius:10px;">
+                        <div class="image-container" style="position: relative">
+                            <MudImage Src="@item.ThumbnailUrl" Alt="@item.Name" Style="width: 150px; height: 260px; min-height: 260px; width: 100%; cursor: pointer; padding:20px; padding-bottom:0px;z-index: 1;" @onclick="@(() => NavigateToItemDetails(item.Id))" />
 
-                                <MudButton Class="wishlist-button"
-                                        Style="z-index: 2; position: absolute; top: 0px; right: 0px; background-color: #ffffff; border-radius: 40px; height: 65px; align-items: center;"  
-                                        OnClick="@(() => ToggleWishlist(item))">
-                                        <MudIcon Icon="@Icons.Material.Filled.Favorite" 
-                                               Color="@(IsInWishlist(item.Id) ? Color.Error : Color.Default)"
-                                               FontSize="50px" />
-                                </MudButton>
-                            </div>              
-                            <MudCardContent>
-                                <MudLink Href="@($"/item-details/{item.Id}")"  style="text-decoration: none;">
-                                    <MudText Typo="Typo.h6" class="item-name">@item.Name</MudText>
-                                </MudLink>
-                                <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <MudText Typo="Typo.h6" class="item-price">@item.Price.ToString("C")</MudText>
-                                    <MudText Typo="Typo.body2" >Stock: @item.StockQuantity</MudText>
-                                </div>
-                            </MudCardContent>
+                            <MudButton Class="wishlist-button" Style="z-index: 2; position: absolute; top: 0px; right: 0px; background-color: #ffffff; border-radius: 40px; height: 65px; align-items: center;" OnClick="@(() => ToggleWishlist(item))">
+                                <MudIcon Icon="@Icons.Material.Filled.Favorite" Color="@(IsInWishlist(item.Id) ? Color.Error : Color.Default)" FontSize="50px" />
+                            </MudButton>
+                        </div>
+                        <MudCardContent>
+                            <MudLink Href="@($"/item-details/{item.Id}")" style="text-decoration: none;">
+                                <MudText Typo="Typo.h6" class="item-name">@item.Name</MudText>
+                            </MudLink>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <MudText Typo="Typo.h6" class="item-price">@item.Price.ToString("C")</MudText>
+                                <MudText Typo="Typo.body2">Stock: @item.StockQuantity</MudText>
+                            </div>
+                        </MudCardContent>
 
-                            <MudCardActions>
-                                <MudGrid Style="margin-left:4px; margin-right: 4px; margin-bottom: 10px;">
-                                    <MudItem xs="2" Class="d-flex justify-center" Style="width:100%">
-                                        <MudIconButton Icon="@Icons.Material.Filled.Remove"
-                                            Class="quantity-btn"
-                                            OnClick="@(() => DecreaseQuantity(item.Id))" />
-                                    </MudItem>
-                                    <MudItem xs="3" Class="d-flex justify-center" >
-                                        <MudNumericField HideSpinButtons="true"
-                                                       Value="@GetItemQuantity(item.Id)"
-                                                       ValueChanged="@((int value) => SetItemQuantity(item.Id, value))"
-                                                       Min="1"
-                                                       Max="@item.StockQuantity"
-                                                       Variant="Variant.Outlined"
-                                                       Class="mud-input-root" 
-                                                       Style="width:50px;height:50px" />
-                                    </MudItem>
-                                    <MudItem xs="3" Class="d-flex justify-center" Style="width:100%">
-                                        <MudIconButton Icon="@Icons.Material.Filled.Add"
-                                            Class="quantity-btn"
-                                            OnClick="@(() => IncreaseQuantity(item.Id))" />
-                                    </MudItem>
-                                    <MudItem xs="4" Class="d-flex justify-center">
-                                        <MudIconButton Icon="@Icons.Material.Outlined.ShoppingCart" 
-                                        Class="add-to-cart-btn" OnClick="@(() => AddToCart(item))" Size="Size.Medium" 
-                                        />
-                                    </MudItem>
-                                </MudGrid>
-                            </MudCardActions>
-                        </MudCard>
-                    </MudItem>
+                        <MudCardActions>
+                            <MudGrid Style="margin-left:4px; margin-right: 4px; margin-bottom: 10px;">
+                                <MudItem xs="2" Class="d-flex justify-center" Style="width:100%">
+                                    <MudIconButton Icon="@Icons.Material.Filled.Remove" Class="quantity-btn" OnClick="@(() => DecreaseQuantity(item.Id))" />
+                                </MudItem>
+                                <MudItem xs="3" Class="d-flex justify-center">
+                                    <MudNumericField HideSpinButtons="true" Value="@GetItemQuantity(item.Id)" ValueChanged="@((int value) => SetItemQuantity(item.Id, value))" Min="1" Max="@item.StockQuantity" Variant="Variant.Outlined" Class="mud-input-root" Style="width:50px;height:50px" />
+                                </MudItem>
+                                <MudItem xs="3" Class="d-flex justify-center" Style="width:100%">
+                                    <MudIconButton Icon="@Icons.Material.Filled.Add" Class="quantity-btn" OnClick="@(() => IncreaseQuantity(item.Id))" />
+                                </MudItem>
+                                <MudItem xs="4" Class="d-flex justify-center">
+                                    <MudIconButton Icon="@Icons.Material.Outlined.ShoppingCart" Class="add-to-cart-btn" OnClick="@(() => AddToCart(item))" Size="Size.Medium" />
+                                </MudItem>
+                            </MudGrid>
+                        </MudCardActions>
+                    </MudCard>
+                </MudItem>
 
             }
         </MudGrid>
