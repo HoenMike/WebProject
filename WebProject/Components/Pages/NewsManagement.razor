@@ -34,37 +34,39 @@
   {
     @foreach (var news in displayedNews)
     {
-      <MudCard Class="mb-2" Elevation="3">
-        <MudExpansionPanel Style="margin: 10px; word-break: break-word" HideIcon="true">
+      <MudCard Class="mb-6" Elevation="1" style="border-radius: 6px;">
+        <MudExpansionPanel Style="margin: 10px 4px; word-break: break-word">
           <TitleContent>
-            <MudGrid xs="12">
-              <MudItem xs="10">
+            <MudGrid>
+              <MudItem xs="4">
+                @if (!string.IsNullOrEmpty(news.ImageUrl))
+                {
+                  <MudImage Src="@news.ImageUrl" Alt="News Image" Style="width: 100%; height: auto;" />
+                }
+              </MudItem>
+              <MudItem xs="6">
                 <MudText Typo="Typo.h6" GutterBottom="true">@news.Title</MudText>
                 <MudText Typo="Typo.caption" Style="font-style: italic; margin-bottom: 4px; display: block">
                   Created at: @news.CreatedAt.ToString("g") - by @news.CreatedBy
                 </MudText>
-                @if (news.UpdatedAt.HasValue)
-                {
-                  <MudText Typo="Typo.caption" Style="font-style: italic;">
-                    Updated at: @news.UpdatedAt.Value.ToString("g") - by @news.UpdatedBy
-                  </MudText>
-                }
+                  @if (news.UpdatedAt.HasValue)
+                  {
+                    <MudText Typo="Typo.caption" Style="font-style: italic;">
+                      Updated at: @news.UpdatedAt.Value.ToString("g") - by @news.UpdatedBy
+                    </MudText>
+                  }
+                </MudItem>
 
-              </MudItem>
-              <MudItem xs="2">
-                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary"
-                  OnClick="() => OpenEditNewsDialog(news)" />
-                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error"
-                  OnClick="() => OpenDeleteConfirmationDialog(news)" />
-              </MudItem>
+                <MudItem xs="2">
+                  <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary"
+                    OnClick="() => OpenEditNewsDialog(news)" />
+                  <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error"
+                    OnClick="() => OpenDeleteConfirmationDialog(news)" />
+                </MudItem>
             </MudGrid>
           </TitleContent>
           <ChildContent>
             <MudText Typo="Typo.body1">@news.Content</MudText>
-            @if (!string.IsNullOrEmpty(news.ImageUrl))
-            {
-              <MudImage Src="@news.ImageUrl" Alt="News Image" Style="width: 100%; height: auto;" />
-            }
           </ChildContent>
         </MudExpansionPanel>
       </MudCard>
