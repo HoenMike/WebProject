@@ -7,6 +7,7 @@
 @inject NavigationManager Navigation
 @inject IDialogService DialogService
 @using MudBlazor
+@inject IJSRuntime JSRuntime
 <style>
   .item-details-container {
     display: flex;
@@ -101,11 +102,12 @@
     padding: 20px;
 
   }
+
   .mud-input-root input {
-    text-align: center; 
-    width: 60px; 
+    text-align: center;
+    width: 60px;
     height: 50px;
-}
+  }
 </style>
 <MudContainer>
   <div class="item-details-container">
@@ -116,21 +118,16 @@
           <MudGrid>
             <MudItem xs="12" md="4">
               @* <MudImage Src="@item.ThumbnailUrl" Alt="@item.Name" Style="width: 100%; border-radius: 8px;" /> *@
-               <div class="image-container" style="position: relative">
-                        <MudImage Src="@item.ThumbnailUrl" Alt="@item.Name" 
-                            Style="width: 100%; border-radius: 8px;z-index: 1;"/>  
+              <div class="image-container" style="position: relative">
+                <MudImage Src="@item.ThumbnailUrl" Alt="@item.Name" Style="width: 100%; border-radius: 8px;z-index: 1;" />
 
-                        <MudButton 
-                                Style="z-index: 2; position: absolute; top: 0px; right: 0px; background-color: #ffffff; border-radius: 40px; height: 65px;width:65px ;align-items: center;"  
-                                 OnClick="@(() => ToggleWishlist(item))">
-                                <MudIcon Icon="@Icons.Material.Filled.Favorite" 
-                                       Color="@(IsInWishlist(item.Id) ? Color.Error : Color.Default)"
-                                       Size="Size.Medium"/>
-                        </MudButton>
-                  </div>  
+                <MudButton Style="z-index: 2; position: absolute; top: 0px; right: 0px; background-color: #ffffff; border-radius: 40px; height: 65px;width:65px ;align-items: center;" OnClick="@(() => ToggleWishlist(item))">
+                  <MudIcon Icon="@Icons.Material.Filled.Favorite" Color="@(IsInWishlist(item.Id) ? Color.Error : Color.Default)" Size="Size.Medium" />
+                </MudButton>
+              </div>
             </MudItem>
 
-           
+
             <MudItem xs="12" md="8">
               <MudText Typo="Typo.h4" class="item-name">@item.Name</MudText>
               <MudGrid>
@@ -153,19 +150,13 @@
                 <!-- Quantity Control -->
                 <MudItem xs="12" sm="12" md="12" lg="4" Class="d-flex align-center flex-nowrap" Style="gap: 4px;">
                   <MudItem>
-                    <MudIconButton Icon="@Icons.Material.Filled.Remove"
-                                    Class="quantity-btn"
-                                    OnClick="DecreaseQuantity" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Remove" Class="quantity-btn" OnClick="DecreaseQuantity" />
                   </MudItem>
                   <MudItem>
-                    <MudNumericField HideSpinButtons="true" @bind-Value="buyQuantity" Min="1" Max="@item.StockQuantity" Variant="Variant.Outlined" 
-                    Class="mud-input-root" 
-                     Style="width: 60px; height: 50px;" />
+                    <MudNumericField HideSpinButtons="true" @bind-Value="buyQuantity" Min="1" Max="@item.StockQuantity" Variant="Variant.Outlined" Class="mud-input-root" Style="width: 60px; height: 50px;" />
                   </MudItem>
                   <MudItem>
-                    <MudIconButton Icon="@Icons.Material.Filled.Add"
-                                    Class="quantity-btn"
-                                    OnClick="IncreaseQuantity" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Add" Class="quantity-btn" OnClick="IncreaseQuantity" />
                   </MudItem>
                 </MudItem>
 
@@ -298,6 +289,7 @@
 
   protected override async Task OnInitializedAsync()
   {
+    JSRuntime.InvokeVoidAsync("scrollToTop");
     item = await ItemController.GetItemAsync(Id);
     if (item != null)
     {

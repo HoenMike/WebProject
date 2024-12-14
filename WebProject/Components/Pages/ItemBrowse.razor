@@ -10,6 +10,7 @@
 @inject CartController CartController
 @inject NavigationManager Navigation
 @inject WishlistController WishlistController
+@inject IJSRuntime JSRuntime
 
 
 @rendermode InteractiveServer
@@ -158,6 +159,7 @@
     {
         if (firstRender)
         {
+            JSRuntime.InvokeVoidAsync("scrollToTop");
             await LoadItems();
             if (await IsUserLoggedIn())
             {
