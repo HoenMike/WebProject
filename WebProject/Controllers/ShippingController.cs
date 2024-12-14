@@ -86,18 +86,7 @@ namespace WebProject.Controllers
 
     public async Task CancelOrder(int orderId)
     {
-      var parameters = new DialogParameters
-      {
-        ["Message"] = "Are you sure you want to cancel this order?"
-      };
-      var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
-      var dialog = _dialogService.Show<ConfirmationDialog>("Cancel Order", parameters, options);
-      var result = await dialog.Result;
 
-      if (result.Canceled || !(result.Data is bool confirmed) || !confirmed)
-      {
-        return;
-      }
 
       using var transaction = await _dbContext.Database.BeginTransactionAsync();
       try

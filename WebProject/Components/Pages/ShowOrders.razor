@@ -8,6 +8,7 @@
 @inject ISnackbar Snackbar
 @inject ShippingController ShippingController
 @using WebProject.Components.Account.Pages
+@inject IDialogService DialogService
 
 @rendermode InteractiveServer
 
@@ -57,36 +58,36 @@
               @{
                   var itemShipper = itemShippers.FirstOrDefault(itemShipper => itemShipper.OrderId == cellContext.Item.Id);
                   var shipperName = itemShipper != null
-                            ? DbContext.Users.FirstOrDefault(user => user.Id == itemShipper.ShipperId)?.UserName
-                            : null;
+                                                          ? DbContext.Users.FirstOrDefault(user => user.Id == itemShipper.ShipperId)?.UserName
+                                                          : null;
                 }
                 @if (shipperName != null)
                 {
-                  <MudStack Row="true" AlignItems="AlignItems.Center">
-                    <MudText>Assigned Shipper: @shipperName</MudText>
+                              <MudStack Row="true" AlignItems="AlignItems.Center">
+                                <MudText>Assigned Shipper: @shipperName</MudText>
                     @if (cellContext.Item.Status != "Delivery Successful")
                     {
-                      <MudButton Size="Size.Small" Variant="Variant.Filled" Color="Color.Error"
-                        OnClick="() => CancelOrder(cellContext.Item.Id)">
-                        Cancel
-                      </MudButton>
+                                        <MudButton Size="Size.Small" Variant="Variant.Filled" Color="Color.Error"
+                                          OnClick="() => ConfirmCancelOrder(cellContext.Item.Id)">
+                                          Cancel
+                                        </MudButton>
                     }
-                  </MudStack>
+                              </MudStack>
                 }
                 else
                 {
-                  <span>Not Assigned</span>
+                              <span>Not Assigned</span>
                 }
-              </Authorized>
-            </AuthorizeView>
-          </CellTemplate>
-        </TemplateColumn>
-      </Columns>
-      <PagerContent>
-        <MudDataGridPager T="Order" />
-      </PagerContent>
-    </MudDataGrid>
-  </MudContainer>
+                    </Authorized>
+                  </AuthorizeView>
+                </CellTemplate>
+              </TemplateColumn>
+            </Columns>
+            <PagerContent>
+              <MudDataGridPager T="Order" />
+            </PagerContent>
+          </MudDataGrid>
+        </MudContainer>
 
   @code {
   private List<Order> orders = new();
@@ -159,7 +160,21 @@
       Snackbar.Add($"{ex.Message}. Please refresh the page and try again.", Severity.Error);
     }
   }
+  private async Task ConfirmCancelOrder(int orderId)
+  {
+    var parameters = new DialogParameters
+      {
+        ["Message"] = "Are you sure you want to cancel this order?"
+      };
+    var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+    var dialog = DialogService.Show<ConfirmationDialog>("Cancel Order", parameters, options);
+    var result = await dialog.Result;
 
+    if (!result.Canceled && result.Data is bool confirmed && confirmed)
+    {
+      await CancelOrder(orderId);
+    }
+  }
   private async Task CancelOrder(int orderId)
   {
     try
