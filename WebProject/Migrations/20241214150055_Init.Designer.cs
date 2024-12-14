@@ -12,7 +12,7 @@ using WebProject.Data;
 namespace WebProject.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241213084502_Init")]
+    [Migration("20241214150055_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -350,6 +350,9 @@ namespace WebProject.Migrations
 
                     b.Property<string>("CreatedBy")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ImageUrl")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Title")

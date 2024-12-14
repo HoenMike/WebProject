@@ -15,7 +15,6 @@
 @inject NavigationManager NavigationManager
 @inject ISnackbar Snackbar
 @inject AuthenticationStateProvider AuthenticationStateProvider
-
 @rendermode InteractiveServer
 
 <PageTitle>Shipping Information</PageTitle>
@@ -61,13 +60,13 @@
 </MudContainer>
 
 @code {
-  private ApplicationUser user;
+  private ApplicationUser user = default!;
   private string ShippingStatusMessage = string.Empty;
   private string ShippingStatusMessageType = "alert-success";
   private bool isLoading = true;
 
+  [SupplyParameterFromForm]
   private ShippingInputModel ShippingInput { get; set; } = new();
-
   protected override async Task OnInitializedAsync()
   {
     try
@@ -113,30 +112,37 @@
       isLoading = false;
     }
   }
-
-  private async Task OnValidSubmitShippingAsync()
+  protected override async Task OnAfterRenderAsync(bool firstRender)
+  {
+    if (firstRender)
+    {
+      isLoading = false;
+      StateHasChanged();
+    }
+  }
+  private async Task OnValidSubmitPaymentAsync()
   {
     try
     {
-      // Check if a shipping info already exists for this user
-      var existingShippingInfos = await DbContext.UserShippingInfos
+      // Check if a checkout info already exists for this user
+      var existingCheckoutInfos = await DbContext.UserShippingInfos
       .Where(u => u.UserId == user.Id)
       .ToListAsync();
 
-      if (existingShippingInfos.Count > 1)
+      if (existingCheckoutInfos.Count > 1)
       {
         // Remove all existing shipping info records for the user
-        DbContext.UserShippingInfos.RemoveRange(existingShippingInfos);
+        DbContext.UserShippingInfos.RemoveRange(existingCheckoutInfos);
       }
-      else if (existingShippingInfos.Count == 1)
+      else if (existingCheckoutInfos.Count == 1)
       {
         // Update the existing shipping info record
-        var existingShippingInfo = existingShippingInfos.First();
-        existingShippingInfo.ReceiverName = ShippingInput.ReceiverName ?? string.Empty;
-        existingShippingInfo.Address = ShippingInput.Address ?? string.Empty;
-        existingShippingInfo.PhoneNumber = ShippingInput.PhoneNumber ?? string.Empty;
+        var existingCheckoutInfo = existingCheckoutInfos.First();
+        existingCheckoutInfo.ReceiverName = ShippingInput.ReceiverName ?? string.Empty;
+        existingCheckoutInfo.Address = ShippingInput.Address ?? string.Empty;
+        existingCheckoutInfo.PhoneNumber = ShippingInput.PhoneNumber ?? string.Empty;
 
-        DbContext.UserShippingInfos.Update(existingShippingInfo);
+        DbContext.UserShippingInfos.Update(existingCheckoutInfo);
       }
       else
       {
