@@ -16,38 +16,10 @@
 
 <PageTitle>Assign Roles</PageTitle>
 
-<MudContainer>
-  <MudGrid>
+<MudContainer Class="pa-6">
+  <MudGrid Spacing="4">
     <MudItem xs="12" md="6">
-      <MudPaper Elevation="3" Class="pa-4">
-        <EditForm Model="Input" OnValidSubmit="OnValidSubmitAsync">
-          <DataAnnotationsValidator />
-          <MudGrid>
-            <MudItem xs="12">
-              <MudTextField @bind-Value="Input.Username" Label="Username" Variant="Variant.Outlined" Required="true"
-                RequiredError="Username is required!" />
-            </MudItem>
-            <MudItem xs="12">
-              <MudSelect @bind-Value="Input.Role" Label="Role" Variant="Variant.Outlined" Required="true"
-                RequiredError="Role is required!">
-                @foreach (var role in _availableRoles)
-                {
-                  <MudSelectItem Value="@role">@role</MudSelectItem>
-                }
-              </MudSelect>
-            </MudItem>
-            <MudItem xs="12">
-              <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">
-                Assign Role
-              </MudButton>
-            </MudItem>
-          </MudGrid>
-        </EditForm>
-      </MudPaper>
-    </MudItem>
-
-    <MudItem xs="12" md="6">
-      <MudPaper Elevation="3" Class="pa-4">
+      <MudPaper Elevation="2" Class="pa-4" style="margin-bottom: 16px;">
         <MudText Typo="Typo.h6" Class="mb-4">Role Management</MudText>
         <MudTextField @bind-Value="_newRoleName" Label="New Role Name" Variant="Variant.Outlined" />
         <MudButton Color="Color.Success" Variant="Variant.Filled" Class="mt-2" OnClick="CreateRole">
@@ -70,10 +42,36 @@
           </Columns>
         </MudDataGrid>
       </MudPaper>
+
+      <MudPaper Elevation="2" Class="pa-4">
+        <EditForm Model="Input" OnValidSubmit="OnValidSubmitAsync">
+          <DataAnnotationsValidator />
+          <MudGrid Spacing="3">
+            <MudItem xs="12">
+              <MudTextField @bind-Value="Input.Username" Label="Username" Variant="Variant.Outlined" Required="true"
+                RequiredError="Username is required!" />
+            </MudItem>
+            <MudItem xs="12">
+              <MudSelect @bind-Value="Input.Role" Label="Role" Variant="Variant.Outlined" Required="true"
+                RequiredError="Role is required!">
+                @foreach (var role in _availableRoles)
+                {
+                  <MudSelectItem Value="@role">@role</MudSelectItem>
+                }
+              </MudSelect>
+            </MudItem>
+            <MudItem xs="12">
+              <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" style="background-color: #ff66a1;color:white" FullWidth="true">
+                Assign Role
+              </MudButton>
+            </MudItem>
+          </MudGrid>
+        </EditForm>
+      </MudPaper>
     </MudItem>
 
-    <MudItem xs="12">
-      <MudPaper Elevation="3" Class="pa-4">
+    <MudItem xs="12" md="6">
+      <MudPaper Elevation="2" Class="pa-4">
         <MudText Typo="Typo.h6" Class="mb-4">User Roles</MudText>
         <MudTable Items="UserRoles" Hover="true">
           <HeaderContent>
