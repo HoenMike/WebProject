@@ -44,7 +44,7 @@
                 }
               </MudItem>
               <MudItem xs="6">
-                <MudText Typo="Typo.h6" GutterBottom="true">@news.Title</MudText>
+                <MudText Typo="Typo.h6" style="color: #c92e69;" GutterBottom="true"><b>@news.Title</b></MudText>
                 <MudText Typo="Typo.caption" Style="font-style: italic; margin-bottom: 4px; display: block">
                   Created at: @news.CreatedAt.ToString("g") - by @news.CreatedBy
                 </MudText>
@@ -73,7 +73,12 @@
 
     @if (CanLoadMore)
     {
-      <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="LoadMoreNews" Class="mt-4">Load More</MudButton>
+      <MudGrid Justify="Justify.Center">
+        <MudItem>
+          <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="LoadMoreNews" Class="mt-4">Load More
+          </MudButton>
+        </MudItem>
+      </MudGrid>
     }
   }
 </MudContainer>

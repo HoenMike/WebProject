@@ -9,13 +9,15 @@
         <MudTextField @bind-Value="newItem.Price" Label="Price" Required="true" InputType="InputType.Number" />
       </MudItem>
       <MudItem xs="12">
-        <MudTextField @bind-Value="newItem.Description" Label="Description" Required="true" />
+        <MudTextField Textarea="true" Lines="10" @bind-Value="newItem.Description" Label="Description"
+          Required="true" />
       </MudItem>
       <MudItem xs="12">
         <MudTextField @bind-Value="newItem.ThumbnailUrl" Label="Image URL" Required="true" />
       </MudItem>
       <MudItem xs="12">
-        <MudTextField @bind-Value="newItem.StockQuantity" Label="Stock Quantity" Required="true" InputType="InputType.Number" />
+        <MudTextField @bind-Value="newItem.StockQuantity" Label="Stock Quantity" Required="true"
+          InputType="InputType.Number" />
       </MudItem>
     </MudGrid>
   </DialogContent>
