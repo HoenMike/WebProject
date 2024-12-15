@@ -5,6 +5,9 @@
 @inject ItemController ItemController
 @using MudBlazor
 
+
+@attribute [Authorize(Roles = "Admin")]
+
 @rendermode InteractiveServer
 
 <PageTitle>Item Management</PageTitle>
@@ -24,7 +27,8 @@
     </MudGrid>
   </MudPaper>
 
-  <MudTable Items="@displayedItems" Dense="true" Loading="@isLoading" LoadingProgressColor="Color.Primary"  Elevation="3">
+  <MudTable Items="@displayedItems" Dense="true" Loading="@isLoading" LoadingProgressColor="Color.Primary"
+    Elevation="3">
     <HeaderContent>
       <MudTh>Image</MudTh>
       <MudTh>Name</MudTh>

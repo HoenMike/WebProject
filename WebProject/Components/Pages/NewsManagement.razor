@@ -6,6 +6,9 @@
 @inject IDialogService DialogService
 @using MudBlazor
 
+
+@attribute [Authorize(Roles = "Admin")]
+
 @rendermode InteractiveServer
 
 <PageTitle>News Management</PageTitle>

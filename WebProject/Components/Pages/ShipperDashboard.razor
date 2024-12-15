@@ -9,6 +9,8 @@
 @inject ShippingController ShippingController
 @inject IDialogService DialogService
 
+@attribute [Authorize(Roles = "Shipper")]
+
 <PageTitle>Shipper Dashboard</PageTitle>
 
 <MudContainer style="margin-top: 20px;" MaxWidth="MaxWidth.ExtraLarge">

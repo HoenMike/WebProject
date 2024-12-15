@@ -6,6 +6,8 @@
 @inject CartController CartController
 @using MudBlazor
 
+@attribute [Authorize]
+
 <PageTitle>My Wishlist</PageTitle>
 
 <style>
@@ -60,7 +62,9 @@
   <MudPaper Elevation="2" Class="pa-4 mb-6">
     <MudGrid>
       <MudItem xs="12">
-        <MudTextField Variant="Variant.Outlined" @bind-Value="searchTerm" Label="Search Items" AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" Immediate="true" Clearable="true" OnClearButtonClick="ClearSearch" OnKeyUp="FilterItems" />
+        <MudTextField Variant="Variant.Outlined" @bind-Value="searchTerm" Label="Search Items"
+          AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" Immediate="true" Clearable="true"
+          OnClearButtonClick="ClearSearch" OnKeyUp="FilterItems" />
       </MudItem>
     </MudGrid>
   </MudPaper>
@@ -76,8 +80,12 @@
         <MudItem Style="width:300px">
           <MudCard Style="word-break: break-word; border-radius:10px;">
             <div class="image-container" style="position: relative">
-              <MudImage Src="@item.ThumbnailUrl" Alt="@item.Name" Style="width: 150px; height: 260px; min-height: 260px; width: 100%; cursor: pointer; padding:20px; padding-bottom:0px;z-index: 1;" @onclick="@(() => NavigateToItemDetails(item.Id))" />
-              <MudButton Class="wishlist-button" Style="z-index: 2; position: absolute; top: 0px; right: 0px; background-color: #ffffff; border-radius: 40px; height: 65px; align-items: center;" OnClick="@(() => RemoveFromWishlist(item))">
+              <MudImage Src="@item.ThumbnailUrl" Alt="@item.Name"
+                Style="width: 150px; height: 260px; min-height: 260px; width: 100%; cursor: pointer; padding:20px; padding-bottom:0px;z-index: 1;"
+                @onclick="@(() => NavigateToItemDetails(item.Id))" />
+              <MudButton Class="wishlist-button"
+                Style="z-index: 2; position: absolute; top: 0px; right: 0px; background-color: #ffffff; border-radius: 40px; height: 65px; align-items: center;"
+                OnClick="@(() => RemoveFromWishlist(item))">
                 <MudIcon Icon="@Icons.Material.Filled.Favorite" Color="Color.Error" FontSize="50px" />
               </MudButton>
             </div>
@@ -93,19 +101,24 @@
             <MudCardActions>
               <MudGrid Style="margin-left:4px; margin-right: 4px; margin-bottom: 10px;">
                 <MudItem xs="2" Class="d-flex justify-center" Style="width:100%">
-                  <MudIconButton Icon="@Icons.Material.Filled.Remove" Class="quantity-btn" OnClick="@(() => DecreaseQuantity(item.Id))" />
+                  <MudIconButton Icon="@Icons.Material.Filled.Remove" Class="quantity-btn"
+                    OnClick="@(() => DecreaseQuantity(item.Id))" />
                 </MudItem>
 
                 <MudItem xs="3" Class="d-flex justify-center">
-                  <MudNumericField HideSpinButtons="true" Value="@GetItemQuantity(item.Id)" ValueChanged="@((int value) => SetItemQuantity(item.Id, value))" Min="1" Max="@item.StockQuantity" Variant="Variant.Outlined" Class="mud-input-root" Style="width:50px;height:50px" />
+                  <MudNumericField HideSpinButtons="true" Value="@GetItemQuantity(item.Id)"
+                    ValueChanged="@((int value) => SetItemQuantity(item.Id, value))" Min="1" Max="@item.StockQuantity"
+                    Variant="Variant.Outlined" Class="mud-input-root" Style="width:50px;height:50px" />
                 </MudItem>
 
                 <MudItem xs="3" Class="d-flex justify-center" Style="width:100%">
-                  <MudIconButton Icon="@Icons.Material.Filled.Add" Class="quantity-btn" OnClick="@(() => IncreaseQuantity(item.Id))" />
+                  <MudIconButton Icon="@Icons.Material.Filled.Add" Class="quantity-btn"
+                    OnClick="@(() => IncreaseQuantity(item.Id))" />
                 </MudItem>
 
                 <MudItem xs="4" Class="d-flex justify-center">
-                  <MudIconButton Icon="@Icons.Material.Outlined.ShoppingCart" Class="add-to-cart-btn" OnClick="@(() => AddToCart(item))" Size="Size.Medium" />
+                  <MudIconButton Icon="@Icons.Material.Outlined.ShoppingCart" Class="add-to-cart-btn"
+                    OnClick="@(() => AddToCart(item))" Size="Size.Medium" />
                 </MudItem>
               </MudGrid>
             </MudCardActions>

@@ -4,6 +4,9 @@
 @inject ISnackbar Snackbar
 @inject IDialogService DialogService
 
+
+@attribute [Authorize(Roles = "Admin")]
+
 @rendermode InteractiveServer
 
 <PageTitle>Promote Management</PageTitle>
