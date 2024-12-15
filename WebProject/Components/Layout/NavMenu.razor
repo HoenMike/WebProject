@@ -4,165 +4,165 @@
 
 @rendermode InteractiveServer
 <style>
-    .navigation-container {
-        position: relative;
-    }
+  .navigation-container {
+    position: relative;
+  }
 
-    .nav-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 10px;
-        background-color: white;
-    }
+  .nav-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    background-color: white;
+  }
 
-    .mobile-toggle {
-        cursor: pointer;
-    }
+  .mobile-toggle {
+    cursor: pointer;
+  }
 
-    .nav-title {
-        flex-grow: 1;
-        text-align: center;
-    }
+  .nav-title {
+    flex-grow: 1;
+    text-align: center;
+  }
 
-    .mud-nav-link .mud-nav-link-text {
-        font-weight: bold;
-    }
+  .mud-nav-link .mud-nav-link-text {
+    font-weight: bold;
+  }
 
-    .mud-nav-link {
-        margin: 0 8px;
-        color: black;
-        font-weight: bold;
-        transition: all 0.2s ease;
-    }
+  .mud-nav-link {
+    margin: 0 8px;
+    color: black;
+    font-weight: bold;
+    transition: all 0.2s ease;
+  }
 
-    .mud-nav-link:hover {
-        background-color: #ff66a1;
-        color: black;
-    }
+  .mud-nav-link:hover {
+    background-color: #ff66a1;
+    color: black;
+  }
 
-    .mud-nav-link.active {
-        background-color: #ff66a1;
-        color: white;
-        font-weight: bold;
-    }
+  .mud-nav-link.active {
+    background-color: #ff66a1;
+    color: white;
+    font-weight: bold;
+  }
 
-    .mud-nav-link.active .mud-nav-link-icon {
-        color: white;
-    }
+  .mud-nav-link.active .mud-nav-link-icon {
+    color: white;
+  }
 
-    .text-pink {
-        color: #ff66a1;
-        font-weight: bold;
-    }
+  .text-pink {
+    color: #ff66a1;
+    font-weight: bold;
+  }
 
-    .text-black {
-        color: black;
-        font-weight: bold;
-    }
+  .text-black {
+    color: black;
+    font-weight: bold;
+  }
 
-    .mud-paper {
-        background-color: white;
-    }
+  .mud-paper {
+    background-color: white;
+  }
 </style>
 <div class="navigation-container @(isMenuOpen ? "menu-open" : "") mud-elevation-3">
-    <div class="nav-header">
-        <MudLink Href="/" Underline="Underline.None" Typo="Typo.h4" Class="nav-title">
-            <span class="text-pink">Daily</span><span class="text-black">Store</span>
-        </MudLink>
-        <div class="mobile-toggle" @onclick="ToggleMenu">
-            <MudIcon Icon="@Icons.Material.Filled.Menu" />
-        </div>
+  <div class="nav-header">
+    <MudLink Href="/" Underline="Underline.None" Typo="Typo.h4" Class="nav-title">
+      <span class="text-pink">Daily</span><span class="text-black">Store</span>
+    </MudLink>
+    <div class="mobile-toggle" @onclick="ToggleMenu">
+      <MudIcon Icon="@Icons.Material.Filled.Menu" />
     </div>
+  </div>
 
-    <div class="mud-navmenu-container py-3" Width="250px" Square="true">
-        <MudNavMenu Color="Color.Secondary" Bordered="false">
-            <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">
-                Home
-            </MudNavLink>
+  <div class="mud-navmenu-container py-3" Width="250px" Square="true">
+    <MudNavMenu Color="Color.Secondary" Bordered="false">
+      <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">
+        Home
+      </MudNavLink>
 
-            <MudNavLink Href="itembrowse" Icon="@Icons.Material.Filled.GridView">
-                Item Browse
-            </MudNavLink>
+      <MudNavLink Href="itembrowse" Icon="@Icons.Material.Filled.GridView">
+        Item Browse
+      </MudNavLink>
 
-            <MudNavLink Href="news" Icon="@Icons.Material.Filled.Newspaper">
-                News
-            </MudNavLink>
+      <MudNavLink Href="news" Icon="@Icons.Material.Filled.Newspaper">
+        News
+      </MudNavLink>
 
 
-            <AuthorizeView Roles="Admin">
-                <MudDivider Class="my-2" />
-                <MudNavLink Href="items" Icon="@Icons.Material.Filled.List">
-                    Item Management
-                </MudNavLink>
-                <MudNavLink Href="news_management" Icon="@Icons.Material.Filled.EditNote">
-                    News Management
-                </MudNavLink>
-                <MudNavLink Href="promote_management" Icon="@Icons.Material.Filled.ViewCarousel">
-                    Promotes Manage
-                </MudNavLink>
-            </AuthorizeView>
-            <AuthorizeView>
+      <AuthorizeView Roles="Admin">
+        <MudDivider Class="my-2" />
+        <MudNavLink Href="items" Icon="@Icons.Material.Filled.List">
+          Item Management
+        </MudNavLink>
+        <MudNavLink Href="news_management" Icon="@Icons.Material.Filled.EditNote">
+          News Management
+        </MudNavLink>
+        <MudNavLink Href="promote_management" Icon="@Icons.Material.Filled.ViewCarousel">
+          Promotes Manage
+        </MudNavLink>
+      </AuthorizeView>
+      <AuthorizeView>
 
-                <MudDivider Class="my-2" />
-                <MudNavLink Href="ordereditems" Icon="@Icons.Material.Filled.Campaign">
-                    Ordered Items
-                </MudNavLink>
-            </AuthorizeView>
-            <AuthorizeView Roles="Admin,Shipper">
+        <MudDivider Class="my-2" />
+        <MudNavLink Href="ordereditems" Icon="@Icons.Material.Filled.Campaign">
+          Ordered Items
+        </MudNavLink>
+      </AuthorizeView>
+      <AuthorizeView Roles="Admin,Shipper">
 
-                <MudDivider Class="my-2" />
-                <MudNavLink Href="itemorders" Icon="@Icons.Material.Filled.Campaign">
-                    Show Orders
-                </MudNavLink>
-            </AuthorizeView>
-            <AuthorizeView Roles="Shipper">
-                <MudNavLink Href="shipperdashboard" Icon="@Icons.Material.Filled.Dashboard">
-                    Shipper Dashboard
-                </MudNavLink>
-            </AuthorizeView>
-            <AuthorizeView>
-                <MudNavLink Href="assign-roles" Icon="@Icons.Material.Filled.Lock">
-                    Role Assign
-                </MudNavLink>
-            </AuthorizeView>
+        <MudDivider Class="my-2" />
+        <MudNavLink Href="itemorders" Icon="@Icons.Material.Filled.Campaign">
+          Show Orders
+        </MudNavLink>
+      </AuthorizeView>
+      <AuthorizeView Roles="Shipper">
+        <MudNavLink Href="shipperdashboard" Icon="@Icons.Material.Filled.Dashboard">
+          Shipper Dashboard
+        </MudNavLink>
+      </AuthorizeView>
+      <AuthorizeView Roles="Admin">
+        <MudNavLink Href="assign-roles" Icon="@Icons.Material.Filled.Lock">
+          Role Assign
+        </MudNavLink>
+      </AuthorizeView>
 
-            <MudDivider Class="my-2" />
+      <MudDivider Class="my-2" />
 
-            <AuthorizeView>
-                <Authorized>
-                    <MudNavLink Href="cart" Icon="@Icons.Material.Filled.ShoppingCart">
-                        Cart
-                    </MudNavLink>
-                    <MudNavLink Href="wishlist" Icon="@Icons.Material.Filled.Favorite">
-                        Wishlist
-                    </MudNavLink>
-                    <MudNavLink Href="paymentinfo" Icon="@Icons.Material.Filled.CreditCard">
-                        Payment Info
-                    </MudNavLink>
-                    <MudNavLink Href="shippinginfo" Icon="@Icons.Material.Filled.LocalShipping">
-                        Shipping Info
-                    </MudNavLink>
-                </Authorized>
-            </AuthorizeView>
+      <AuthorizeView>
+        <Authorized>
+          <MudNavLink Href="cart" Icon="@Icons.Material.Filled.ShoppingCart">
+            Cart
+          </MudNavLink>
+          <MudNavLink Href="wishlist" Icon="@Icons.Material.Filled.Favorite">
+            Wishlist
+          </MudNavLink>
+          <MudNavLink Href="paymentinfo" Icon="@Icons.Material.Filled.CreditCard">
+            Payment Info
+          </MudNavLink>
+          <MudNavLink Href="shippinginfo" Icon="@Icons.Material.Filled.LocalShipping">
+            Shipping Info
+          </MudNavLink>
+        </Authorized>
+      </AuthorizeView>
 
-            <AuthorizeView>
-                <Authorized>
-                    <MudNavLink Href="Account/Manage/ChangePassword" Icon="@Icons.Material.Filled.Person">
+      <AuthorizeView>
+        <Authorized>
+          <MudNavLink Href="Account/Manage/ChangePassword" Icon="@Icons.Material.Filled.Person">
             @context.User.Identity?.Name
-                    </MudNavLink>
-                </Authorized>
-                <NotAuthorized>
-                    <MudNavLink Href="Account/Register" Icon="@Icons.Material.Filled.PersonAdd">
-                        Register
-                    </MudNavLink>
-                    <MudNavLink Href="Account/Login" Icon="@Icons.Material.Filled.Login">
-                        Login
-                    </MudNavLink>
-                </NotAuthorized>
-            </AuthorizeView>
-        </MudNavMenu>
-    </div>
+          </MudNavLink>
+        </Authorized>
+        <NotAuthorized>
+          <MudNavLink Href="Account/Register" Icon="@Icons.Material.Filled.PersonAdd">
+            Register
+          </MudNavLink>
+          <MudNavLink Href="Account/Login" Icon="@Icons.Material.Filled.Login">
+            Login
+          </MudNavLink>
+        </NotAuthorized>
+      </AuthorizeView>
+    </MudNavMenu>
+  </div>
 </div>
 
 @code {

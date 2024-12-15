@@ -10,7 +10,7 @@ namespace WebProject.Controllers
 
     public async Task<List<Item>> GetItemsAsync()
     {
-      return await _context.Items.ToListAsync();
+      return await _context.Items.OrderByDescending(item => item.Id).ToListAsync();
     }
 
     public async Task<Item?> GetItemAsync(int id)
