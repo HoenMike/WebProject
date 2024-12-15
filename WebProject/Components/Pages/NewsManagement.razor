@@ -49,20 +49,20 @@
                 <MudText Typo="Typo.caption" Style="font-style: italic; margin-bottom: 4px; display: block">
                   Created at: @news.CreatedAt.ToString("g") - by @news.CreatedBy
                 </MudText>
-                  @if (news.UpdatedAt.HasValue)
-                  {
-                    <MudText Typo="Typo.caption" Style="font-style: italic;">
-                      Updated at: @news.UpdatedAt.Value.ToString("g") - by @news.UpdatedBy
-                    </MudText>
-                  }
-                </MudItem>
+                @if (news.UpdatedAt.HasValue)
+                {
+                  <MudText Typo="Typo.caption" Style="font-style: italic;">
+                    Updated at: @news.UpdatedAt.Value.ToString("g") - by @news.UpdatedBy
+                  </MudText>
+                }
+              </MudItem>
 
-                <MudItem xs="2">
-                  <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary"
-                    OnClick="() => OpenEditNewsDialog(news)" />
-                  <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error"
-                    OnClick="() => OpenDeleteConfirmationDialog(news)" />
-                </MudItem>
+              <MudItem xs="2">
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary"
+                  OnClick="() => OpenEditNewsDialog(news)" />
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error"
+                  OnClick="() => OpenDeleteConfirmationDialog(news)" />
+              </MudItem>
             </MudGrid>
           </TitleContent>
           <ChildContent>
