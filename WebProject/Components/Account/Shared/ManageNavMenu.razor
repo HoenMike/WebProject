@@ -2,7 +2,13 @@
 @using WebProject.Data
 
 @inject SignInManager<ApplicationUser> SignInManager
-
+<style>
+    .nav-pills .nav-link.active,
+    .nav-pills .show>.nav-link {
+        color: #fff;
+        background-color: #ff66a1;
+    }
+</style>
 <ul class="nav nav-pills flex-column">
     <li class="nav-item">
         <NavLink class="nav-link" href="Account/Manage/ChangePassword" Match="NavLinkMatch.All">

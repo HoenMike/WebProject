@@ -7,6 +7,7 @@
 @inject NavigationManager Navigation
 @inject IDialogService DialogService
 @using MudBlazor
+@using System.Security.Claims
 @inject IJSRuntime JSRuntime
 <style>
   .item-details-container {
@@ -416,14 +417,34 @@
     if (reviewForm.IsValid)
     {
       newReview.ItemId = Id;
-      newReview.UserId = "currentUserId";
+      newReview.UserId = await GetUserIdAsync();
+      newReview.User = new ApplicationUser
+        {
+          UserName = (await
+        AuthenticationStateProvider.GetAuthenticationStateAsync()).User.Identity?.Name
+        };
       await ReviewController.AddReviewAsync(newReview);
       Snackbar.Add("Review submitted successfully", Severity.Success);
-      reviews.Add(newReview);
+      reviews.Insert(0, newReview); // Add the new review to the top of the list
       ApplyFilters();
       CalculateAverageRating();
       newReview = new();
+      StateHasChanged();
     }
+  }
+
+  private async Task<string> GetUserIdAsync()
+  {
+    var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+    var user = authState.User;
+
+    if (user.Identity?.IsAuthenticated != true)
+    {
+      throw new InvalidOperationException("You have to login first");
+    }
+
+    return user.FindFirst(ClaimTypes.NameIdentifier)?.Value ??
+    throw new InvalidOperationException("Cannot find user identifier");
   }
   private async Task<bool> IsUserLoggedIn()
   {
