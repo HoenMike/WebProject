@@ -425,16 +425,6 @@
       newReview = new();
     }
   }
-
-  @* private async Task AddToWishlist()
-  {
-    if (item != null)
-    {
-      await WishlistController.AddToWishlistAsync(item.Id);
-      Snackbar.Add("Item added to wishlist", Severity.Success);
-    }
-  } *@
-
   private async Task<bool> IsUserLoggedIn()
   {
     var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
