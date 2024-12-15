@@ -58,36 +58,36 @@
               @{
                   var itemShipper = itemShippers.FirstOrDefault(itemShipper => itemShipper.OrderId == cellContext.Item.Id);
                   var shipperName = itemShipper != null
-                                                          ? DbContext.Users.FirstOrDefault(user => user.Id == itemShipper.ShipperId)?.UserName
-                                                          : null;
+                            ? DbContext.Users.FirstOrDefault(user => user.Id == itemShipper.ShipperId)?.UserName
+                            : null;
                 }
                 @if (shipperName != null)
                 {
-                              <MudStack Row="true" AlignItems="AlignItems.Center">
-                                <MudText>Assigned Shipper: @shipperName</MudText>
+                  <MudStack Row="true" AlignItems="AlignItems.Center">
+                    <MudText>Assigned Shipper: @shipperName</MudText>
                     @if (cellContext.Item.Status != "Delivery Successful")
                     {
-                                        <MudButton Size="Size.Small" Variant="Variant.Filled" Color="Color.Error"
-                                          OnClick="() => ConfirmCancelOrder(cellContext.Item.Id)">
-                                          Cancel
-                                        </MudButton>
+                      <MudButton Size="Size.Small" Variant="Variant.Filled" Color="Color.Error"
+                        OnClick="() => ConfirmCancelOrder(cellContext.Item.Id)">
+                        Cancel
+                      </MudButton>
                     }
-                              </MudStack>
+                  </MudStack>
                 }
                 else
                 {
-                              <span>Not Assigned</span>
+                  <span>Not Assigned</span>
                 }
-                    </Authorized>
-                  </AuthorizeView>
-                </CellTemplate>
-              </TemplateColumn>
-            </Columns>
-            <PagerContent>
-              <MudDataGridPager T="Order" />
-            </PagerContent>
-          </MudDataGrid>
-        </MudContainer>
+              </Authorized>
+            </AuthorizeView>
+          </CellTemplate>
+        </TemplateColumn>
+      </Columns>
+      <PagerContent>
+        <MudDataGridPager T="Order" />
+      </PagerContent>
+    </MudDataGrid>
+  </MudContainer>
 
   @code {
   private List<Order> orders = new();
