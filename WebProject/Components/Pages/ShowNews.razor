@@ -19,44 +19,55 @@
 
   @if (isLoading)
   {
-    <MudProgressLinear Indeterminate="true" Color="Color.Primary" Style="margin-bottom: 20px;" />
+      <MudProgressLinear Indeterminate="true" Color="Color.Primary" Style="margin-bottom: 20px;" />
   }
   else
   {
     @foreach (var news in displayedNews)
     {
-      <MudCard Class="mb-6" Elevation="1" style="border-radius: 6px;">
-        <MudExpansionPanel Style="margin: 10px 4px; word-break: break-word">
-          <TitleContent>
-            <MudGrid>
-              <MudItem xs="4">
+          <MudCard Class="mb-6" Elevation="1" style="border-radius: 6px;">
+            <MudExpansionPanel Style="margin: 10px 4px; word-break: break-word">
+              <TitleContent>
+                <MudGrid>
+                  <MudItem xs="4">
                 @if (!string.IsNullOrEmpty(news.ImageUrl))
                 {
-                  <MudImage Src="@news.ImageUrl" Alt="News Image" Style="width: 100%; height: auto;" />
+                        <MudImage Src="@news.ImageUrl" Alt="News Image" Style="width: 100%; height: auto;" />
                 }
-              </MudItem>
-              <MudItem xs="8">
-                <MudText Typo="Typo.h5" style="color: #c92e69;" GutterBottom="true"><b>@news.Title</b></MudText>
-                <MudText Typo="Typo.caption" Style="font-style: italic; margin-bottom: 4px; display: block">Created By:
+                  </MudItem>
+                  <MudItem xs="8">
+                    <MudText Typo="Typo.h5" style="color: #c92e69;" GutterBottom="true"><b>@news.Title</b></MudText>
+                    <MudText Typo="Typo.caption" Style="font-style: italic; margin-bottom: 4px; display: block">Created By:
                   @news.CreatedBy - @news.CreatedAt</MudText>
                 @if (news.UpdatedAt.HasValue)
                 {
-                  <MudText Typo="Typo.caption" Style="font-style: italic;">Latest Update: @news.UpdatedAt.Value.ToString("g")
-                  </MudText>
+                        <MudText Typo="Typo.caption" Style="font-style: italic;">Latest Update: @news.UpdatedAt.Value.ToString("g")
+                        </MudText>
                 }
-              </MudItem>
-            </MudGrid>
-          </TitleContent>
-          <ChildContent>
-            <MudText Typo="Typo.body1">@news.Content</MudText>
-          </ChildContent>
-        </MudExpansionPanel>
-      </MudCard>
+                  </MudItem>
+                </MudGrid>
+              </TitleContent>
+              <ChildContent>
+                <MudText Typo="Typo.body1">@news.Content</MudText>
+              </ChildContent>
+            </MudExpansionPanel>
+          </MudCard>
+    }
+    @if (CanLoadMore)
+    {
+          <MudGrid Justify="Justify.Center">
+            <MudItem>
+              <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="LoadMoreNews" Class="mt-4">Load More
+              </MudButton>
+            </MudItem>
+          </MudGrid>
     }
   }
 </MudContainer>
 
 @code {
+  private const int PageSize = 5;
+  private int currentPage = 1;
   private List<News> news = new();
   private List<News> displayedNews = new();
   private bool isLoading = true;
@@ -74,8 +85,8 @@
   {
     try
     {
-      news = await DbContext.News.ToListAsync();
-      displayedNews = news.OrderByDescending(news => news.CreatedAt).ToList();
+      news = await DbContext.News.OrderByDescending(n => n.CreatedAt).ToListAsync();
+      ApplyFilter();
     }
     catch (Exception ex)
     {
@@ -90,84 +101,32 @@
 
   private void FilterNews()
   {
-    if (string.IsNullOrEmpty(searchTerm))
-    {
-      displayedNews = news;
-    }
-    else
-    {
-      displayedNews = news.Where(news =>
-      news.Title.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
-      ).ToList();
-    }
+    currentPage = 1;
+    ApplyFilter();
+  }
+
+  private void ApplyFilter()
+  {
+    IEnumerable<News> filteredNews = string.IsNullOrEmpty(searchTerm)
+    ? news
+    : news.Where(n => n.Title.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+
+    displayedNews = filteredNews.Take(currentPage * PageSize).ToList();
   }
 
   private void ClearSearch()
   {
     searchTerm = string.Empty;
-    displayedNews = news;
-    StateHasChanged();
+    currentPage = 1;
+    ApplyFilter();
   }
 
-  private async Task OpenAddNewsDialog()
+  private void LoadMoreNews()
   {
-    var parameters = new DialogParameters();
-    var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
-    var dialog = DialogService.Show<AddNewsDialog>("Add News", parameters, options);
-    var result = await dialog.Result;
-
-    if (result != null && !result.Canceled)
-    {
-      await LoadNews();
-    }
+    currentPage++;
+    ApplyFilter();
   }
 
-  private async Task OpenDeleteConfirmationDialog(News news)
-  {
-    var parameters = new DialogParameters
-      {
-        ["Message"] = $"Are you sure you want to delete the news '{news.Title}'?"
-      };
-    var options = new DialogOptions
-      {
-        CloseButton = true,
-        MaxWidth = MaxWidth.Small,
-        FullWidth = true
-      };
-    var dialog = DialogService.Show<ConfirmationDialog>("Delete News", parameters, options);
-    var result = await dialog.Result;
-
-    if (result != null && result.Data is bool confirmed && confirmed)
-    {
-      await DeleteNews(news);
-    }
-  }
-
-  private async Task OpenEditNewsDialog(News news)
-  {
-    var parameters = new DialogParameters { ["News"] = news };
-    var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
-    var dialog = DialogService.Show<EditNewsDialog>("Edit News", parameters, options);
-    var result = await dialog.Result;
-
-    if (result != null && !result.Canceled)
-    {
-      await LoadNews();
-    }
-  }
-
-  private async Task DeleteNews(News news)
-  {
-    try
-    {
-      DbContext.News.Remove(news);
-      await DbContext.SaveChangesAsync();
-      Snackbar.Add("News deleted successfully", Severity.Success);
-      await LoadNews();
-    }
-    catch (Exception ex)
-    {
-      Snackbar.Add($"Error deleting news: {ex.Message}", Severity.Error);
-    }
-  }
+  private bool CanLoadMore => displayedNews.Count < (string.IsNullOrEmpty(searchTerm) ? news.Count : news.Count(n =>
+  n.Title.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)));
 }
