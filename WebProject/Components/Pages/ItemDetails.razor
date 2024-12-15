@@ -57,31 +57,19 @@
   }
 
   .add-to-cart-btn {
-    color: #ff66a1;
-    border: 2px solid #ff66a1;
+    color: #ffffff;
+    background-color:#FF66A1 ;
     font-size: 15px;
     border-radius: 8px;
     padding: 8px 16px;
   }
 
-  .buy-now-btn {
-    background-color: #ff66a1;
-    color: white;
-    padding: 8px 20px;
-    border: none;
-    border-radius: 8px;
-    font-size: 15px;
-    cursor: pointer;
-  }
 
   .add-to-cart-btn:hover {
     background-color: #ff1871;
     color: #ffffff
   }
 
-  .buy-now-btn:hover {
-    background-color: #ff1871;
-  }
 
   .rating-container {
     border: 1px solid #FF66A1;
@@ -166,7 +154,7 @@
                 </MudItem>
 
                 <!-- Action Buttons -->
-                <MudItem xs="12" sm="12" md="12" Class="d-flex justify-start" Style="gap: 12px;">
+                <MudItem xs="12" sm="12" md="12" lg="8" Class="d-flex justify-start" Style="gap: 12px;">
                   <MudItem>
                     <MudButton Class="add-to-cart-btn" StartIcon="@Icons.Material.Outlined.ShoppingCart"
                       OnClick="AddToCart" Style="height: 50px;flex: 1;">Add to cart</MudButton>
@@ -190,8 +178,8 @@
                   <MudTextField @bind-Value="newReview.Comment" Label="Comment" Required="true" Lines="2" />
                   <MudGrid>
                     <MudItem xs="12" style="padding-top: 30px;" Class="d-flex justify-end">
-                      <MudButton Size="Size.Medium" Variant="Variant.Filled"
-                        style="background-color:#FF66A1;color:#ffffff ;" OnClick="SubmitReview">Submit</MudButton>
+                      <MudButton Size="Size.Medium" 
+                        style="border: 2px solid #FF66A1;color:#FF66A1 ; padding: 8px 16px;" OnClick="SubmitReview">Submit</MudButton>
                     </MudItem>
                   </MudGrid>
                 </MudForm>
