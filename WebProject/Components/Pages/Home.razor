@@ -279,7 +279,8 @@
   {
     try
     {
-      items = await DbContext.Items.OrderByDescending(item => item.Id).ToListAsync();
+
+      items = await DbContext.Items.OrderByDescending(item => item.Id).Take(8).ToListAsync();
       displayedItems = items;
     }
     catch (Exception ex)
@@ -300,7 +301,6 @@
       var promotes = await DbContext.Promotes
       .Where(p => p.IsActive)
       .OrderByDescending(p => p.Id)
-      .Take(8)
       .ToListAsync();
       activePromotes = promotes;
     }
