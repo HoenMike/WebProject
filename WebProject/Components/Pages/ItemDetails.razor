@@ -165,18 +165,10 @@
                 </MudItem>
 
                 <!-- Action Buttons -->
-                <MudItem xs="12" sm="12" md="12" lg="8" Class="d-flex justify-start" Style="gap: 12px;">
+                <MudItem xs="12" sm="12" md="12" Class="d-flex justify-start" Style="gap: 12px;">
                   <MudItem>
                     <MudButton Class="add-to-cart-btn" StartIcon="@Icons.Material.Outlined.ShoppingCart"
                       OnClick="AddToCart" Style="height: 50px;flex: 1;">Add to cart</MudButton>
-                  </MudItem>
-                  <MudItem>
-                    <MudButton Class="buy-now-btn" OnClick="BuyNow" Style="height: 50px;flex: 1;">Buy
-                      Now
-                    </MudButton>
-                    @* <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="AddToWishlist">
-                      Add to Wishlist
-                    </MudButton> *@
                   </MudItem>
                 </MudItem>
               </MudGrid>
@@ -414,11 +406,6 @@
         Snackbar.Add(ex.Message, Severity.Error);
       }
     }
-  }
-
-  private async Task BuyNow()
-  {
-    // Implement buy now functionality
   }
 
 

@@ -23,7 +23,7 @@
 <MudContainer MaxWidth="MaxWidth.Small" Class="pa-4">
   <MudCard Class="pa-4 mb-4 mt-4">
     <MudCardContent>
-      <h3 style="text-align: center;"Class="mb-4">Shipping Information</h3>
+      <h3 style="text-align: center;" Class="mb-4">Shipping Information</h3>
       @if (isLoading)
       {
         <MudProgressLinear Indeterminate="true" Color="Color.Primary" Class="mb-3" />
@@ -32,8 +32,8 @@
       {
         @if (!string.IsNullOrEmpty(ShippingStatusMessage))
         {
-          <MudAlert Severity="@(ShippingStatusMessageType == "alert-success" ? Severity.Success : Severity.Error)" 
-                    Elevation="1" Class="mb-3">
+          <MudAlert Severity="@(ShippingStatusMessageType == "alert-success" ? Severity.Success : Severity.Error)"
+            Elevation="1" Class="mb-3">
             @ShippingStatusMessage
           </MudAlert>
         }
@@ -41,17 +41,27 @@
           <DataAnnotationsValidator />
           <MudStack Spacing="0">
 
-            <MudTextField @bind-Value="ShippingInput.ReceiverName" Label="Receiver Name" 
-                          Required="true" RequiredError="Receiver Name is required" Variant="Variant.Outlined" Class="mb-3" />
-            <MudTextField @bind-Value="ShippingInput.Address" Label="Address" 
-                          Required="true" RequiredError="Address is required" Variant="Variant.Outlined" Class="mb-3" />
-            <MudTextField @bind-Value="ShippingInput.PhoneNumber" Label="Phone Number" 
-                          Required="true" RequiredError="Phone Number is required" Variant="Variant.Outlined" Class="mb-3" />
+            <MudTextField @bind-Value="ShippingInput.ReceiverName" Label="Receiver Name" Required="true"
+              RequiredError="Receiver Name is required" Variant="Variant.Outlined" Class="mb-3" />
+            <MudTextField @bind-Value="ShippingInput.Address" Label="Address" Required="true"
+              RequiredError="Address is required" Variant="Variant.Outlined" Class="mb-3" />
+            <MudTextField @bind-Value="ShippingInput.PhoneNumber" Label="Phone Number" Required="true"
+              RequiredError="Phone Number is required" Variant="Variant.Outlined" Class="mb-3" />
           </MudStack>
           <MudCardActions Class="d-flex justify-end mt-4">
-            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" style="background-color: #ff66a1;color:white">
-              Save Shipping Information
-            </MudButton>
+            <MudGrid>
+              <MudItem xs="6">
+                <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="OnClearShippingInfo">
+                  Clear Information
+                </MudButton>
+              </MudItem>
+              <MudItem xs="6" class="d-flex justify-end">
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled"
+                  style="background-color: #ff66a1;color:white">
+                  Save Shipping Information
+                </MudButton>
+              </MudItem>
+            </MudGrid>
           </MudCardActions>
         </EditForm>
       }
@@ -114,6 +124,39 @@
       isLoading = false;
       StateHasChanged();
     }
+  }
+
+  private async Task OnClearShippingInfo()
+  {
+    try
+    {
+      var existingShippingInfos = await DbContext.UserShippingInfos
+      .Where(u => u.UserId == user.Id)
+      .ToListAsync();
+
+      if (existingShippingInfos.Any())
+      {
+        DbContext.UserShippingInfos.RemoveRange(existingShippingInfos);
+        await DbContext.SaveChangesAsync();
+        ShippingStatusMessage = "Shipping information has been cleared from the database.";
+        ShippingStatusMessageType = "alert-info";
+      }
+      else
+      {
+        ShippingStatusMessage = "No shipping information found to clear.";
+        ShippingStatusMessageType = "alert-warning";
+      }
+
+      ShippingInput = new ShippingInputModel();
+    }
+    catch (Exception ex)
+    {
+      Logger.LogError(ex, "Error clearing shipping information");
+      ShippingStatusMessage = $"Error: {ex.Message}";
+      ShippingStatusMessageType = "alert-danger";
+    }
+
+    await InvokeAsync(StateHasChanged);
   }
   private async Task OnValidSubmitPaymentAsync()
   {
