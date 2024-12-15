@@ -6,27 +6,32 @@
 @inject IDialogService DialogService
 @using MudBlazor
 
+@attribute [Authorize]
+
 @rendermode InteractiveServer
 <style>
-  .check-out-btn{
+  .check-out-btn {
     background-color: #ff66a1;
     color: white;
   }
+
   .check-out-btn:hover {
     background-color: #ff1871;
     color: #ffffff
-    }
-  .delete-btn{
-    background-color: black; 
-    color: #ffffff; 
-    border-radius:8px;
+  }
+
+  .delete-btn {
+    background-color: black;
+    color: #ffffff;
+    border-radius: 8px;
     padding: 6px 6px;
   }
-  .delete-btn:hover{
+
+  .delete-btn:hover {
     background-color: #dc0000;
     color: #ffffff
   }
-}
+  }
 </style>
 <PageTitle>Your Cart</PageTitle>
 

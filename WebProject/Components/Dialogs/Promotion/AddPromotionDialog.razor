@@ -7,12 +7,16 @@
 <MudDialog>
   <DialogContent>
     <MudForm @ref="form" @bind-IsValid="@success">
-      <MudTextField T="string" Label="Image URL" @bind-Value="newPromotion.ImageUrl" Required="true" RequiredError="Image URL is required!" Validation="@(new Func<string, string>(ValidateImageUrl))" />
+      <MudTextField T="string" Label="Image URL" @bind-Value="newPromotion.ImageUrl" Required="true"
+        RequiredError="Image URL is required!" Validation="@(new Func<string, string>(ValidateImageUrl))" />
 
+      <div class="d-flex align-center mt-4">
+        <MudSwitch T="bool" @bind-Checked="newPromotion.IsActive" Color="Color.Primary" Label="Active" />
+      </div>
 
       @if (!string.IsNullOrEmpty(newPromotion.ImageUrl))
       {
-          <MudImage Src="@newPromotion.ImageUrl" Alt="Preview" Class="mt-4" Height="200" />
+        <MudImage Src="@newPromotion.ImageUrl" Alt="Preview" Class="mt-4" Height="200" />
       }
     </MudForm>
   </DialogContent>

@@ -9,7 +9,8 @@
         <MudTextField @bind-Value="editItem.Price" Label="Price" Required="true" InputType="InputType.Number" />
       </MudItem>
       <MudItem xs="12">
-        <MudTextField @bind-Value="editItem.Description" Label="Description" Required="true" />
+        <MudTextField Textarea="true" Lines="10" @bind-Value="editItem.Description" Label="Description"
+          Required="true" />
       </MudItem>
       <MudItem xs="12">
         <MudTextField @bind-Value="editItem.ThumbnailUrl" Label="Image URL" />

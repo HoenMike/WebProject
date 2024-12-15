@@ -5,6 +5,9 @@
 @inject ItemController ItemController
 @using MudBlazor
 
+
+@attribute [Authorize(Roles = "Admin")]
+
 @rendermode InteractiveServer
 
 <PageTitle>Item Management</PageTitle>
@@ -18,43 +21,48 @@
           OnClearButtonClick="ClearSearch" OnKeyUp="FilterItems" />
       </MudItem>
       <MudItem xs="12">
-        <MudButton Variant="Variant.Filled" OnClick="OpenAddItemDialog" Color="Color.Secondary" Class="ml-2">Add
-          Item</MudButton>
+        <MudButton Variant="Variant.Filled" OnClick="OpenAddItemDialog" Color="Color.Secondary" Class="ml-2">Add Item
+        </MudButton>
       </MudItem>
     </MudGrid>
   </MudPaper>
 
-  @if (isLoading)
-  {
-    <MudProgressLinear Indeterminate="true" Color="Color.Primary" Style="margin-bottom: 20px;" />
-  }
-  else
-  {
-    <MudTable Elevation="3" Items="@displayedItems" Hover="true" Striped="true">
-      <HeaderContent>
-        <MudTh>Image</MudTh>
-        <MudTh>Name</MudTh>
-        <MudTh>Price</MudTh>
-        <MudTh>Description</MudTh>
-        <MudTh>Stock Quantity</MudTh>
-        <MudTh>Actions</MudTh>
-      </HeaderContent>
-      <RowTemplate Context="item">
-        <MudTd><img src="@item.ThumbnailUrl" alt="@item.Name" style="width: 50px; height: 50px;" /></MudTd>
-        <MudTd>@item.Name</MudTd>
-        <MudTd>@item.Price.ToString("C")</MudTd>
-        <MudTd>@item.Description</MudTd>
-        <MudTd>@item.StockQuantity</MudTd>
-        <MudTd>
-          <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary"
-            OnClick="() => OpenEditItemDialog(item)" />
-          <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error"
-            OnClick="() => OpenDeleteConfirmationDialog(item)" />
-        </MudTd>
-      </RowTemplate>
-    </MudTable>
-  }
+  <MudTable Items="@displayedItems" Dense="true" Loading="@isLoading" LoadingProgressColor="Color.Primary"
+    Elevation="3">
+    <HeaderContent>
+      <MudTh>Image</MudTh>
+      <MudTh>Name</MudTh>
+      <MudTh>Price</MudTh>
+      <MudTh>Description</MudTh>
+      <MudTh>Stock Quantity</MudTh>
+      <MudTh>Actions</MudTh>
+    </HeaderContent>
+    <RowTemplate Context="item">
+      <MudTd>
+        <img src="@item.ThumbnailUrl" alt="@item.Name" style="width: 50px; height: 50px; object-fit: cover;" />
+      </MudTd>
+      <MudTd>@item.Name</MudTd>
+      <MudTd>@item.Price.ToString("C")</MudTd>
+      <MudTd>
+        <MudText Typo="Typo.body2"
+          Style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+          @item.Description
+        </MudText>
+      </MudTd>
+      <MudTd>@item.StockQuantity</MudTd>
+      <MudTd>
+        <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary"
+          OnClick="() => OpenEditItemDialog(item)" />
+        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error"
+          OnClick="() => OpenDeleteConfirmationDialog(item)" />
+      </MudTd>
+    </RowTemplate>
+    <PagerContent>
+      <MudTablePager />
+    </PagerContent>
+  </MudTable>
 </MudContainer>
+
 @code {
   private List<Item> items = new();
   private List<Item> displayedItems = new();
@@ -96,7 +104,8 @@
     else
     {
       displayedItems = items.Where(item =>
-      item.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+      item.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+      item.Description.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
       ).ToList();
     }
   }

@@ -16,6 +16,9 @@
 @inject ISnackbar Snackbar
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
+@attribute [Authorize]
+
+
 @rendermode InteractiveServer
 <PageTitle>Payment Information</PageTitle>
 <MudContainer MaxWidth="MaxWidth.Medium">
@@ -35,7 +38,7 @@
       <MudGrid>
         <MudItem xs="12" sm="12" md="6">
           <MudCard Elevation="2" Class="pa-4">
-            <h4 style="text-align: center;"Class="mb-4">Add New Card</h4>
+            <h4 style="text-align: center;" Class="mb-4">Add New Card</h4>
             @if (ExistingCards.Count >= 3)
             {
               <MudAlert Severity="Severity.Error" Class="mb-4">
@@ -62,7 +65,8 @@
 
                 <MudCheckBox T="bool" @bind-Value="CardInput.IsPrimary" Label="Set as Primary Card" Class="mb-3" />
 
-                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" style="background-color: #ff66a1;color:white" FullWidth="true">
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled"
+                  style="background-color: #ff66a1;color:white" FullWidth="true">
                   Save Card Information
                 </MudButton>
               </EditForm>
@@ -74,7 +78,7 @@
         {
           <MudItem xs="12" sm="12" md="6">
             <MudCard Elevation="2" Class="pa-4">
-              <h4 style="text-align: center;"Class="mb-4">Existing Cards</h4>
+              <h4 style="text-align: center;" Class="mb-4">Existing Cards</h4>
               <MudList T="UserCard" Dense="true">
                 @foreach (var card in ExistingCards)
                 {

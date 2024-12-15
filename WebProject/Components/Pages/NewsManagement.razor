@@ -6,6 +6,9 @@
 @inject IDialogService DialogService
 @using MudBlazor
 
+
+@attribute [Authorize(Roles = "Admin")]
+
 @rendermode InteractiveServer
 
 <PageTitle>News Management</PageTitle>
@@ -25,7 +28,6 @@
     </MudGrid>
   </MudPaper>
 
-
   @if (isLoading)
   {
     <MudProgressLinear Indeterminate="true" Color="Color.Primary" Style="margin-bottom: 20px;" />
@@ -34,12 +36,18 @@
   {
     @foreach (var news in displayedNews)
     {
-      <MudCard Class="mb-2" Elevation="3">
-        <MudExpansionPanel Style="margin: 10px; word-break: break-word" HideIcon="true">
+      <MudCard Class="mb-6" Elevation="1" style="border-radius: 6px;">
+        <MudExpansionPanel Style="margin: 10px 4px; word-break: break-word">
           <TitleContent>
-            <MudGrid xs="12">
-              <MudItem xs="10">
-                <MudText Typo="Typo.h6" GutterBottom="true">@news.Title</MudText>
+            <MudGrid>
+              <MudItem xs="4">
+                @if (!string.IsNullOrEmpty(news.ImageUrl))
+                {
+                  <MudImage Src="@news.ImageUrl" Alt="News Image" Style="width: 100%; height: auto;" />
+                }
+              </MudItem>
+              <MudItem xs="6">
+                <MudText Typo="Typo.h6" style="color: #c92e69;" GutterBottom="true"><b>@news.Title</b></MudText>
                 <MudText Typo="Typo.caption" Style="font-style: italic; margin-bottom: 4px; display: block">
                   Created at: @news.CreatedAt.ToString("g") - by @news.CreatedBy
                 </MudText>
@@ -49,9 +57,9 @@
                     Updated at: @news.UpdatedAt.Value.ToString("g") - by @news.UpdatedBy
                   </MudText>
                 }
-
               </MudItem>
-              <MudItem xs="2">
+
+              <MudItem xs="12" sm="2" class="d-flex justify-end align-items-start">
                 <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary"
                   OnClick="() => OpenEditNewsDialog(news)" />
                 <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error"
@@ -61,17 +69,26 @@
           </TitleContent>
           <ChildContent>
             <MudText Typo="Typo.body1">@news.Content</MudText>
-            @if (!string.IsNullOrEmpty(news.ImageUrl))
-            {
-              <MudImage Src="@news.ImageUrl" Alt="News Image" Style="width: 100%; height: auto;" />
-            }
           </ChildContent>
         </MudExpansionPanel>
       </MudCard>
     }
+
+    @if (CanLoadMore)
+    {
+      <MudGrid Justify="Justify.Center">
+        <MudItem>
+          <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="LoadMoreNews" Class="mt-4">Load More
+          </MudButton>
+        </MudItem>
+      </MudGrid>
+    }
   }
 </MudContainer>
+
 @code {
+  private const int PageSize = 5;
+  private int currentPage = 1;
   private List<News> news = new();
   private List<News> displayedNews = new();
   private bool isLoading = true;
@@ -89,8 +106,8 @@
   {
     try
     {
-      news = await DbContext.News.ToListAsync();
-      displayedNews = news.OrderByDescending(news => news.CreatedAt).ToList();
+      news = await DbContext.News.OrderByDescending(n => n.CreatedAt).ToListAsync();
+      ApplyFilter();
     }
     catch (Exception ex)
     {
@@ -103,25 +120,26 @@
     }
   }
 
+  private void ApplyFilter()
+  {
+    IEnumerable<News> filteredNews = string.IsNullOrEmpty(searchTerm)
+    ? news
+    : news.Where(n => n.Title.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+
+    displayedNews = filteredNews.Take(currentPage * PageSize).ToList();
+  }
+
   private void FilterNews()
   {
-    if (string.IsNullOrEmpty(searchTerm))
-    {
-      displayedNews = news;
-    }
-    else
-    {
-      displayedNews = news.Where(news =>
-      news.Title.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
-      ).ToList();
-    }
+    currentPage = 1;
+    ApplyFilter();
   }
 
   private void ClearSearch()
   {
     searchTerm = string.Empty;
-    displayedNews = news;
-    StateHasChanged();
+    currentPage = 1;
+    ApplyFilter();
   }
 
   private async Task OpenAddNewsDialog()
@@ -137,11 +155,11 @@
     }
   }
 
-  private async Task OpenDeleteConfirmationDialog(News news)
+  private async Task OpenDeleteConfirmationDialog(News newsItem)
   {
     var parameters = new DialogParameters
       {
-        ["Message"] = $"Are you sure you want to delete the news '{news.Title}'?"
+        ["Message"] = $"Are you sure you want to delete the news '{newsItem.Title}'?"
       };
     var options = new DialogOptions
       {
@@ -154,13 +172,13 @@
 
     if (result != null && result.Data is bool confirmed && confirmed)
     {
-      await DeleteNews(news);
+      await DeleteNews(newsItem);
     }
   }
 
-  private async Task OpenEditNewsDialog(News news)
+  private async Task OpenEditNewsDialog(News newsItem)
   {
-    var parameters = new DialogParameters { ["News"] = news };
+    var parameters = new DialogParameters { ["News"] = newsItem };
     var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
     var dialog = DialogService.Show<EditNewsDialog>("Edit News", parameters, options);
     var result = await dialog.Result;
@@ -171,11 +189,11 @@
     }
   }
 
-  private async Task DeleteNews(News news)
+  private async Task DeleteNews(News newsItem)
   {
     try
     {
-      DbContext.News.Remove(news);
+      DbContext.News.Remove(newsItem);
       await DbContext.SaveChangesAsync();
       Snackbar.Add("News deleted successfully", Severity.Success);
       await LoadNews();
@@ -186,4 +204,12 @@
     }
   }
 
+  private void LoadMoreNews()
+  {
+    currentPage++;
+    ApplyFilter();
+  }
+
+  private bool CanLoadMore => displayedNews.Count < (string.IsNullOrEmpty(searchTerm) ? news.Count : news.Count(n =>
+  n.Title.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)));
 }

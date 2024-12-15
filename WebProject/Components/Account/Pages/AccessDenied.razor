@@ -1,8 +1,16 @@
 ﻿@page "/Account/AccessDenied"
 
+
 <PageTitle>Access denied</PageTitle>
 
-<header>
-    <h1 class="text-danger">Access denied</h1>
-    <p class="text-danger">You do not have access to this resource.</p>
-</header>
+<MudContainer MaxWidth="MaxWidth.Medium" Class="d-flex justify-center align-center" Style="height: 100vh;">
+    <MudCard Class="pa-6">
+        <header>
+            <div class="d-flex justify-center">
+                <MudImage Src="images/images.jpg" Alt="Access Denied" Class="rounded" />
+            </div>
+            <h1 class="text-danger d-flex justify-center"><b>ACCESS DENIED!</b></h1>
+            <p class="text-danger d-flex justify-center">You do not have access to this resource.</p>
+        </header>
+    </MudCard>
+</MudContainer>
